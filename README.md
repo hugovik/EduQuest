@@ -37,3 +37,16 @@ uvicorn app.main:app --reload
 ```text
 Welcome home, Lena
 ```
+Version:
+
+v0.2.0 Foundation
+
+## Run
+
+Backend
+
+uvicorn app.main:app --reload
+
+Frontend
+
+npm run dev

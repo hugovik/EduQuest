@@ -1,19 +1,27 @@
 import { useState } from "react";
 import { Mic } from "lucide-react";
-
-const quest = {
-  title: "Professor Owl and the Lost Page",
-  realm: "Reading Forest",
-  passage:
-    "Professor Owl found a lost page near the library tree. Lena helped him read the clues and return the page to the magic book.",
-  question: "Who found the lost page?",
-  options: ["Captain Beaver", "Professor Owl", "Spark Dragon"],
-  answer: "Professor Owl",
-};
+import { useQuests } from "./useQuests";
 
 export function ReadingQuestPage() {
+  const { data: quests, isLoading, error } = useQuests();
   const [selected, setSelected] = useState("");
   const [feedback, setFeedback] = useState("");
+
+  if (isLoading) {
+    return <main className="screen">Loading Reading Forest...</main>;
+  }
+
+  if (error) {
+    return <main className="screen">Unable to load Reading Forest.</main>;
+  }
+
+  const quest = quests.find((item) => item.subject === "reading");
+
+  if (!quest) {
+    return <main className="screen">No reading quests found.</main>;
+  }
+
+  const options = ["Captain Beaver", "Professor Owl", "Spark Dragon"];
 
   function checkAnswer() {
     if (selected === quest.answer) {
@@ -44,7 +52,7 @@ export function ReadingQuestPage() {
         <h3>{quest.question}</h3>
 
         <div className="options">
-          {quest.options.map((option) => (
+          {options.map((option) => (
             <button
               key={option}
               onClick={() => setSelected(option)}
