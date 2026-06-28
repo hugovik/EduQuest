@@ -1,0 +1,18 @@
+{
+  "child": {
+    "id": 1,
+    "name": "Lena",
+    "grade": 2,
+    "level": 1,
+    "xp": 40
+  },
+  "quests": [
+    {
+      "id": "reading-forest-001",
+      "title": "Professor Owl and the Lost Page",
+      "realm": "Reading Forest",
+      "subject": "reading",
+      "xpReward": 25
+    }
+  ]
+}

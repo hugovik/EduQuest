@@ -1,0 +1,252 @@
+:root {
+  --bg: #f7f1df;
+  --panel: #fffaf0;
+  --ink: #24304f;
+  --muted: #65708f;
+  --green: #4d9b75;
+  --gold: #f6bc4f;
+  --purple: #7c62c4;
+  --blue: #4b7bec;
+  --shadow: 0 18px 45px rgba(43, 53, 91, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(246, 188, 79, 0.28), transparent 34%),
+    linear-gradient(135deg, #f7f1df 0%, #e7f3ee 100%);
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 36px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--green);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+nav {
+  display: flex;
+  gap: 10px;
+}
+
+nav button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255,255,255,.6);
+  border-radius: 999px;
+  color: var(--ink);
+}
+
+nav button.active {
+  background: var(--ink);
+  color: white;
+}
+
+.screen {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 28px 60px;
+}
+
+.hero-card, .lesson-card {
+  background: rgba(255,250,240,.92);
+  border: 1px solid rgba(255,255,255,.7);
+  box-shadow: var(--shadow);
+  border-radius: 34px;
+  padding: 36px;
+}
+
+.hero-card {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 28px;
+  align-items: center;
+}
+
+.hero-card h2, .lesson-card h2 {
+  font-size: 42px;
+  line-height: 1.05;
+  margin: 0 0 12px;
+}
+
+.hero-card p, .passage {
+  font-size: 20px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.tree-card {
+  background: linear-gradient(160deg, #fff 0%, #e7f7eb 100%);
+  border-radius: 28px;
+  padding: 28px;
+  text-align: center;
+  display: grid;
+  gap: 8px;
+}
+
+.tree-emoji {
+  font-size: 78px;
+}
+
+.xp-wrap {
+  margin-top: 28px;
+}
+
+.xp-label {
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.xp-bar {
+  height: 18px;
+  background: #e8dfca;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.xp-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: inherit;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.quest-card {
+  background: rgba(255,255,255,.72);
+  border-radius: 26px;
+  padding: 24px;
+  box-shadow: 0 12px 25px rgba(43,53,91,.08);
+}
+
+.quest-card svg {
+  color: var(--purple);
+}
+
+.world-map {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.realm {
+  min-height: 180px;
+  border-radius: 32px;
+  padding: 28px;
+  font-size: 26px;
+  font-weight: 900;
+  box-shadow: var(--shadow);
+}
+
+.reading { background: #e9ddff; }
+.math { background: #d9f1f6; }
+.writing { background: #ffe2c6; }
+.castle { background: #fff0b8; }
+
+.passage {
+  background: #fff;
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.voice-button, .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 14px 20px;
+  border-radius: 999px;
+  color: white;
+  background: var(--purple);
+  font-weight: 800;
+}
+
+.primary {
+  background: var(--green);
+}
+
+.hint {
+  color: var(--muted);
+  margin-top: -6px;
+}
+
+.options {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.options button {
+  text-align: left;
+  background: white;
+  border: 2px solid transparent;
+  padding: 16px 18px;
+  border-radius: 18px;
+}
+
+.options button.selected {
+  border-color: var(--gold);
+  background: #fff6dc;
+}
+
+.success {
+  font-weight: 900;
+  color: var(--green);
+  font-size: 20px;
+}
+
+.feedback {
+  font-weight: 700;
+  color: var(--purple);
+}
+
+@media (max-width: 760px) {
+  .app-header, nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-card {
+    grid-template-columns: 1fr;
+  }
+
+  .grid, .world-map {
+    grid-template-columns: 1fr;
+  }
+}
