@@ -21,6 +21,29 @@ body {
     linear-gradient(135deg, #f7f1df 0%, #e7f3ee 100%);
 }
 
+.dashboard {
+    max-width: 1200px;
+    margin: auto;
+    padding: 32px;
+
+    display: grid;
+    gap: 24px;
+}
+
+@media (min-width: 900px){
+
+    .dashboard{
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:24px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
 button {
   border: 0;
   cursor: pointer;
