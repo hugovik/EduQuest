@@ -1,0 +1,16 @@
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.card p {
+  color: var(--color-ink);
+  line-height: 1.5;
+}

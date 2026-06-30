@@ -5,24 +5,37 @@ import QuestBoard from "./components/QuestBoard";
 import DragonNest from "./components/DragonNest";
 import AchievementShelf from "./components/AchievementShelf";
 
+import { usePlayer } from "./hooks/usePlayer";
+import { useQuests } from "./hooks/useQuests";
+
 export function TreeHouseDashboard() {
+  const { data: player, isLoading, error } = usePlayer();
+
+  const { data: quests, isLoading: questsLoading,} = useQuests();
+
+  if (isLoading) {
+    return <main className="dashboard">Loading Tree House...</main>;
+  }
+
+  if (error) {
+    return <main className="dashboard">Unable to load Tree House.</main>;
+  }
+
   return (
     <main className="dashboard">
-
       <h1>🌳 EduQuest</h1>
 
-      <PlayerCard />
+      <PlayerCard player={player} />
 
-      <XPBar />
+      <XPBar player={player} />
 
-      <TreeOfGrowth />
+      <TreeOfGrowth player={player} />
 
-      <QuestBoard />
+      <QuestBoard quest={quests?.[0]} />
 
       <DragonNest />
 
       <AchievementShelf />
-
     </main>
   );
 }

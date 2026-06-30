@@ -1,0 +1,28 @@
+.dashboard {
+  max-width: 1200px;
+  margin: auto;
+  padding: var(--space-xl);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.dashboard h1 {
+  margin: 0 0 var(--space-md);
+  font-size: 32px;
+}
+
+@media (min-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard h1 {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard {
+    padding: 20px;
+  }
+}
