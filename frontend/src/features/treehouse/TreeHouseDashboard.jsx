@@ -9,7 +9,7 @@ import { usePlayer } from "./hooks/usePlayer";
 import { useQuests } from "./hooks/useQuests";
 import { useProgressSummary } from "./hooks/useProgressSummary";
 
-export function TreeHouseDashboard() {
+export function TreeHouseDashboard({ onGoToMath }) {
   const { data: player, isLoading, error } = usePlayer();
   const { data: quests, isLoading: questsLoading } = useQuests();
   const {
@@ -36,7 +36,7 @@ export function TreeHouseDashboard() {
 
       <TreeOfGrowth player={player} />
 
-      <QuestBoard quest={quests?.[0]} isLoading={questsLoading} />
+      <QuestBoard quest={quests?.[0]} isLoading={questsLoading} onGoToMath={onGoToMath} />
 
       <DragonNest />
 

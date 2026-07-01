@@ -5,6 +5,7 @@ from sqlalchemy import inspect, text
 from app.api.child_routes import router as child_router
 from app.api.quest_routes import router as quest_router
 from app.database.database import Base, engine
+from app.api.dev_routes import router as dev_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -68,3 +69,4 @@ def health():
 
 app.include_router(child_router)
 app.include_router(quest_router)
+app.include_router(dev_router)
