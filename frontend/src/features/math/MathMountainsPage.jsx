@@ -1,19 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuests } from "../treehouse/hooks/useQuests";
 import { useCompleteQuest } from "../quests/hooks/useCompleteQuest";
+import InventoryBar from "./components/InventoryBar";
 import MathObstacleQuest from "./components/MathObstacleQuest";
 import MathOperationSelector from "./components/MathOperationSelector";
 import { mathObstacles } from "./data/mathObstacles";
+import { useIncorrectAnswerPenalty } from "./hooks/useIncorrectAnswerPenalty";
+import { useInventory } from "./hooks/useInventory";
+import { useObstacleProgress } from "./hooks/useObstacleProgress";
+import { useRewardCorrectAnswer } from "./hooks/useRewardCorrectAnswer";
 import TrailMap from "../adventure/components/TrailMap";
 
 export default function MathMountainsPage({ onBack }) {
   const [currentObstacleIndex, setCurrentObstacleIndex] = useState(0);
   const [selectedOperation, setSelectedOperation] = useState("addition");
   const { data: quests, isLoading, error } = useQuests();
+  const {
+    data: inventory,
+    isLoading: inventoryLoading,
+    error: inventoryError,
+  } = useInventory();
+  const {
+    data: obstacleProgress = [],
+    isLoading: progressLoading,
+    error: progressError,
+  } = useObstacleProgress();
   const completeQuest = useCompleteQuest();
+  const rewardCorrectAnswer = useRewardCorrectAnswer();
+  const incorrectAnswerPenalty = useIncorrectAnswerPenalty();
 
   const mathQuest = quests?.find((quest) => quest.subject === "math");
   const currentObstacle = mathObstacles[currentObstacleIndex];
+  const currentObstacleProgress = obstacleProgress.find(
+    (progress) => progress.obstacle_id === currentObstacle.id
+  );
+
+  useEffect(() => {
+    if (!obstacleProgress.length) {
+      return;
+    }
+
+    const firstIncompleteIndex = mathObstacles.findIndex((obstacle) => {
+      const progress = obstacleProgress.find(
+        (item) => item.obstacle_id === obstacle.id
+      );
+
+      return !progress?.completed;
+    });
+
+    if (firstIncompleteIndex >= 0 && firstIncompleteIndex !== currentObstacleIndex) {
+      setCurrentObstacleIndex(firstIncompleteIndex);
+    }
+  }, [currentObstacleIndex, obstacleProgress]);
+
+  async function handleCorrectAnswer(obstacleId) {
+    return rewardCorrectAnswer.mutateAsync({ obstacleId });
+  }
+
+  async function handleIncorrectAnswer(obstacleId) {
+    return incorrectAnswerPenalty.mutateAsync({ obstacleId });
+  }
 
   function handleObstacleComplete() {
     if (currentObstacleIndex < mathObstacles.length - 1) {
@@ -21,18 +67,18 @@ export default function MathMountainsPage({ onBack }) {
       return;
     }
 
-    if (!mathQuest || completeQuest.isSuccess) {
+    if (!mathQuest || completeQuest.isSuccess || completeQuest.isPending) {
       return;
     }
 
     completeQuest.mutate(mathQuest.id);
   }
 
-  if (isLoading) {
+  if (isLoading || inventoryLoading || progressLoading) {
     return <main className="dashboard">Loading Math Mountains...</main>;
   }
 
-  if (error) {
+  if (error || inventoryError || progressError) {
     return <main className="dashboard">Unable to load Math Mountains.</main>;
   }
 
@@ -56,6 +102,8 @@ export default function MathMountainsPage({ onBack }) {
 
       <h1>⛰️ Math Mountains</h1>
 
+      <InventoryBar inventory={inventory} />
+
       <p>
         Obstacle {currentObstacleIndex + 1} of {mathObstacles.length}
       </p>
@@ -73,11 +121,29 @@ export default function MathMountainsPage({ onBack }) {
       />
 
       <MathObstacleQuest
-        key={`${currentObstacle.id}-${selectedOperation}`}
+        key={`${currentObstacle.id}-${selectedOperation}-${currentObstacleProgress?.current_progress ?? 0}`}
         obstacle={currentObstacle}
+        obstacleProgress={currentObstacleProgress}
         selectedOperation={selectedOperation}
+        isAnswerPending={
+          rewardCorrectAnswer.isPending || incorrectAnswerPenalty.isPending
+        }
+        onCorrectAnswer={handleCorrectAnswer}
+        onIncorrectAnswer={handleIncorrectAnswer}
         onObstacleComplete={handleObstacleComplete}
       />
+
+      {rewardCorrectAnswer.isError && (
+        <div className="card quest-result error">
+          Materials could not be saved. Try the answer again.
+        </div>
+      )}
+
+      {incorrectAnswerPenalty.isError && (
+        <div className="card quest-result error">
+          The try was saved locally, but XP could not be updated yet.
+        </div>
+      )}
 
       {completeQuest.isSuccess && (
         <div className="card quest-result success">

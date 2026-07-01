@@ -101,3 +101,28 @@
   box-shadow: 0 0 0 3px rgba(64, 108, 53, 0.25);
   transform: translateY(-1px);
 }
+
+.inventory-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.inventory-bar span {
+  font-weight: 700;
+}
+
+.obstacle-progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  height: 0.85rem;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.obstacle-progress-fill {
+  background: #73a942;
+  height: 100%;
+  transition: width 180ms ease;
+}

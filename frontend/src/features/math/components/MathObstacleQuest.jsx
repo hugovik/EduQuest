@@ -3,7 +3,11 @@ import { generateMathProblem } from "../utils/generateMathProblem";
 
 export default function MathObstacleQuest({
   obstacle,
+  obstacleProgress,
   selectedOperation,
+  isAnswerPending,
+  onCorrectAnswer,
+  onIncorrectAnswer,
   onObstacleComplete,
 }) {
   const [problem, setProblem] = useState(() =>
@@ -14,51 +18,61 @@ export default function MathObstacleQuest({
   );
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState(null);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [materialsEarned, setMaterialsEarned] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
+  const [displayProgress, setDisplayProgress] = useState(obstacleProgress);
+  const [isComplete, setIsComplete] = useState(Boolean(obstacleProgress?.completed));
 
-  const totalCorrectNeeded =
-    obstacle.totalMaterialsNeeded * obstacle.correctAnswersPerMaterial;
+  const currentProgress = displayProgress?.current_progress ?? 0;
+  const requiredProgress =
+    displayProgress?.required_progress ?? obstacle.totalMaterialsNeeded;
+  const progressPercent = Math.min(
+    100,
+    Math.round((currentProgress / requiredProgress) * 100)
+  );
 
   function normalize(value) {
     return String(value || "").trim();
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    if (isComplete) {
+    if (isComplete || isAnswerPending) {
       return;
     }
 
     if (normalize(answer) !== normalize(problem.answer)) {
-      setFeedback("incorrect");
+      try {
+        await onIncorrectAnswer(obstacle.id);
+        setFeedback("incorrect");
+      } catch {
+        setFeedback("penalty-save-error");
+      }
       return;
     }
 
-    const nextCorrectAnswers = correctAnswers + 1;
-    const nextMaterialsEarned = Math.floor(
-      nextCorrectAnswers / obstacle.correctAnswersPerMaterial
-    );
+    try {
+      const rewardResult = await onCorrectAnswer(obstacle.id);
+      const nextProgress = rewardResult.obstacle_progress;
 
-    setCorrectAnswers(nextCorrectAnswers);
-    setMaterialsEarned(nextMaterialsEarned);
-    setFeedback("correct");
-    setAnswer("");
+      setDisplayProgress(nextProgress);
+      setFeedback("correct");
+      setAnswer("");
 
-    if (nextCorrectAnswers >= totalCorrectNeeded) {
-      setIsComplete(true);
-      onObstacleComplete();
-      return;
+      if (nextProgress.completed) {
+        setIsComplete(true);
+        onObstacleComplete();
+        return;
+      }
+
+      setProblem(
+        generateMathProblem({
+          operation: selectedOperation,
+          context: obstacle.id,
+        })
+      );
+    } catch {
+      setFeedback("save-error");
     }
-
-    setProblem(
-      generateMathProblem({
-        operation: selectedOperation,
-        context: obstacle.id,
-      })
-    );
   }
 
   return (
@@ -75,13 +89,16 @@ export default function MathObstacleQuest({
 
       <div className="math-progress-box">
         <strong>
-          {obstacle.materialEmoji} {materialsEarned} /{" "}
-          {obstacle.totalMaterialsNeeded} {obstacle.materialName}
+          {obstacle.materialEmoji} {currentProgress} / {requiredProgress}{" "}
+          {obstacle.materialName}
         </strong>
 
-        <p>
-          Correct answers: {correctAnswers} / {totalCorrectNeeded}
-        </p>
+        <div className="obstacle-progress-bar" aria-hidden="true">
+          <div
+            className="obstacle-progress-fill"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
       </div>
 
       {!isComplete ? (
@@ -96,10 +113,11 @@ export default function MathObstacleQuest({
             value={answer}
             onChange={(event) => setAnswer(event.target.value)}
             placeholder="Type your answer"
+            disabled={isAnswerPending}
           />
 
-          <button className="primary-button" type="submit">
-            Check Answer
+          <button className="primary-button" type="submit" disabled={isAnswerPending}>
+            {isAnswerPending ? "Saving..." : "Check Answer"}
           </button>
         </form>
       ) : (
@@ -108,12 +126,26 @@ export default function MathObstacleQuest({
 
       {feedback === "correct" && !isComplete && (
         <div className="quest-result success">
-          ✅ Correct! The workers are getting closer to opening the trail.
+          ✅ Correct! One brick was added to the repair.
         </div>
       )}
 
       {feedback === "incorrect" && (
-        <div className="quest-result error">❌ Not quite. Try again.</div>
+        <div className="quest-result error">
+          Not quite — try again! −2 XP
+        </div>
+      )}
+
+      {feedback === "save-error" && (
+        <div className="quest-result error">
+          The answer was correct, but progress could not be saved yet.
+        </div>
+      )}
+
+      {feedback === "penalty-save-error" && (
+        <div className="quest-result error">
+          Not quite — try again! XP could not be updated yet.
+        </div>
       )}
     </section>
   );
