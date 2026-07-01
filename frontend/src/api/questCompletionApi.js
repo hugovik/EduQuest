@@ -6,7 +6,13 @@ export async function completeQuest(questId) {
   });
 
   if (!response.ok) {
-    throw new Error(`Quest completion failed: ${response.status}`);
+    const error = new Error(
+      response.status === 409
+        ? "This adventure is already complete."
+        : `Quest completion failed: ${response.status}`
+    );
+    error.status = response.status;
+    throw error;
   }
 
   return response.json();

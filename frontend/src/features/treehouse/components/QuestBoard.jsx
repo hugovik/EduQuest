@@ -7,6 +7,9 @@ export default function QuestBoard({ quest }) {
     return <div className="card">Loading quest...</div>;
   }
 
+  const isDuplicateBlocked = completeQuest.error?.status === 409;
+  const isCompleted = !quest.repeatable && (completeQuest.isSuccess || isDuplicateBlocked);
+
   return (
     <div className="card">
       <h2>📖 Today's Adventure</h2>
@@ -17,10 +20,14 @@ export default function QuestBoard({ quest }) {
 
       <button
         className="primary-button"
-        disabled={completeQuest.isPending}
+        disabled={completeQuest.isPending || isCompleted}
         onClick={() => completeQuest.mutate(quest.id)}
       >
-        {completeQuest.isPending ? "Completing..." : "Complete Adventure"}
+        {completeQuest.isPending
+          ? "Completing..."
+          : isCompleted
+            ? "Adventure Complete"
+            : "Complete Adventure"}
       </button>
 
       {completeQuest.data?.events?.length > 0 && (
@@ -28,6 +35,12 @@ export default function QuestBoard({ quest }) {
           {completeQuest.data.events.map((event) => (
             <p key={event}>✨ {event}</p>
           ))}
+        </div>
+      )}
+
+      {completeQuest.error && (
+        <div className="quest-result" role="status">
+          <p>{completeQuest.error.message}</p>
         </div>
       )}
     </div>

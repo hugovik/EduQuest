@@ -10,6 +10,7 @@ class QuestRead(BaseModel):
     question: str | None = None
     answer: str | None = None
     xp_reward: int
+    repeatable: bool = False
 
     model_config = {
         "from_attributes": True

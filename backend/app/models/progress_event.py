@@ -9,6 +9,7 @@ class ProgressEvent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     child_id = Column(Integer, nullable=False, index=True)
+    quest_completion_id = Column(Integer, nullable=True, index=True)
 
     event_type = Column(String, nullable=False)
     title = Column(String, nullable=False)

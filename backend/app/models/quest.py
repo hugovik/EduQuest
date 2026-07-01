@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Boolean, Column, Integer, String, Text
 
 from app.database.database import Base
 
@@ -14,3 +14,4 @@ class Quest(Base):
     question = Column(Text, nullable=True)
     answer = Column(String, nullable=True)
     xp_reward = Column(Integer, nullable=False, default=10)
+    repeatable = Column(Boolean, nullable=False, default=False)

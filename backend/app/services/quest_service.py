@@ -11,6 +11,10 @@ from app.models.quest_completion import QuestCompletion
 from app.models.tree_growth_event import TreeGrowthEvent
 from app.repositories.child_repository import ChildRepository
 from app.repositories.quest_repository import QuestRepository
+from app.services.progression_rules import (
+    calculate_level_from_xp,
+    calculate_tree_stage_from_xp,
+)
 
 
 class QuestService:
@@ -181,14 +185,34 @@ class QuestService:
         if quest is None:
             raise HTTPException(status_code=404, detail="Quest not found")
 
-        child.xp += quest.xp_reward
+        existing_completion = (
+            db.query(QuestCompletion)
+            .filter(
+                QuestCompletion.child_id == child.id,
+                QuestCompletion.quest_id == quest.id,
+            )
+            .first()
+        )
 
-        if child.xp >= 100 and child.level == 1:
-            child.level = 2
-            child.tree_stage = "Growing Sapling"
-            events = ["Quest Completed", "XP Awarded", "Level Up", "Tree Grew"]
+        if existing_completion is not None and not quest.repeatable:
+            raise HTTPException(status_code=409, detail="Quest already completed")
+
+        previous_level = child.level
+        previous_tree_stage = child.tree_stage
+
+        child.xp += quest.xp_reward
+        child.level = calculate_level_from_xp(child.xp)
+        child.tree_stage = calculate_tree_stage_from_xp(child.xp)
+
+        events = ["Quest Completed", "XP Awarded"]
+
+        if child.level > previous_level:
+            events.append("Level Up")
+
+        if child.tree_stage != previous_tree_stage:
+            events.append("Tree Grew")
         else:
-            events = ["Quest Completed", "XP Awarded", "Tree Sparkled"]
+            events.append("Tree Sparkled")
 
         quest_completion = QuestCompletion(
             child_id=child.id,
@@ -196,8 +220,12 @@ class QuestService:
             xp_awarded=quest.xp_reward,
         )
 
+        db.add(quest_completion)
+        db.flush()
+
         progress_event = ProgressEvent(
             child_id=child.id,
+            quest_completion_id=quest_completion.id,
             event_type="quest_completed",
             title=f"Completed {quest.title}",
             description=f"{child.name} completed a quest in {quest.realm}.",
@@ -206,11 +234,11 @@ class QuestService:
 
         tree_event = TreeGrowthEvent(
             child_id=child.id,
+            quest_completion_id=quest_completion.id,
             growth_type="new_leaf",
             description="A new leaf appeared on the Tree of Growth.",
         )
 
-        db.add(quest_completion)
         db.add(progress_event)
         db.add(tree_event)
         db.flush()
