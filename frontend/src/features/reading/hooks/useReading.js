@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getReadingPassages,
   getReadingProgress,
+  getReadingProgressSummary,
   submitReadingAnswers,
 } from "../../../api/readingApi";
 import { queryKeys } from "../../../api/queryKeys";
@@ -20,6 +21,13 @@ export function useReadingProgress() {
   });
 }
 
+export function useReadingProgressSummary() {
+  return useQuery({
+    queryKey: queryKeys.readingProgressSummary,
+    queryFn: getReadingProgressSummary,
+  });
+}
+
 export function useSubmitReadingAnswers() {
   const queryClient = useQueryClient();
 
@@ -27,6 +35,7 @@ export function useSubmitReadingAnswers() {
     mutationFn: submitReadingAnswers,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.readingProgress });
+      queryClient.invalidateQueries({ queryKey: queryKeys.readingProgressSummary });
       queryClient.invalidateQueries({ queryKey: queryKeys.player });
       queryClient.invalidateQueries({ queryKey: queryKeys.dailyGoal });
       queryClient.invalidateQueries({ queryKey: queryKeys.dailyStreak });

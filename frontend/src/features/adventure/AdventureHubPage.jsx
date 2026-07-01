@@ -27,12 +27,17 @@ function getLevelLabel(level) {
     : `Using Grade ${level.effectiveLevel} Level`;
 }
 
-function getQuestProgressLabel(progress) {
+function getAdventureProgressLabel(adventure, progress) {
   if (!progress || progress.total_quests <= 0) {
     return "Not started yet";
   }
 
-  return `${progress.completed_quests} / ${progress.total_quests} quests complete`;
+  const unit = adventure.id === "reading" ? "passages" : "quests";
+  return `${progress.completed_quests} / ${progress.total_quests} ${unit} complete`;
+}
+
+function formatPercent(value) {
+  return Math.round((value ?? 0) * 100);
 }
 
 function getProgressPercent(progress) {
@@ -182,8 +187,15 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
                 ) : (
                   <>
                     <span>{statusLabel}</span>
-                    <span>{getQuestProgressLabel(progress)}</span>
+                    <span>{getAdventureProgressLabel(adventure, progress)}</span>
                     <span>{progress?.xp_earned ?? 0} XP earned</span>
+                    {adventure.id === "reading" && (
+                      <>
+                        <span>{progress?.questions_answered ?? 0} answers recorded</span>
+                        <span>{formatPercent(progress?.accuracy)}% reading accuracy</span>
+                        <span>{progress?.vocabulary_learned ?? 0} vocabulary words</span>
+                      </>
+                    )}
                     {progress?.total_quests > 0 && (
                       <div className="adventure-progress-bar" aria-hidden="true">
                         <div

@@ -6,6 +6,7 @@ from app.database.database import get_db
 from app.schemas.reading import (
     ReadingPassageRead,
     ReadingProgressRead,
+    ReadingProgressSummaryRead,
     ReadingSubmitRequest,
     ReadingSubmitResponse,
 )
@@ -38,6 +39,14 @@ def get_reading_progress(
     reading_service: ReadingService = Depends(get_reading_service),
 ):
     return reading_service.get_progress(db)
+
+
+@router.get("/progress/summary", response_model=ReadingProgressSummaryRead)
+def get_reading_progress_summary(
+    db: Session = Depends(get_db),
+    reading_service: ReadingService = Depends(get_reading_service),
+):
+    return reading_service.get_progress_summary(db)
 
 
 @router.post("/passages/{passage_id}/submit", response_model=ReadingSubmitResponse)

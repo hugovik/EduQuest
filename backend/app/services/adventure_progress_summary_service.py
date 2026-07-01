@@ -100,6 +100,21 @@ class AdventureProgressSummaryService:
             )
             .scalar()
         )
+        questions_answered = (
+            db.query(func.coalesce(func.sum(ReadingProgress.questions_answered), 0))
+            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .scalar()
+        )
+        correct_answers = (
+            db.query(func.coalesce(func.sum(ReadingProgress.correct_answers), 0))
+            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .scalar()
+        )
+        vocabulary_learned = (
+            db.query(func.coalesce(func.sum(ReadingProgress.vocabulary_learned), 0))
+            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .scalar()
+        )
         completed = completed_passages + completed_reading_quests
         total = total_passages + total_reading_quests
 
@@ -109,6 +124,9 @@ class AdventureProgressSummaryService:
             "xp_earned": passage_xp + quest_xp,
             "level": level,
             "status": self.get_status(completed, total),
+            "questions_answered": questions_answered,
+            "accuracy": correct_answers / questions_answered if questions_answered else 0,
+            "vocabulary_learned": vocabulary_learned,
         }
 
     def get_default_summary(self, level: int) -> dict:

@@ -7,6 +7,9 @@ class AdventureProgressRead(BaseModel):
     xp_earned: int
     level: int
     status: str
+    questions_answered: int | None = None
+    accuracy: float | None = None
+    vocabulary_learned: int | None = None
 
 
 class AdventureProgressSummaryResponse(BaseModel):

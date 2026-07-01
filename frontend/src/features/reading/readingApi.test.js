@@ -1,6 +1,7 @@
 import {
   getReadingPassages,
   getReadingProgress,
+  getReadingProgressSummary,
   submitReadingAnswers,
 } from "../../api/readingApi.js";
 
@@ -24,6 +25,20 @@ export async function runReadingApiTests() {
       };
     }
 
+    if (String(url).endsWith("/reading/progress/summary")) {
+      return {
+        ok: true,
+        json: async () => ({
+          completed_passage_ids: ["reading-l2-01"],
+          passages_completed: 1,
+          questions_answered: 4,
+          accuracy: 1,
+          vocabulary_learned: 2,
+          total_xp_earned: 20,
+        }),
+      };
+    }
+
     if (String(url).endsWith("/reading/progress")) {
       return {
         ok: true,
@@ -40,6 +55,7 @@ export async function runReadingApiTests() {
   try {
     const passages = await getReadingPassages(2);
     const progress = await getReadingProgress();
+    const summary = await getReadingProgressSummary();
     const result = await submitReadingAnswers({
       passageId: "reading-l2-01",
       answers: { q1: "Beside the old tree" },
@@ -47,8 +63,9 @@ export async function runReadingApiTests() {
 
     assert(passages[0].level === 2, "Reading passages should load by level.");
     assert(progress[0].completed === true, "Reading progress should load.");
+    assert(summary.passages_completed === 1, "Reading summary should load.");
     assert(result.rewards.xp === 5, "Reading submit should return rewards.");
-    assert(calls[2].options.method === "POST", "Reading submit should use POST.");
+    assert(calls[3].options.method === "POST", "Reading submit should use POST.");
   } finally {
     globalThis.fetch = originalFetch;
   }

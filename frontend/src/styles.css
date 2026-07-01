@@ -318,3 +318,65 @@
   padding: 0.45rem 0.6rem;
   width: 100%;
 }
+
+.reading-step-card,
+.reading-map-card,
+.reading-progress-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reading-step-track {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.reading-step-track span {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #a6c96a;
+  border-radius: 999px;
+  font-weight: 800;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
+
+.reading-progress-metrics,
+.reading-results-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.reading-progress-metrics span,
+.reading-results-grid span {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  font-weight: 800;
+  padding: 0.65rem;
+}
+
+.reading-story-button {
+  flex-direction: column;
+}
+
+.reading-story-button small {
+  font-weight: 700;
+  opacity: 0.78;
+}
+
+.reading-story-button-completed {
+  border-color: #5f8d2b;
+}
+
+.reading-question-shell {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reading-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

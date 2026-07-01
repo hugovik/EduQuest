@@ -36,8 +36,20 @@ class ReadingProgressRead(BaseModel):
     xp_awarded: int
     completed: bool
     completed_at: datetime | None
+    accuracy: float | None = None
 
     model_config = {"from_attributes": True}
+
+
+class ReadingProgressSummaryRead(BaseModel):
+    completed_passage_ids: list[str]
+    passages_completed: int
+    questions_answered: int
+    correct_answers: int
+    accuracy: float
+    total_xp_earned: int
+    vocabulary_learned: int
+    vocabulary_words: list[str]
 
 
 class ReadingSubmitRequest(BaseModel):

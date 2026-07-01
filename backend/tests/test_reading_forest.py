@@ -95,10 +95,11 @@ def test_comprehension_scoring_rewards_and_persists_progress(db_session, reading
     assert result["total_questions"] == 4
     assert result["rewards"]["xp"] == 4 * READING_CORRECT_ANSWER_XP
     assert result["child"].xp == starting_xp + result["rewards"]["xp"]
-    assert result["progress"].completed is True
-    assert result["progress"].questions_answered == 4
-    assert result["progress"].correct_answers == 4
-    assert result["progress"].vocabulary_learned == 2
+    assert result["progress"]["completed"] is True
+    assert result["progress"]["questions_answered"] == 4
+    assert result["progress"]["correct_answers"] == 4
+    assert result["progress"]["vocabulary_learned"] == 2
+    assert result["progress"]["accuracy"] == 1
 
 
 def test_duplicate_passage_completion_does_not_award_extra_xp(db_session, reading_service):
@@ -147,3 +148,19 @@ def test_adventure_summary_uses_reading_progress(db_session, reading_service):
     assert summary["reading"]["total_quests"] >= 30
     assert summary["reading"]["xp_earned"] == 4 * READING_CORRECT_ANSWER_XP
     assert summary["reading"]["status"] == "in_progress"
+
+
+def test_progress_summary_exposes_parent_friendly_reading_metrics(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+    reading_service.submit_answers(db_session, passage["id"], correct_answers_for(passage))
+
+    summary = reading_service.get_progress_summary(db_session)
+
+    assert summary["completed_passage_ids"] == [passage["id"]]
+    assert summary["passages_completed"] == 1
+    assert summary["questions_answered"] == 4
+    assert summary["correct_answers"] == 4
+    assert summary["accuracy"] == 1
+    assert summary["total_xp_earned"] == 4 * READING_CORRECT_ANSWER_XP
+    assert summary["vocabulary_learned"] == 2
+    assert summary["vocabulary_words"]

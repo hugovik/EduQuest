@@ -20,6 +20,16 @@ export async function getReadingProgress() {
   return response.json();
 }
 
+export async function getReadingProgressSummary() {
+  const response = await fetch(`${API_BASE_URL}/reading/progress/summary`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load reading progress summary.");
+  }
+
+  return response.json();
+}
+
 export async function submitReadingAnswers({ passageId, answers }) {
   const response = await fetch(`${API_BASE_URL}/reading/passages/${passageId}/submit`, {
     method: "POST",

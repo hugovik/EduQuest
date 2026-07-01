@@ -1906,9 +1906,60 @@ class ReadingService:
 
         return passage
 
-    def get_progress(self, db: Session) -> list[ReadingProgress]:
+    def serialize_progress(self, progress: ReadingProgress) -> dict:
+        accuracy = (
+            progress.correct_answers / progress.questions_answered
+            if progress.questions_answered
+            else 0
+        )
+
+        return {
+            "child_id": progress.child_id,
+            "passage_id": progress.passage_id,
+            "level": progress.level,
+            "questions_answered": progress.questions_answered,
+            "correct_answers": progress.correct_answers,
+            "vocabulary_learned": progress.vocabulary_learned,
+            "xp_awarded": progress.xp_awarded,
+            "completed": progress.completed,
+            "completed_at": progress.completed_at,
+            "accuracy": accuracy,
+        }
+
+    def get_progress(self, db: Session) -> list[dict]:
         child = self.get_child_or_create_default(db)
-        return self.progress_repository.list_by_child(db, child.id)
+        return [
+            self.serialize_progress(progress)
+            for progress in self.progress_repository.list_by_child(db, child.id)
+        ]
+
+    def get_progress_summary(self, db: Session) -> dict:
+        child = self.get_child_or_create_default(db)
+        progress_items = self.progress_repository.list_by_child(db, child.id)
+        completed_items = [item for item in progress_items if item.completed]
+        questions_answered = sum(item.questions_answered for item in completed_items)
+        correct_answers = sum(item.correct_answers for item in completed_items)
+        vocabulary_words = []
+
+        for item in completed_items:
+            passage = self.passage_repository.get_by_id(db, item.passage_id)
+            if passage is None:
+                continue
+
+            for word in json.loads(passage.vocabulary_words):
+                if word not in vocabulary_words:
+                    vocabulary_words.append(word)
+
+        return {
+            "completed_passage_ids": [item.passage_id for item in completed_items],
+            "passages_completed": len(completed_items),
+            "questions_answered": questions_answered,
+            "correct_answers": correct_answers,
+            "accuracy": correct_answers / questions_answered if questions_answered else 0,
+            "total_xp_earned": sum(item.xp_awarded for item in completed_items),
+            "vocabulary_learned": len(vocabulary_words),
+            "vocabulary_words": vocabulary_words,
+        }
 
     def normalize_answer(self, value):
         if isinstance(value, list):
@@ -1951,7 +2002,7 @@ class ReadingService:
         if existing_progress is not None and existing_progress.completed:
             return {
                 "child": child,
-                "progress": existing_progress,
+                "progress": self.serialize_progress(existing_progress),
                 "score": existing_progress.correct_answers,
                 "total_questions": existing_progress.questions_answered,
                 "accuracy": (
@@ -2037,7 +2088,7 @@ class ReadingService:
 
         return {
             "child": child,
-            "progress": progress,
+            "progress": self.serialize_progress(progress),
             "score": score,
             "total_questions": total_questions,
             "accuracy": score / total_questions if total_questions else 0,
