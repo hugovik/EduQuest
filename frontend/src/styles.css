@@ -380,3 +380,80 @@
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
+.reading-vocabulary-section {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.reading-vocabulary-card {
+  background: #edf8c8;
+  border: 1px solid #a6c96a;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.reading-vocabulary-card strong {
+  color: #244026;
+  font-size: 1.05rem;
+}
+
+.reading-vocabulary-card p {
+  margin: 0;
+}
+
+.reading-vocabulary-card small {
+  color: #4f673a;
+  font-weight: 700;
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px solid #a6c96a;
+  border-radius: 8px;
+  color: #244026;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.5rem 0.75rem;
+}
+
+.reading-hint-box {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.reading-hint-box p {
+  background: #f8ffd8;
+  border-left: 4px solid #73a942;
+  margin: 0;
+  padding: 0.65rem;
+}
+
+.reading-review-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reading-review-card {
+  border: 2px solid #c7ddb1;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.reading-review-card.correct {
+  background: #eefbd8;
+}
+
+.reading-review-card.incorrect {
+  background: #fff4e8;
+}
+
+.reading-review-card p {
+  margin: 0;
+}

@@ -7,6 +7,12 @@ from app.schemas.child import ChildRead
 from app.schemas.daily_goal import DailyGoalRead, LearningStreakRead
 
 
+class VocabularyWordRead(BaseModel):
+    word: str
+    definition: str
+    example: str | None = None
+
+
 class ReadingQuestionRead(BaseModel):
     id: str
     type: str
@@ -14,6 +20,7 @@ class ReadingQuestionRead(BaseModel):
     options: list[str] | None = None
     pairs: dict[str, str] | None = None
     items: list[str] | None = None
+    hint: str | None = None
 
 
 class ReadingPassageRead(BaseModel):
@@ -22,7 +29,7 @@ class ReadingPassageRead(BaseModel):
     level: int
     text: str
     estimated_reading_time: str
-    vocabulary_words: list[str]
+    vocabulary_words: list[VocabularyWordRead]
     questions: list[ReadingQuestionRead]
 
 
@@ -58,8 +65,14 @@ class ReadingSubmitRequest(BaseModel):
 
 class ReadingQuestionResult(BaseModel):
     question_id: str
+    questionId: str | None = None
+    prompt: str
     correct: bool
+    isCorrect: bool
+    player_answer: object | None = None
+    correct_answer: object
     expected_answer: object
+    explanation: str
 
 
 class ReadingSubmitResponse(BaseModel):

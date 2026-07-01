@@ -78,6 +78,10 @@ def test_passage_loading_hides_answers(db_session, reading_service):
 
     assert passage["questions"]
     assert "answer" not in passage["questions"][0]
+    assert "explanation" not in passage["questions"][0]
+    assert passage["questions"][0]["hint"]
+    assert passage["vocabulary_words"][0]["word"]
+    assert passage["vocabulary_words"][0]["definition"]
 
 
 def test_comprehension_scoring_rewards_and_persists_progress(db_session, reading_service):
@@ -164,3 +168,81 @@ def test_progress_summary_exposes_parent_friendly_reading_metrics(db_session, re
     assert summary["total_xp_earned"] == 4 * READING_CORRECT_ANSWER_XP
     assert summary["vocabulary_learned"] == 2
     assert summary["vocabulary_words"]
+
+
+
+def test_string_vocabulary_is_normalized_for_backward_compatibility(reading_service):
+    normalized = reading_service.normalize_vocabulary_word("trail")
+
+    assert normalized["word"] == "trail"
+    assert normalized["definition"] == "A path through a forest or park."
+    assert normalized["example"]
+
+
+def test_structured_vocabulary_is_preserved(reading_service):
+    normalized = reading_service.normalize_vocabulary_word(
+        {
+            "word": "sparkle",
+            "definition": "A quick shine of light.",
+            "example": "The lake had a sparkle in the sun.",
+        }
+    )
+
+    assert normalized["word"] == "sparkle"
+    assert normalized["definition"] == "A quick shine of light."
+    assert normalized["example"] == "The lake had a sparkle in the sun."
+
+
+
+def test_submission_returns_child_friendly_feedback(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+
+    result = reading_service.submit_answers(
+        db_session,
+        passage["id"],
+        {"q1": "Inside a cave"},
+    )
+    feedback = result["question_results"][0]
+
+    assert feedback["question_id"] == "q1"
+    assert feedback["questionId"] == "q1"
+    assert feedback["correct"] is False
+    assert feedback["isCorrect"] is False
+    assert feedback["player_answer"] == "Inside a cave"
+    assert feedback["correct_answer"] == "Beside the old tree"
+    assert feedback["expected_answer"] == "Beside the old tree"
+    assert feedback["explanation"]
+
+
+def test_sequence_feedback_returns_correct_event_order(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+
+    result = reading_service.submit_answers(
+        db_session,
+        passage["id"],
+        {"q3": ["Lena chooses a path", "Lena reads a clue", "Lena enters the forest"]},
+    )
+    feedback = next(item for item in result["question_results"] if item["question_id"] == "q3")
+
+    assert feedback["correct"] is False
+    assert feedback["correct_answer"] == [
+        "Lena enters the forest",
+        "Lena reads a clue",
+        "Lena chooses a path",
+    ]
+    assert "order" in feedback["explanation"]
+
+
+def test_vocabulary_feedback_returns_correct_match(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+
+    result = reading_service.submit_answers(
+        db_session,
+        passage["id"],
+        {"q4": "spaceship"},
+    )
+    feedback = next(item for item in result["question_results"] if item["question_id"] == "q4")
+
+    assert feedback["correct"] is False
+    assert feedback["correct_answer"] == passage["vocabulary_words"][0]["word"]
+    assert "vocabulary" in feedback["explanation"]

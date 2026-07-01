@@ -20,6 +20,33 @@ from app.services.progression_rules import (
 )
 
 READING_CORRECT_ANSWER_XP = 5
+VOCABULARY_DEFINITIONS = {
+    "trail": {
+        "definition": "A path through a forest or park.",
+        "example": "Lena followed the trail between the tall trees.",
+    },
+    "leaf": {
+        "definition": "A flat green part of a plant or tree.",
+        "example": "A leaf floated down beside the path.",
+    },
+    "curious": {
+        "definition": "Wanting to learn or know more about something.",
+        "example": "Lena felt curious when she found the note.",
+    },
+    "glimmer": {
+        "definition": "A small, soft shine of light.",
+        "example": "The glimmer on the stone helped Lena see the clue.",
+    },
+    "discover": {
+        "definition": "To find or learn something new.",
+        "example": "Lena hoped to discover where the path led.",
+    },
+    "observe": {
+        "definition": "To look carefully and notice details.",
+        "example": "Lena paused to observe the marker on the stone.",
+    },
+}
+
 READING_PASSAGES = [
     {
         "id": "reading-l1-01",
@@ -1867,6 +1894,61 @@ class ReadingService:
             )
         db.flush()
 
+    def normalize_vocabulary_word(self, item) -> dict:
+        if isinstance(item, dict):
+            word = str(item.get("word", "")).strip()
+            definition = item.get("definition") or VOCABULARY_DEFINITIONS.get(word.lower(), {}).get("definition")
+            example = item.get("example") or VOCABULARY_DEFINITIONS.get(word.lower(), {}).get("example")
+            return {
+                "word": word,
+                "definition": definition or f"A new Reading Forest word: {word}.",
+                "example": example,
+            }
+
+        word = str(item).strip()
+        defaults = VOCABULARY_DEFINITIONS.get(word.lower(), {})
+        return {
+            "word": word,
+            "definition": defaults.get("definition") or f"A new Reading Forest word: {word}.",
+            "example": defaults.get("example"),
+        }
+
+    def normalize_vocabulary_words(self, vocabulary_words) -> list[dict]:
+        return [
+            self.normalize_vocabulary_word(item)
+            for item in vocabulary_words
+        ]
+
+    def get_question_hint(self, question: dict) -> str:
+        if question.get("hint"):
+            return question["hint"]
+
+        if question["type"] == "sequence":
+            return "Look back at what happened first, next, and last in the story."
+
+        if question["type"] == "vocabulary_matching":
+            return "Look at the New Words cards before choosing."
+
+        return "Look back at the story and find the sentence with this clue."
+
+    def get_question_explanation(self, question: dict) -> str:
+        if question.get("explanation"):
+            return question["explanation"]
+
+        if question["type"] == "sequence":
+            return "The story events happen in this order from beginning to end."
+
+        if question["type"] == "vocabulary_matching":
+            return "The vocabulary word matches the meaning shown in the New Words cards."
+
+        if question["type"] == "true_false":
+            return "The story gives this detail directly, so checking the sentence helps."
+
+        return "The answer can be found by rereading the story clue carefully."
+
+    def serialize_answer(self, value):
+        return value
+
     def serialize_passage(self, passage: ReadingPassage) -> dict:
         questions = json.loads(passage.questions)
         safe_questions = []
@@ -1875,8 +1957,9 @@ class ReadingService:
             safe_question = {
                 key: value
                 for key, value in question.items()
-                if key != "answer"
+                if key not in {"answer", "explanation"}
             }
+            safe_question["hint"] = self.get_question_hint(question)
             safe_questions.append(safe_question)
 
         return {
@@ -1885,7 +1968,9 @@ class ReadingService:
             "level": passage.level,
             "text": passage.text,
             "estimated_reading_time": passage.estimated_reading_time,
-            "vocabulary_words": json.loads(passage.vocabulary_words),
+            "vocabulary_words": self.normalize_vocabulary_words(
+                json.loads(passage.vocabulary_words)
+            ),
             "questions": safe_questions,
         }
 
@@ -1946,7 +2031,8 @@ class ReadingService:
             if passage is None:
                 continue
 
-            for word in json.loads(passage.vocabulary_words):
+            for item in self.normalize_vocabulary_words(json.loads(passage.vocabulary_words)):
+                word = item["word"]
                 if word not in vocabulary_words:
                     vocabulary_words.append(word)
 
@@ -1978,8 +2064,14 @@ class ReadingService:
             results.append(
                 {
                     "question_id": question["id"],
+                    "questionId": question["id"],
+                    "prompt": question["prompt"],
                     "correct": correct,
+                    "isCorrect": correct,
+                    "player_answer": actual,
+                    "correct_answer": expected,
                     "expected_answer": expected,
+                    "explanation": self.get_question_explanation(question),
                 }
             )
 

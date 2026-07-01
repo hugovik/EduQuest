@@ -6,6 +6,18 @@ function formatPercent(value) {
   return Math.round((value ?? 0) * 100);
 }
 
+function formatAnswer(value) {
+  if (Array.isArray(value)) {
+    return value.join(" → ");
+  }
+
+  if (value === null || value === undefined || value === "") {
+    return "No answer selected";
+  }
+
+  return String(value);
+}
+
 export default function ReadingResults({ result, nextPassageTitle, onChooseAnother, onNextPassage }) {
   if (!result) {
     return null;
@@ -34,6 +46,31 @@ export default function ReadingResults({ result, nextPassageTitle, onChooseAnoth
           Badge unlocked: {getAchievementName(result.achievements_unlocked[0])}!
         </p>
       )}
+
+      {result.question_results?.length > 0 && (
+        <section className="reading-review-section">
+          <p className="quest-realm">Review Answers</p>
+          <h3>Let&apos;s learn from the clues</h3>
+          {result.question_results.map((item) => (
+            <article
+              className={item.correct ? "reading-review-card correct" : "reading-review-card incorrect"}
+              key={item.question_id}
+            >
+              <strong>{item.correct ? "Great job!" : "Good try!"}</strong>
+              <p>{item.prompt}</p>
+              <p>Your answer: {formatAnswer(item.player_answer)}</p>
+              {!item.correct && (
+                <p>The correct answer was: {formatAnswer(item.correct_answer)}</p>
+              )}
+              {Array.isArray(item.correct_answer) && (
+                <p>Correct order: {formatAnswer(item.correct_answer)}</p>
+              )}
+              <p>{item.explanation}</p>
+            </article>
+          ))}
+        </section>
+      )}
+
       <div className="reading-result-actions">
         {nextPassageTitle && (
           <button className="primary-button" type="button" onClick={onNextPassage}>
