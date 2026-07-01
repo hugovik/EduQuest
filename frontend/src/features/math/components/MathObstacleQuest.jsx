@@ -2,6 +2,7 @@ import { useState } from "react";
 import { generateMathProblem } from "../utils/generateMathProblem";
 
 export default function MathObstacleQuest({
+  levelConfig,
   obstacle,
   obstacleProgress,
   selectedOperation,
@@ -13,6 +14,7 @@ export default function MathObstacleQuest({
   const [problem, setProblem] = useState(() =>
     generateMathProblem({
       operation: selectedOperation,
+      levelConfig,
       context: obstacle.id,
     })
   );
@@ -67,6 +69,7 @@ export default function MathObstacleQuest({
       setProblem(
         generateMathProblem({
           operation: selectedOperation,
+          levelConfig,
           context: obstacle.id,
         })
       );

@@ -1,20 +1,33 @@
-const problemOperations = [
-  "addition",
-  "subtraction",
-  "multiplication",
-  "division",
-];
+import { getAdventureLevelConfig } from "../../learning/learningLevelConfig.js";
+import { getAvailableMathOperations } from "./mathGradeConfig.js";
 
 function randomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function resolveOperation(operation = "addition") {
+function randomItem(items) {
+  return items[randomNumber(0, items.length - 1)];
+}
+
+function resolveMathConfig({ grade, levelConfig }) {
+  return levelConfig ?? getAdventureLevelConfig({
+    adventureType: "math",
+    childGrade: grade,
+  }).config;
+}
+
+function resolveOperation(operation = "addition", levelConfig) {
+  const availableOperations = getAvailableMathOperations(levelConfig);
+
   if (operation === "mixed") {
-    return problemOperations[randomNumber(0, problemOperations.length - 1)];
+    return randomItem(availableOperations);
   }
 
-  return problemOperations.includes(operation) ? operation : "addition";
+  if (availableOperations.includes(operation)) {
+    return operation;
+  }
+
+  return availableOperations.includes("addition") ? "addition" : availableOperations[0];
 }
 
 function storyForOperation(operation, context, values) {
@@ -65,9 +78,10 @@ function storyForOperation(operation, context, values) {
   return "Lena shares " + values.dividend + " berries equally into " + values.divisor + " bowls. How many berries are in each bowl?";
 }
 
-function generateAdditionProblem(context) {
-  const left = randomNumber(1, 12);
-  const right = randomNumber(1, 12);
+function generateAdditionProblem(context, levelConfig) {
+  const { min, max } = levelConfig.addition;
+  const left = randomNumber(min, max);
+  const right = randomNumber(min, max);
   const values = { left, right };
 
   return {
@@ -78,23 +92,26 @@ function generateAdditionProblem(context) {
   };
 }
 
-function generateSubtractionProblem(context) {
-  const answer = randomNumber(1, 12);
-  const removed = randomNumber(1, 12);
-  const total = answer + removed;
+function generateSubtractionProblem(context, levelConfig) {
+  const { min, max } = levelConfig.subtraction;
+  const first = randomNumber(min, max);
+  const second = randomNumber(min, max);
+  const total = Math.max(first, second);
+  const removed = Math.min(first, second);
   const values = { total, removed };
 
   return {
     operation: "subtraction",
     question: `${total} - ${removed}`,
     story: storyForOperation("subtraction", context, values),
-    answer: String(answer),
+    answer: String(total - removed),
   };
 }
 
-function generateMultiplicationProblem(context) {
-  const left = randomNumber(1, 5);
-  const right = randomNumber(1, 5);
+function generateMultiplicationProblem(context, levelConfig) {
+  const { min, max, multiDigit } = levelConfig.multiplication;
+  const left = multiDigit ? randomNumber(10, 99) : randomNumber(min, max);
+  const right = randomNumber(min, max);
   const values = { left, right };
 
   return {
@@ -105,9 +122,9 @@ function generateMultiplicationProblem(context) {
   };
 }
 
-function generateDivisionProblem(context) {
-  const divisor = randomNumber(2, 5);
-  const quotient = randomNumber(1, 5);
+function generateDivisionProblem(context, levelConfig) {
+  const divisor = randomItem(levelConfig.division.divisors);
+  const quotient = randomNumber(1, levelConfig.multiplication?.max ?? 12);
   const dividend = divisor * quotient;
   const values = { dividend, divisor };
 
@@ -119,20 +136,26 @@ function generateDivisionProblem(context) {
   };
 }
 
-export function generateMathProblem({ operation = "addition", context } = {}) {
-  const resolvedOperation = resolveOperation(operation);
+export function generateMathProblem({
+  operation = "addition",
+  grade,
+  levelConfig,
+  context,
+} = {}) {
+  const mathConfig = resolveMathConfig({ grade, levelConfig });
+  const resolvedOperation = resolveOperation(operation, mathConfig);
 
   if (resolvedOperation === "subtraction") {
-    return generateSubtractionProblem(context);
+    return generateSubtractionProblem(context, mathConfig);
   }
 
   if (resolvedOperation === "multiplication") {
-    return generateMultiplicationProblem(context);
+    return generateMultiplicationProblem(context, mathConfig);
   }
 
   if (resolvedOperation === "division") {
-    return generateDivisionProblem(context);
+    return generateDivisionProblem(context, mathConfig);
   }
 
-  return generateAdditionProblem(context);
+  return generateAdditionProblem(context, mathConfig);
 }

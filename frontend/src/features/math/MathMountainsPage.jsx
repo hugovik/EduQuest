@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useQuests } from "../treehouse/hooks/useQuests";
+import { usePlayer } from "../treehouse/hooks/usePlayer";
 import { useCompleteQuest } from "../quests/hooks/useCompleteQuest";
 import InventoryBar from "./components/InventoryBar";
+import LearningLevelSelector from "../learning/components/LearningLevelSelector";
 import MathObstacleQuest from "./components/MathObstacleQuest";
 import MathOperationSelector from "./components/MathOperationSelector";
 import { mathObstacles } from "./data/mathObstacles";
@@ -9,11 +11,14 @@ import { useIncorrectAnswerPenalty } from "./hooks/useIncorrectAnswerPenalty";
 import { useInventory } from "./hooks/useInventory";
 import { useObstacleProgress } from "./hooks/useObstacleProgress";
 import { useRewardCorrectAnswer } from "./hooks/useRewardCorrectAnswer";
+import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
 import TrailMap from "../adventure/components/TrailMap";
 
 export default function MathMountainsPage({ onBack }) {
   const [currentObstacleIndex, setCurrentObstacleIndex] = useState(0);
   const [selectedOperation, setSelectedOperation] = useState("addition");
+  const [mathOverrideLevel, setMathOverrideLevel] = useState(null);
+  const { data: player, isLoading: playerLoading, error: playerError } = usePlayer();
   const { data: quests, isLoading, error } = useQuests();
   const {
     data: inventory,
@@ -28,12 +33,26 @@ export default function MathMountainsPage({ onBack }) {
   const completeQuest = useCompleteQuest();
   const rewardCorrectAnswer = useRewardCorrectAnswer();
   const incorrectAnswerPenalty = useIncorrectAnswerPenalty();
+  const mathLevel = getAdventureLevelConfig({
+    adventureType: "math",
+    childGrade: player?.grade,
+    overrideLevel: mathOverrideLevel,
+  });
+  const availableOperations = mathLevel.config?.operations ?? [];
 
   const mathQuest = quests?.find((quest) => quest.subject === "math");
   const currentObstacle = mathObstacles[currentObstacleIndex];
   const currentObstacleProgress = obstacleProgress.find(
     (progress) => progress.obstacle_id === currentObstacle.id
   );
+
+  useEffect(() => {
+    if (selectedOperation === "mixed" || availableOperations.includes(selectedOperation)) {
+      return;
+    }
+
+    setSelectedOperation(availableOperations[0] ?? "addition");
+  }, [availableOperations, selectedOperation]);
 
   useEffect(() => {
     if (!obstacleProgress.length) {
@@ -74,11 +93,11 @@ export default function MathMountainsPage({ onBack }) {
     completeQuest.mutate(mathQuest.id);
   }
 
-  if (isLoading || inventoryLoading || progressLoading) {
+  if (playerLoading || isLoading || inventoryLoading || progressLoading) {
     return <main className="dashboard">Loading Math Mountains...</main>;
   }
 
-  if (error || inventoryError || progressError) {
+  if (playerError || error || inventoryError || progressError) {
     return <main className="dashboard">Unable to load Math Mountains.</main>;
   }
 
@@ -104,11 +123,21 @@ export default function MathMountainsPage({ onBack }) {
 
       <InventoryBar inventory={inventory} />
 
+      <LearningLevelSelector
+        childGrade={player?.grade}
+        effectiveLevel={mathLevel.effectiveLevel}
+        overrideLevel={mathOverrideLevel}
+        source={mathLevel.source}
+        onOverrideLevelChange={setMathOverrideLevel}
+      />
+
       <p>
         Obstacle {currentObstacleIndex + 1} of {mathObstacles.length}
       </p>
 
       <MathOperationSelector
+        availableOperations={availableOperations}
+        effectiveLevel={mathLevel.effectiveLevel}
         selectedOperation={selectedOperation}
         onSelectOperation={setSelectedOperation}
       />
@@ -121,7 +150,8 @@ export default function MathMountainsPage({ onBack }) {
       />
 
       <MathObstacleQuest
-        key={`${currentObstacle.id}-${selectedOperation}-${currentObstacleProgress?.current_progress ?? 0}`}
+        key={`${currentObstacle.id}-${selectedOperation}-${mathLevel.effectiveLevel}-${currentObstacleProgress?.current_progress ?? 0}`}
+        levelConfig={mathLevel.config}
         obstacle={currentObstacle}
         obstacleProgress={currentObstacleProgress}
         selectedOperation={selectedOperation}
