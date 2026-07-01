@@ -1,20 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import get_quest_service
 from app.database.database import get_db
-from app.repositories.child_repository import ChildRepository
-from app.repositories.quest_repository import QuestRepository
 from app.schemas.child import ChildRead
 from app.services.quest_service import QuestService
 
 router = APIRouter(prefix="/child", tags=["child"])
-
-
-def get_quest_service():
-    return QuestService(
-        child_repository=ChildRepository(),
-        quest_repository=QuestRepository(),
-    )
 
 
 @router.get("", response_model=ChildRead)

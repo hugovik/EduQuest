@@ -6,8 +6,12 @@ from sqlalchemy.pool import StaticPool
 
 from app.database.database import Base
 from app.models import AchievementUnlock, ProgressEvent, Quest, QuestCompletion, TreeGrowthEvent
+from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.child_repository import ChildRepository
+from app.repositories.progress_event_repository import ProgressEventRepository
+from app.repositories.quest_completion_repository import QuestCompletionRepository
 from app.repositories.quest_repository import QuestRepository
+from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
 from app.services.quest_service import QuestService
 
 
@@ -34,6 +38,10 @@ def quest_service():
     return QuestService(
         child_repository=ChildRepository(),
         quest_repository=QuestRepository(),
+        quest_completion_repository=QuestCompletionRepository(),
+        progress_event_repository=ProgressEventRepository(),
+        tree_growth_event_repository=TreeGrowthEventRepository(),
+        achievement_repository=AchievementRepository(),
     )
 
 

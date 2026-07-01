@@ -1,16 +1,15 @@
 from fastapi import HTTPException
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.achievement import Achievement
-from app.models.achievement_unlock import AchievementUnlock
 from app.models.child import Child
 from app.models.quest import Quest
-from app.models.progress_event import ProgressEvent
-from app.models.quest_completion import QuestCompletion
-from app.models.tree_growth_event import TreeGrowthEvent
+from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.child_repository import ChildRepository
+from app.repositories.progress_event_repository import ProgressEventRepository
+from app.repositories.quest_completion_repository import QuestCompletionRepository
 from app.repositories.quest_repository import QuestRepository
+from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
 from app.services.progression_rules import (
     calculate_level_from_xp,
     calculate_tree_stage_from_xp,
@@ -22,9 +21,17 @@ class QuestService:
         self,
         child_repository: ChildRepository,
         quest_repository: QuestRepository,
+        quest_completion_repository: QuestCompletionRepository,
+        progress_event_repository: ProgressEventRepository,
+        tree_growth_event_repository: TreeGrowthEventRepository,
+        achievement_repository: AchievementRepository,
     ):
         self.child_repository = child_repository
         self.quest_repository = quest_repository
+        self.quest_completion_repository = quest_completion_repository
+        self.progress_event_repository = progress_event_repository
+        self.tree_growth_event_repository = tree_growth_event_repository
+        self.achievement_repository = achievement_repository
 
     def get_child_or_create_default(self, db: Session) -> Child:
         child = self.child_repository.get_first(db)
@@ -69,9 +76,9 @@ class QuestService:
         ]
 
         for achievement in default_achievements:
-            existing = db.query(Achievement).filter(Achievement.id == achievement.id).first()
+            existing = self.achievement_repository.get_by_id(db, achievement.id)
             if existing is None:
-                db.add(achievement)
+                self.achievement_repository.create(db, achievement)
 
         db.flush()
 
@@ -80,26 +87,10 @@ class QuestService:
         self.seed_achievements(db)
         unlocked_achievements = self.list_unlocked_achievements(db)
 
-        completed_quests = (
-            db.query(QuestCompletion)
-            .filter(QuestCompletion.child_id == child.id)
-            .count()
-        )
-        total_xp_awarded = (
-            db.query(func.coalesce(func.sum(QuestCompletion.xp_awarded), 0))
-            .filter(QuestCompletion.child_id == child.id)
-            .scalar()
-        )
-        progress_events = (
-            db.query(ProgressEvent)
-            .filter(ProgressEvent.child_id == child.id)
-            .count()
-        )
-        tree_growth_events = (
-            db.query(TreeGrowthEvent)
-            .filter(TreeGrowthEvent.child_id == child.id)
-            .count()
-        )
+        completed_quests = self.quest_completion_repository.count_by_child(db, child.id)
+        total_xp_awarded = self.quest_completion_repository.total_xp_awarded_by_child(db, child.id)
+        progress_events = self.progress_event_repository.count_by_child(db, child.id)
+        tree_growth_events = self.tree_growth_event_repository.count_by_child(db, child.id)
 
         return {
             "child": child,
@@ -115,13 +106,7 @@ class QuestService:
     def list_unlocked_achievements(self, db: Session) -> list[dict]:
         child = self.get_child_or_create_default(db)
 
-        rows = (
-            db.query(AchievementUnlock, Achievement)
-            .join(Achievement, AchievementUnlock.achievement_id == Achievement.id)
-            .filter(AchievementUnlock.child_id == child.id)
-            .order_by(AchievementUnlock.unlocked_at.desc())
-            .all()
-        )
+        rows = self.achievement_repository.list_unlocks_with_achievements(db, child.id)
 
         return [
             {
@@ -136,29 +121,14 @@ class QuestService:
     def unlock_eligible_achievements(self, db: Session, child: Child) -> list[Achievement]:
         self.seed_achievements(db)
 
-        completed_quests = (
-            db.query(QuestCompletion)
-            .filter(QuestCompletion.child_id == child.id)
-            .count()
-        )
-        total_xp_awarded = (
-            db.query(func.coalesce(func.sum(QuestCompletion.xp_awarded), 0))
-            .filter(QuestCompletion.child_id == child.id)
-            .scalar()
-        )
+        completed_quests = self.quest_completion_repository.count_by_child(db, child.id)
+        total_xp_awarded = self.quest_completion_repository.total_xp_awarded_by_child(db, child.id)
 
-        achievements = db.query(Achievement).all()
+        achievements = self.achievement_repository.list_all(db)
         newly_unlocked = []
 
         for achievement in achievements:
-            already_unlocked = (
-                db.query(AchievementUnlock)
-                .filter(
-                    AchievementUnlock.child_id == child.id,
-                    AchievementUnlock.achievement_id == achievement.id,
-                )
-                .first()
-            )
+            already_unlocked = self.achievement_repository.get_unlock(db, child.id, achievement.id)
 
             if already_unlocked is not None:
                 continue
@@ -168,12 +138,7 @@ class QuestService:
                 value = total_xp_awarded
 
             if value >= achievement.trigger_threshold:
-                db.add(
-                    AchievementUnlock(
-                        child_id=child.id,
-                        achievement_id=achievement.id,
-                    )
-                )
+                self.achievement_repository.create_unlock(db, child.id, achievement.id)
                 newly_unlocked.append(achievement)
 
         return newly_unlocked
@@ -185,13 +150,10 @@ class QuestService:
         if quest is None:
             raise HTTPException(status_code=404, detail="Quest not found")
 
-        existing_completion = (
-            db.query(QuestCompletion)
-            .filter(
-                QuestCompletion.child_id == child.id,
-                QuestCompletion.quest_id == quest.id,
-            )
-            .first()
+        existing_completion = self.quest_completion_repository.get_by_child_and_quest(
+            db,
+            child.id,
+            quest.id,
         )
 
         if existing_completion is not None and not quest.repeatable:
@@ -214,33 +176,30 @@ class QuestService:
         else:
             events.append("Tree Sparkled")
 
-        quest_completion = QuestCompletion(
-            child_id=child.id,
-            quest_id=quest.id,
-            xp_awarded=quest.xp_reward,
+        quest_completion = self.quest_completion_repository.create(
+            db,
+            child.id,
+            quest.id,
+            quest.xp_reward,
         )
 
-        db.add(quest_completion)
-        db.flush()
-
-        progress_event = ProgressEvent(
-            child_id=child.id,
-            quest_completion_id=quest_completion.id,
-            event_type="quest_completed",
-            title=f"Completed {quest.title}",
-            description=f"{child.name} completed a quest in {quest.realm}.",
-            xp_change=quest.xp_reward,
+        self.progress_event_repository.create_quest_completed_event(
+            db,
+            child.id,
+            quest_completion.id,
+            f"Completed {quest.title}",
+            f"{child.name} completed a quest in {quest.realm}.",
+            quest.xp_reward,
         )
 
-        tree_event = TreeGrowthEvent(
-            child_id=child.id,
-            quest_completion_id=quest_completion.id,
-            growth_type="new_leaf",
-            description="A new leaf appeared on the Tree of Growth.",
+        self.tree_growth_event_repository.create_growth_event(
+            db,
+            child.id,
+            quest_completion.id,
+            "new_leaf",
+            "A new leaf appeared on the Tree of Growth.",
         )
 
-        db.add(progress_event)
-        db.add(tree_event)
         db.flush()
 
         unlocked_achievements = self.unlock_eligible_achievements(db, child)
