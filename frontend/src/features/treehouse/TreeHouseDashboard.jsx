@@ -11,8 +11,12 @@ import { useProgressSummary } from "./hooks/useProgressSummary";
 
 export function TreeHouseDashboard() {
   const { data: player, isLoading, error } = usePlayer();
-  const { data: quests } = useQuests();
-  const { data: progressSummary } = useProgressSummary();
+  const { data: quests, isLoading: questsLoading } = useQuests();
+  const {
+    data: progressSummary,
+    isLoading: progressSummaryLoading,
+    error: progressSummaryError,
+  } = useProgressSummary();
 
   if (isLoading) {
     return <main className="dashboard">Loading Tree House...</main>;
@@ -32,11 +36,23 @@ export function TreeHouseDashboard() {
 
       <TreeOfGrowth player={player} />
 
-      <QuestBoard quest={quests?.[0]} />
+      <QuestBoard quest={quests?.[0]} isLoading={questsLoading} />
 
       <DragonNest />
 
-      <AchievementShelf achievements={progressSummary?.achievements ?? []} />
+      {progressSummaryLoading ? (
+        <div className="card state-card" role="status">
+          <h2>🏆 Achievements</h2>
+          <p>Loading progress...</p>
+        </div>
+      ) : progressSummaryError ? (
+        <div className="card state-card state-card-error" role="status">
+          <h2>🏆 Achievements</h2>
+          <p>Unable to load progress right now.</p>
+        </div>
+      ) : (
+        <AchievementShelf achievements={progressSummary?.achievements ?? []} />
+      )}
     </main>
   );
 }
