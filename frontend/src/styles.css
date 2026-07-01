@@ -143,3 +143,51 @@
   font: inherit;
   padding: 0.75rem 1rem;
 }
+
+.adventure-hub-header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.adventure-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.adventure-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.adventure-card-disabled {
+  opacity: 0.72;
+}
+
+.adventure-card-icon {
+  font-size: 2.5rem;
+}
+
+.adventure-card-meta {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+
+.adventure-gateway-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.adventure-progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  height: 0.65rem;
+  overflow: hidden;
+}
+
+.adventure-progress-fill {
+  background: #73a942;
+  height: 100%;
+  transition: width 180ms ease;
+}

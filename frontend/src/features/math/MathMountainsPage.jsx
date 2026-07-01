@@ -118,7 +118,7 @@ export default function MathMountainsPage({ onBack }) {
     return (
       <main className="dashboard">
         <button className="primary-button" onClick={onBack}>
-          Back to Tree House
+          Back to Adventure Hub
         </button>
 
         <div className="card">No Math Mountains quest found yet.</div>
@@ -129,7 +129,7 @@ export default function MathMountainsPage({ onBack }) {
   return (
     <main className="dashboard math-mountains-page">
       <button className="primary-button" onClick={onBack}>
-        Back to Tree House
+        Back to Adventure Hub
       </button>
 
       <h1>⛰️ Math Mountains</h1>

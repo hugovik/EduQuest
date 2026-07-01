@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 
+from app.api.adventure_routes import router as adventure_router
 from app.api.child_routes import router as child_router
 from app.api.inventory_routes import router as inventory_router
 from app.api.learning_routes import router as learning_router
@@ -70,6 +71,7 @@ def health():
 
 
 app.include_router(child_router)
+app.include_router(adventure_router)
 app.include_router(quest_router)
 app.include_router(inventory_router)
 app.include_router(learning_router)

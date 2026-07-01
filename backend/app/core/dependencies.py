@@ -38,3 +38,11 @@ def get_learning_preference_service() -> LearningPreferenceService:
         child_repository=ChildRepository(),
         learning_preference_repository=LearningPreferenceRepository(),
     )
+
+from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
+
+
+def get_adventure_progress_summary_service() -> AdventureProgressSummaryService:
+    return AdventureProgressSummaryService(
+        child_repository=ChildRepository(),
+    )

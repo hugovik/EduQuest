@@ -6,4 +6,5 @@ export const queryKeys = {
   obstacleProgress: ["obstacle-progress"],
   learningPreferences: ["learning-preferences"],
   learningPreference: (adventureType) => ["learning-preference", adventureType],
+  adventureProgressSummary: ["adventure-progress-summary"],
 };
