@@ -123,7 +123,7 @@ Status
 
 Current Tasks
 
-- Add tests for quest completion persistence
+- Run and verify backend tests for quest completion persistence
 - Decide duplicate-completion behavior
 - Add source record references between gameplay events
 - Add player progress summary endpoint
@@ -272,3 +272,5 @@ Turn the working quest loop into a reliable core gameplay system.
 - React Query invalidation fixed
 - First gameplay loop confirmed working
 - QuestCompletion record creation added to quest completion service
+- Frontend progress summary API fixed and production build verified
+- Backend quest completion tests added; pass status unverified because Python execution is blocked in this environment
