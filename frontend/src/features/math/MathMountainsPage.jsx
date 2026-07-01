@@ -1,12 +1,30 @@
+import { useState } from "react";
 import { useQuests } from "../treehouse/hooks/useQuests";
 import { useCompleteQuest } from "../quests/hooks/useCompleteQuest";
-import LearningQuestCard from "../quests/components/LearningQuestCard";
+import MathObstacleQuest from "./components/MathObstacleQuest";
+import { mathObstacles } from "./data/mathObstacles";
+import TrailMap from "../adventure/components/TrailMap";
 
 export default function MathMountainsPage({ onBack }) {
+  const [currentObstacleIndex, setCurrentObstacleIndex] = useState(0);
   const { data: quests, isLoading, error } = useQuests();
   const completeQuest = useCompleteQuest();
 
   const mathQuest = quests?.find((quest) => quest.subject === "math");
+  const currentObstacle = mathObstacles[currentObstacleIndex];
+
+  function handleObstacleComplete() {
+    if (currentObstacleIndex < mathObstacles.length - 1) {
+      setCurrentObstacleIndex((currentIndex) => currentIndex + 1);
+      return;
+    }
+
+    if (!mathQuest || completeQuest.isSuccess) {
+      return;
+    }
+
+    completeQuest.mutate(mathQuest.id);
+  }
 
   if (isLoading) {
     return <main className="dashboard">Loading Math Mountains...</main>;
@@ -23,9 +41,7 @@ export default function MathMountainsPage({ onBack }) {
           Back to Tree House
         </button>
 
-        <div className="card">
-          No Math Mountains quest found yet.
-        </div>
+        <div className="card">No Math Mountains quest found yet.</div>
       </main>
     );
   }
@@ -38,22 +54,37 @@ export default function MathMountainsPage({ onBack }) {
 
       <h1>⛰️ Math Mountains</h1>
 
-      <LearningQuestCard
-        quest={mathQuest}
-        onCorrectAnswer={(questId) => completeQuest.mutate(questId)}
-        />
+      <p>
+        Obstacle {currentObstacleIndex + 1} of {mathObstacles.length}
+      </p>
+
+    <TrailMap
+        title="Rescue Trail"
+        emoji="⛰️"
+        obstacles={mathObstacles}
+        currentObstacleIndex={currentObstacleIndex}
+     />
+
+      <MathObstacleQuest
+        key={currentObstacle.id}
+        obstacle={currentObstacle}
+        onObstacleComplete={handleObstacleComplete}
+      />
+
 
       {completeQuest.isSuccess && (
         <div className="card quest-result success">
-          🎉 Quest complete! XP has been added.
+          ⭐ Math Mountains quest complete! XP has been added to Lena&apos;s
+          progress.
         </div>
       )}
 
       {completeQuest.isError && (
         <div className="card quest-result error">
-            {completeQuest.error?.message || "This quest may already be completed."}
+          {completeQuest.error?.message ||
+            "This quest may already be completed."}
         </div>
-    )}
+      )}
     </main>
   );
 }
