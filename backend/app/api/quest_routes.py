@@ -5,7 +5,9 @@ from app.core.dependencies import get_quest_service
 from app.database.database import get_db
 from app.models.quest import Quest
 from app.schemas.quest import QuestRead
+from app.schemas.achievement import AchievementUnlockRead
 from app.schemas.quest_completion import QuestCompletionResponse
+from app.schemas.progress_summary import ProgressSummaryResponse
 from app.services.quest_service import QuestService
 
 router = APIRouter(prefix="/quests", tags=["quests"])
@@ -41,6 +43,22 @@ def get_quests(
 ):
     seed_first_quest(db, quest_service)
     return quest_service.list_quests(db)
+
+
+@router.get("/progress/summary", response_model=ProgressSummaryResponse)
+def get_progress_summary(
+    db: Session = Depends(get_db),
+    quest_service: QuestService = Depends(get_quest_service),
+):
+    return quest_service.get_progress_summary(db)
+
+
+@router.get("/achievements", response_model=list[AchievementUnlockRead])
+def get_achievements(
+    db: Session = Depends(get_db),
+    quest_service: QuestService = Depends(get_quest_service),
+):
+    return quest_service.list_unlocked_achievements(db)
 
 
 @router.post("/{quest_id}/complete", response_model=QuestCompletionResponse)

@@ -7,11 +7,12 @@ import AchievementShelf from "./components/AchievementShelf";
 
 import { usePlayer } from "./hooks/usePlayer";
 import { useQuests } from "./hooks/useQuests";
+import { useProgressSummary } from "./hooks/useProgressSummary";
 
 export function TreeHouseDashboard() {
   const { data: player, isLoading, error } = usePlayer();
-
-  const { data: quests, isLoading: questsLoading,} = useQuests();
+  const { data: quests } = useQuests();
+  const { data: progressSummary } = useProgressSummary();
 
   if (isLoading) {
     return <main className="dashboard">Loading Tree House...</main>;
@@ -35,7 +36,7 @@ export function TreeHouseDashboard() {
 
       <DragonNest />
 
-      <AchievementShelf />
+      <AchievementShelf achievements={progressSummary?.achievements ?? []} />
     </main>
   );
 }

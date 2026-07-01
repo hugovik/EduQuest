@@ -4,3 +4,5 @@ from .world_state import WorldState
 from .quest_completion import QuestCompletion
 from .progress_event import ProgressEvent
 from .tree_growth_event import TreeGrowthEvent
+from .achievement import Achievement
+from .achievement_unlock import AchievementUnlock

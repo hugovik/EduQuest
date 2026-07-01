@@ -7,8 +7,9 @@ export function useCompleteQuest() {
   return useMutation({
     mutationFn: completeQuest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["child"] });
+      queryClient.invalidateQueries({ queryKey: ["player"] });
       queryClient.invalidateQueries({ queryKey: ["quests"] });
+      queryClient.invalidateQueries({ queryKey: ["progress-summary"] });
     },
   });
 }

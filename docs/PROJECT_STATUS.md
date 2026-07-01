@@ -8,7 +8,7 @@ This document provides a real-time overview of the current state of the EduQuest
 
 Unlike the architectural documentation, this document is intended to evolve continuously throughout development.
 
-It acts as the project's operational dashboard, helping contributors quickly understand what has been completed, what is currently being developed, and what comes next.
+It acts as the project operational dashboard, helping contributors quickly understand what has been completed, what is currently being developed, and what comes next.
 
 This document should be updated at the end of every significant development session.
 
@@ -26,7 +26,7 @@ Educational Adventure Platform
 
 Current Phase
 
-**Foundation & Core Development**
+**Sprint 1 - Core Gameplay Loop**
 
 Current Version
 
@@ -34,7 +34,7 @@ Current Version
 
 Overall Progress
 
-**≈ 30%**
+**≈ 42%**
 
 ---
 
@@ -42,20 +42,20 @@ Overall Progress
 
 ## Sprint Goal
 
-Establish a production-ready foundation for the EduQuest platform and begin implementation of the core gameplay experience.
+Complete the first reliable gameplay loop by connecting quest completion, XP rewards, progress history, tree growth, and persistent quest completion records.
 
 ---
 
 # Current Focus
 
-▶ Tree House
+▶ Quest Completion Persistence
 
 Current objectives
 
-- Build interactive Tree House
-- Establish world navigation
-- Connect gameplay systems
-- Prepare for learning modules
+- Persist every completed quest as a QuestCompletion record
+- Keep ProgressEvent and TreeGrowthEvent creation aligned with quest completion
+- Preserve React Query refresh behavior after quest completion
+- Prepare the next core gameplay system: player progress summary
 
 ---
 
@@ -78,7 +78,7 @@ Includes
 
 ---
 
-## Architecture
+## Architecture and Repository Audit
 
 Status
 
@@ -86,51 +86,49 @@ Status
 
 Includes
 
-- Frontend Architecture
-- Backend Architecture
-- Database Design
-- Security
-- Performance
-- Deployment Strategy
-- Architecture Decision Records
+- Architecture audit completed
+- Repository audit completed
+- Engineering Handbook adopted
+- AGENTS.md workflow adopted
+- PROJECT_STATUS.md is now the active operational tracker
 
 ---
 
-## Design System
+## First Gameplay Loop
 
 Status
 
-✅ Complete
+✅ Working
 
 Includes
 
-- Colors
-- Typography
-- Layout
-- Components
-- Motion
-- Illustration Guide
-
----
-
-## Frontend Foundation
-
-Status
-
-✅ Complete
-
-Includes
-
-- React
-- Vite
-- Modular CSS
-- Theme System
-- Project Structure
-- Responsive Foundation
+- Quest list available from backend
+- Quest detail available from backend
+- Quest completion connected from UI to backend
+- XP reward applied to child profile
+- ProgressEvent created on quest completion
+- TreeGrowthEvent created on quest completion
+- React Query invalidation fixed after quest completion
+- QuestCompletion persistence added to backend service
 
 ---
 
 # In Progress
+
+## Gameplay Persistence
+
+Status
+
+🟡 In Progress
+
+Current Tasks
+
+- Add tests for quest completion persistence
+- Decide duplicate-completion behavior
+- Add source record references between gameplay events
+- Add player progress summary endpoint
+
+---
 
 ## Tree House
 
@@ -144,20 +142,43 @@ Current Tasks
 - Navigation
 - Interactive elements
 - World transitions
+- Feedback from quest completion and tree growth
 
 ---
 
-## Gameplay Framework
+# Technical Debt Audit
 
-Status
+## Completed
 
-🟡 In Progress
+- Documentation and planning phases completed
+- Architecture audit completed
+- Repository audit completed
+- Quest completion UI-to-backend loop working
+- React Query invalidation fixed
+- First gameplay loop working
+- QuestCompletion persistence added to backend completion flow
 
-Current Tasks
+## Remaining Technical Debt
 
-- XP system
-- Progress tracking
-- Save architecture
+High priority
+
+- Add backend tests for quest completion persistence
+- Decide whether a child can complete the same quest more than once
+- Add explicit relationships or source references between QuestCompletion, ProgressEvent, and TreeGrowthEvent
+- Wrap gameplay mutations in a clearer transaction boundary as the domain model grows
+
+Medium priority
+
+- Move hardcoded seed quest into a dedicated seed/migration process
+- Add typed response schemas for progress summary endpoints
+- Add frontend loading/error states for gameplay mutations
+- Add empty-state UI for no progress events or no completed quests
+
+Lower priority
+
+- Add database migrations before production data exists
+- Add stronger validation around quest answers and scoring
+- Add structured event metadata once the event system matures
 
 ---
 
@@ -165,234 +186,89 @@ Current Tasks
 
 High Priority
 
-- Reading Forest
-- XP Engine
-- Save System
-- Achievement Engine
-- User Profiles
+- Backend tests for QuestCompletion persistence
+- Player progress summary endpoint
+- Tree growth calculation rules
+- Reward feedback in UI
+- Reading Forest quest expansion
 
 Medium Priority
 
+- Achievement Engine
+- Streak System
 - Math Mountains
 - Writing Kingdom
 - Companion System
-- Coins
-- Inventory
 
 Lower Priority
 
 - Parent Dashboard
 - Professor Owl AI
 - Story Generator
+- Certificates
 
 ---
 
-# Module Progress
+# Implementation Status
 
-| Module | Status | Progress |
+| Area | Status | Progress |
 |---------|--------|---------:|
-| Documentation | ✅ | 100% |
-| Architecture | ✅ | 100% |
+| Documentation / Planning | ✅ | 100% |
+| Architecture Alignment | ✅ | 90% |
+| Repository Cleanup | 🟡 | 85% |
 | Design System | ✅ | 100% |
-| Development Standards | ✅ | 100% |
 | Frontend Foundation | ✅ | 100% |
-| Backend Foundation | 🟡 | 40% |
-| Database | 🟡 | 35% |
+| Backend Foundation | 🟡 | 65% |
+| Database | 🟡 | 55% |
+| Quest Completion Loop | 🟡 | 85% |
+| QuestCompletion Persistence | 🟡 | 80% |
+| Progress Events | 🟡 | 75% |
+| Tree Growth Events | 🟡 | 70% |
+| Frontend Gameplay UI | 🟡 | 70% |
+| Tree House | 🟡 | 40% |
+| Reading Forest | 🟡 | 25% |
+| XP System | 🟡 | 45% |
 | Authentication | ⚪ | 0% |
-| Tree House | 🟡 | 30% |
-| Reading Forest | 🟡 | 20% |
-| Math Mountains | ⚪ | 0% |
-| Writing Kingdom | ⚪ | 0% |
-| XP System | 🟡 | 25% |
 | Achievements | ⚪ | 0% |
 | Companion | ⚪ | 0% |
 | Parent Dashboard | ⚪ | 0% |
 | AI Integration | ⚪ | 0% |
+| Testing Coverage | ⚪ | 25% |
+| Sprint 1 Overall | 🟡 | 78% |
+
+---
+
+# Sprint 2 Plan
+
+## Goal
+
+Turn the working quest loop into a reliable core gameplay system.
+
+## Priorities
+
+1. Harden QuestCompletion persistence.
+2. Add backend tests for quest completion.
+3. Add user progress summary endpoint.
+4. Improve tree growth calculations.
+5. Add basic reward feedback in UI.
+6. Prepare the next gameplay system: achievements or streaks.
+
+## Success Criteria
+
+- Every completed quest has a QuestCompletion record.
+- ProgressEvent and TreeGrowthEvent are created alongside quest completions.
+- Duplicate completions are handled intentionally.
+- UI reflects updated progress after quest completion.
+- Backend tests cover happy path and invalid quest cases.
 
 ---
 
 # Recently Completed
 
-- Documentation blueprint
-- Architecture documentation
-- Design System
-- Development standards
-- CSS modularization
-- Theme architecture
-- Project organization
-
----
-
-# Current Blockers
-
-None
-
----
-
-# Upcoming Milestones
-
-## Milestone 1
-
-Foundation Complete
-
-Status
-
-✅ Complete
-
----
-
-## Milestone 2
-
-Core Gameplay
-
-Status
-
-🟡 In Progress
-
-Includes
-
-- Tree House
-- Navigation
-- XP
-- Save System
-
----
-
-## Milestone 3
-
-Learning Worlds
-
-Status
-
-⚪ Planned
-
-Includes
-
-- Reading Forest
-- Math Mountains
-- Writing Kingdom
-
----
-
-## Milestone 4
-
-Gamification
-
-Status
-
-⚪ Planned
-
-Includes
-
-- Achievements
-- Companion
-- Coins
-- Inventory
-
----
-
-## Milestone 5
-
-AI
-
-Status
-
-⚪ Planned
-
-Includes
-
-- Professor Owl
-- Reading Coach
-- Story Generator
-
----
-
-# Technical Health
-
-Architecture
-
-🟢 Excellent
-
-Documentation
-
-🟢 Complete
-
-Code Organization
-
-🟢 Excellent
-
-Technical Debt
-
-🟢 Low
-
-Testing
-
-🟡 Planned
-
-Deployment
-
-⚪ Future
-
----
-
-# Definition of Current Success
-
-The current development phase is considered successful when:
-
-- Tree House is fully functional
-- Navigation between learning worlds works
-- Student progress can be saved
-- XP system operates correctly
-- Reading Forest becomes playable
-
----
-
-# Session Workflow
-
-Every development session should begin by reviewing this document.
-
-Recommended workflow
-
-```
-Review PROJECT_STATUS
-
-↓
-
-Select Current Task
-
-↓
-
-Implement
-
-↓
-
-Test
-
-↓
-
-Commit
-
-↓
-
-Update PROJECT_STATUS
-```
-
-This document should always reflect the current reality of the project.
-
----
-
-# Notes
-
-This is a living document.
-
-It intentionally changes more frequently than any other project document.
-
-Its purpose is to provide an accurate snapshot of EduQuest at any point during development.
-
----
-
-# Revision History
-
-| Version | Date | Notes |
-|----------|------|-------|
-| 1.0 | Initial | Living project dashboard created |
+- Planning and documentation phases completed
+- Architecture audit completed
+- Repository audit completed
+- Quest completion connected from UI to backend
+- React Query invalidation fixed
+- First gameplay loop confirmed working
+- QuestCompletion record creation added to quest completion service
