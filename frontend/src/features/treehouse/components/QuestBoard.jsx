@@ -1,4 +1,4 @@
-import { useCompleteQuest } from "../../reading/useCompleteQuest";
+import { useCompleteQuest } from "../../quests/hooks/useCompleteQuest";
 
 export default function QuestBoard({ quest }) {
   const completeQuest = useCompleteQuest();
