@@ -1,6 +1,7 @@
 from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.child_repository import ChildRepository
 from app.repositories.inventory_repository import InventoryRepository
+from app.repositories.learning_preference_repository import LearningPreferenceRepository
 from app.repositories.obstacle_progress_repository import ObstacleProgressRepository
 from app.repositories.progress_event_repository import ProgressEventRepository
 from app.repositories.quest_completion_repository import QuestCompletionRepository
@@ -27,4 +28,13 @@ def get_reward_service() -> RewardService:
         child_repository=ChildRepository(),
         inventory_repository=InventoryRepository(),
         obstacle_progress_repository=ObstacleProgressRepository(),
+    )
+
+from app.services.learning_preference_service import LearningPreferenceService
+
+
+def get_learning_preference_service() -> LearningPreferenceService:
+    return LearningPreferenceService(
+        child_repository=ChildRepository(),
+        learning_preference_repository=LearningPreferenceRepository(),
     )

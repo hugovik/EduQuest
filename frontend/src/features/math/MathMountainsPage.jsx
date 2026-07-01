@@ -12,12 +12,12 @@ import { useInventory } from "./hooks/useInventory";
 import { useObstacleProgress } from "./hooks/useObstacleProgress";
 import { useRewardCorrectAnswer } from "./hooks/useRewardCorrectAnswer";
 import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
+import { useLearningLevelPreference } from "../learning/hooks/useLearningLevelPreference";
 import TrailMap from "../adventure/components/TrailMap";
 
 export default function MathMountainsPage({ onBack }) {
   const [currentObstacleIndex, setCurrentObstacleIndex] = useState(0);
   const [selectedOperation, setSelectedOperation] = useState("addition");
-  const [mathOverrideLevel, setMathOverrideLevel] = useState(null);
   const { data: player, isLoading: playerLoading, error: playerError } = usePlayer();
   const { data: quests, isLoading, error } = useQuests();
   const {
@@ -30,6 +30,13 @@ export default function MathMountainsPage({ onBack }) {
     isLoading: progressLoading,
     error: progressError,
   } = useObstacleProgress();
+  const {
+    overrideLevel: mathOverrideLevel,
+    setOverrideLevel: setMathOverrideLevel,
+    isLoading: preferenceLoading,
+    isSaving: preferenceSaving,
+    error: preferenceError,
+  } = useLearningLevelPreference("math");
   const completeQuest = useCompleteQuest();
   const rewardCorrectAnswer = useRewardCorrectAnswer();
   const incorrectAnswerPenalty = useIncorrectAnswerPenalty();
@@ -93,11 +100,17 @@ export default function MathMountainsPage({ onBack }) {
     completeQuest.mutate(mathQuest.id);
   }
 
-  if (playerLoading || isLoading || inventoryLoading || progressLoading) {
+  if (
+    playerLoading ||
+    isLoading ||
+    inventoryLoading ||
+    progressLoading ||
+    preferenceLoading
+  ) {
     return <main className="dashboard">Loading Math Mountains...</main>;
   }
 
-  if (playerError || error || inventoryError || progressError) {
+  if (playerError || error || inventoryError || progressError || preferenceError) {
     return <main className="dashboard">Unable to load Math Mountains.</main>;
   }
 
@@ -126,6 +139,7 @@ export default function MathMountainsPage({ onBack }) {
       <LearningLevelSelector
         childGrade={player?.grade}
         effectiveLevel={mathLevel.effectiveLevel}
+        isSaving={preferenceSaving}
         overrideLevel={mathOverrideLevel}
         source={mathLevel.source}
         onOverrideLevelChange={setMathOverrideLevel}

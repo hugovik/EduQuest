@@ -8,6 +8,7 @@ const levelOptions = Array.from(
 export default function LearningLevelSelector({
   childGrade,
   effectiveLevel,
+  isSaving = false,
   overrideLevel,
   source,
   onOverrideLevelChange,
@@ -27,7 +28,11 @@ export default function LearningLevelSelector({
 
       <label className="learning-level-control">
         <span>Challenge level</span>
-        <select value={overrideLevel ?? "grade"} onChange={handleChange}>
+        <select
+          value={overrideLevel ?? "grade"}
+          onChange={handleChange}
+          disabled={isSaving}
+        >
           <option value="grade">Use my grade level</option>
           {levelOptions.map((level) => (
             <option key={level} value={level}>
@@ -37,9 +42,11 @@ export default function LearningLevelSelector({
         </select>
       </label>
 
-      {source === "override" && (
-        <p>Using Level {effectiveLevel} tasks for this adventure.</p>
-      )}
+      <p>
+        {source === "override"
+          ? `Challenge Level ${effectiveLevel} selected`
+          : "Using your grade level"}
+      </p>
     </section>
   );
 }
