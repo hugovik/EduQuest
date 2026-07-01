@@ -9,3 +9,5 @@ from .achievement_unlock import AchievementUnlock
 from .player_inventory import PlayerInventory
 from .obstacle_progress import ObstacleProgress
 from .adventure_level_preference import AdventureLevelPreference
+from .daily_goal import DailyGoal
+from .learning_streak import LearningStreak

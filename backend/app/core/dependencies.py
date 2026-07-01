@@ -1,5 +1,7 @@
 from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.child_repository import ChildRepository
+from app.repositories.daily_goal_repository import DailyGoalRepository
+from app.repositories.learning_streak_repository import LearningStreakRepository
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.learning_preference_repository import LearningPreferenceRepository
 from app.repositories.obstacle_progress_repository import ObstacleProgressRepository
@@ -7,6 +9,7 @@ from app.repositories.progress_event_repository import ProgressEventRepository
 from app.repositories.quest_completion_repository import QuestCompletionRepository
 from app.repositories.quest_repository import QuestRepository
 from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
+from app.services.daily_goal_service import DailyGoalService
 from app.services.quest_service import QuestService
 
 
@@ -23,11 +26,20 @@ def get_quest_service() -> QuestService:
 from app.services.reward_service import RewardService
 
 
+def get_daily_goal_service() -> DailyGoalService:
+    return DailyGoalService(
+        child_repository=ChildRepository(),
+        daily_goal_repository=DailyGoalRepository(),
+        learning_streak_repository=LearningStreakRepository(),
+    )
+
+
 def get_reward_service() -> RewardService:
     return RewardService(
         child_repository=ChildRepository(),
         inventory_repository=InventoryRepository(),
         obstacle_progress_repository=ObstacleProgressRepository(),
+        daily_goal_service=get_daily_goal_service(),
     )
 
 from app.services.learning_preference_service import LearningPreferenceService

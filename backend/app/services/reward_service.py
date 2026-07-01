@@ -5,6 +5,7 @@ from app.models.player_inventory import PlayerInventory
 from app.repositories.child_repository import ChildRepository
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.obstacle_progress_repository import ObstacleProgressRepository
+from app.services.daily_goal_service import DailyGoalService
 from app.services.progression_rules import (
     calculate_level_from_xp,
     calculate_tree_stage_from_xp,
@@ -28,10 +29,12 @@ class RewardService:
         child_repository: ChildRepository,
         inventory_repository: InventoryRepository,
         obstacle_progress_repository: ObstacleProgressRepository,
+        daily_goal_service: DailyGoalService | None = None,
     ):
         self.child_repository = child_repository
         self.inventory_repository = inventory_repository
         self.obstacle_progress_repository = obstacle_progress_repository
+        self.daily_goal_service = daily_goal_service
 
     def get_child_or_create_default(self, db: Session):
         child = self.child_repository.get_first(db)
@@ -79,12 +82,28 @@ class RewardService:
         events = []
 
         if obstacle_progress.completed:
+            daily_goal_result = None
+
+            if self.daily_goal_service is not None:
+                daily_goal_result = self.daily_goal_service.record_correct_answer(db)
+                events.extend(daily_goal_result["events"])
+
             db.commit()
             db.refresh(inventory)
             db.refresh(obstacle_progress)
+
+            if daily_goal_result is not None:
+                db.refresh(daily_goal_result["daily_goal"])
+                db.refresh(daily_goal_result["streak"])
+
             return {
                 "inventory": inventory,
                 "obstacle_progress": obstacle_progress,
+                "daily_goal": daily_goal_result["daily_goal"] if daily_goal_result else None,
+                "streak": daily_goal_result["streak"] if daily_goal_result else None,
+                "daily_goal_completed_today": (
+                    daily_goal_result["completed_today"] if daily_goal_result else False
+                ),
                 "rewards": rewards,
                 "events": events,
             }
@@ -114,13 +133,28 @@ class RewardService:
                 rewards["coins"] = OBSTACLE_COMPLETION_COINS
                 events.append("Coins Awarded")
 
+        daily_goal_result = None
+
+        if self.daily_goal_service is not None:
+            daily_goal_result = self.daily_goal_service.record_correct_answer(db)
+            events.extend(daily_goal_result["events"])
+
         db.commit()
         db.refresh(inventory)
         db.refresh(obstacle_progress)
 
+        if daily_goal_result is not None:
+            db.refresh(daily_goal_result["daily_goal"])
+            db.refresh(daily_goal_result["streak"])
+
         return {
             "inventory": inventory,
             "obstacle_progress": obstacle_progress,
+            "daily_goal": daily_goal_result["daily_goal"] if daily_goal_result else None,
+            "streak": daily_goal_result["streak"] if daily_goal_result else None,
+            "daily_goal_completed_today": (
+                daily_goal_result["completed_today"] if daily_goal_result else False
+            ),
             "rewards": rewards,
             "events": events,
         }

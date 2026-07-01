@@ -3,9 +3,11 @@ import { getLearningPreferences } from "../../api/learningPreferencesApi";
 import { queryKeys } from "../../api/queryKeys";
 import { usePlayer } from "../treehouse/hooks/usePlayer";
 import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
+import DailyGoalCard from "./components/DailyGoalCard";
 import { adventures } from "./adventureConfig";
 import { useAdventureProgressSummary } from "./hooks/useAdventureProgressSummary";
 import { useAdventureUnlocks } from "./hooks/useAdventureUnlocks";
+import { useDailyGoal } from "./hooks/useDailyGoal";
 
 const statusLabels = {
   not_started: "Not started yet",
@@ -70,8 +72,20 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
     loading: unlocksLoading,
     error: unlocksError,
   } = useAdventureUnlocks();
+  const {
+    dailyGoal,
+    streak,
+    loading: dailyGoalLoading,
+    error: dailyGoalError,
+  } = useDailyGoal();
 
-  if (playerLoading || preferencesLoading || progressLoading || unlocksLoading) {
+  if (
+    playerLoading ||
+    preferencesLoading ||
+    progressLoading ||
+    unlocksLoading ||
+    dailyGoalLoading
+  ) {
     return <main className="dashboard">Loading Adventure Hub...</main>;
   }
 
@@ -90,6 +104,12 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
         <h1>🧭 Adventure Hub</h1>
         <p>Choose a learning world and begin today&apos;s quest.</p>
       </header>
+
+      {dailyGoalError ? (
+        <div className="card state-card">Daily goal unavailable.</div>
+      ) : (
+        <DailyGoalCard dailyGoal={dailyGoal} streak={streak} />
+      )}
 
       <section className="adventure-grid" aria-label="Learning worlds">
         {adventures.map((adventure) => {
