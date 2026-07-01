@@ -1,0 +1,25 @@
+.primary-button {
+  background: var(--color-forest);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  transition: 0.25s;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.95);
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+  transform: none;
+}
+
+.primary-button:disabled:hover {
+  transform: none;
+  filter: none;
+}

@@ -1,0 +1,44 @@
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.card p {
+  color: var(--color-ink);
+  line-height: 1.5;
+}
+
+.quest-result {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.quest-result p {
+  margin: 0 0 var(--space-sm);
+}
+
+.quest-result p:last-child {
+  margin-bottom: 0;
+}
+
+.quest-result-success {
+  border-left: 4px solid var(--color-forest);
+}
+
+.quest-result-error,
+.state-card-error {
+  border-left: 4px solid var(--color-gold-dark);
+}
+
+.state-card p {
+  color: var(--color-muted);
+}

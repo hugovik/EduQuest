@@ -1,0 +1,19 @@
+:root {
+  --color-bg: #f7f1df;
+  --color-ink: #24304f;
+  --color-muted: #65708f;
+  --color-card: #ffffff;
+  --color-forest: #4d9b75;
+  --color-gold: #f6bc4f;
+  --color-gold-dark: #f39c12;
+
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
