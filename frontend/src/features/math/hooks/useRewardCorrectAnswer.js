@@ -18,6 +18,13 @@ export function useRewardCorrectAnswer() {
         queryClient.setQueryData(queryKeys.dailyStreak, result.streak);
       }
 
+      if (result.achievements_unlocked?.length) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.achievements });
+        queryClient.invalidateQueries({ queryKey: queryKeys.earnedAchievements });
+        queryClient.invalidateQueries({ queryKey: queryKeys.progressSummary });
+        queryClient.invalidateQueries({ queryKey: queryKeys.adventureUnlocks });
+      }
+
       queryClient.setQueryData(queryKeys.obstacleProgress, (existing = []) => {
         const nextProgress = result.obstacle_progress;
         const hasProgress = existing.some(

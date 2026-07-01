@@ -49,6 +49,20 @@ def seed_math_quest(db_session, quest_id="math-test", xp_reward=25):
     return quest
 
 
+def seed_reading_quest(db_session, quest_id="reading-test", xp_reward=25):
+    quest = Quest(
+        id=quest_id,
+        title="Reading Test",
+        realm="Reading Forest",
+        subject="reading",
+        xp_reward=xp_reward,
+        repeatable=False,
+    )
+    db_session.add(quest)
+    db_session.commit()
+    return quest
+
+
 def test_summary_returns_all_adventure_keys(db_session, summary_service):
     summary = summary_service.get_summary(db_session)
 
@@ -73,6 +87,26 @@ def test_math_uses_real_completed_quest_data(db_session, summary_service):
     assert summary["math"]["total_quests"] == 1
     assert summary["math"]["xp_earned"] == 30
     assert summary["math"]["status"] == "completed"
+
+
+def test_reading_uses_real_completed_quest_data(db_session, summary_service):
+    child = summary_service.get_child_or_create_default(db_session)
+    quest = seed_reading_quest(db_session, xp_reward=20)
+    db_session.add(
+        QuestCompletion(
+            child_id=child.id,
+            quest_id=quest.id,
+            xp_awarded=20,
+        )
+    )
+    db_session.commit()
+
+    summary = summary_service.get_summary(db_session)
+
+    assert summary["reading"]["completed_quests"] == 1
+    assert summary["reading"]["total_quests"] == 1
+    assert summary["reading"]["xp_earned"] == 20
+    assert summary["reading"]["status"] == "completed"
 
 
 def test_missing_adventure_data_returns_defaults(db_session, summary_service):

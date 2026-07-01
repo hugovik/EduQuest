@@ -214,3 +214,15 @@
   height: 100%;
   transition: width 180ms ease;
 }
+
+.badge-list li {
+  transition: opacity 180ms ease;
+}
+
+.badge-unearned {
+  opacity: 0.55;
+}
+
+.badge-earned {
+  opacity: 1;
+}

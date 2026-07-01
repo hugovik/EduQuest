@@ -4,9 +4,11 @@ import { queryKeys } from "../../api/queryKeys";
 import { usePlayer } from "../treehouse/hooks/usePlayer";
 import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
 import DailyGoalCard from "./components/DailyGoalCard";
+import RecentBadgesCard from "./components/RecentBadgesCard";
 import { adventures } from "./adventureConfig";
 import { useAdventureProgressSummary } from "./hooks/useAdventureProgressSummary";
 import { useAdventureUnlocks } from "./hooks/useAdventureUnlocks";
+import { useAchievements } from "./hooks/useAchievements";
 import { useDailyGoal } from "./hooks/useDailyGoal";
 
 const statusLabels = {
@@ -78,19 +80,42 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
     loading: dailyGoalLoading,
     error: dailyGoalError,
   } = useDailyGoal();
+  const {
+    allAchievements,
+    earnedAchievements,
+    loading: achievementsLoading,
+    error: achievementsError,
+    evaluateEvent,
+  } = useAchievements();
 
   if (
     playerLoading ||
     preferencesLoading ||
     progressLoading ||
     unlocksLoading ||
-    dailyGoalLoading
+    dailyGoalLoading ||
+    achievementsLoading
   ) {
     return <main className="dashboard">Loading Adventure Hub...</main>;
   }
 
   if (playerError || preferencesError) {
     return <main className="dashboard">Unable to load Adventure Hub.</main>;
+  }
+
+  async function handleEnterAdventure(adventure) {
+    if (adventure.enabled) {
+      try {
+        await evaluateEvent({
+          eventType: "adventure_entered",
+          sourceAdventure: adventure.id,
+        });
+      } catch {
+        // Entering the world should still work if badge evaluation is delayed.
+      }
+    }
+
+    onEnterAdventure(adventure.route);
   }
 
   return (
@@ -109,6 +134,15 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
         <div className="card state-card">Daily goal unavailable.</div>
       ) : (
         <DailyGoalCard dailyGoal={dailyGoal} streak={streak} />
+      )}
+
+      {achievementsError ? (
+        <div className="card state-card">Badges unavailable.</div>
+      ) : (
+        <RecentBadgesCard
+          allAchievements={allAchievements}
+          earnedAchievements={earnedAchievements}
+        />
       )}
 
       <section className="adventure-grid" aria-label="Learning worlds">
@@ -176,7 +210,7 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
                 className="primary-button"
                 type="button"
                 disabled={isEnterDisabled}
-                onClick={() => onEnterAdventure(adventure.route)}
+                onClick={() => handleEnterAdventure(adventure)}
               >
                 {getEnterLabel(adventure, isUnlocked)}
               </button>

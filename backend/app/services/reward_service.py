@@ -5,6 +5,7 @@ from app.models.player_inventory import PlayerInventory
 from app.repositories.child_repository import ChildRepository
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.obstacle_progress_repository import ObstacleProgressRepository
+from app.services.achievement_service import AchievementService
 from app.services.daily_goal_service import DailyGoalService
 from app.services.progression_rules import (
     calculate_level_from_xp,
@@ -30,11 +31,13 @@ class RewardService:
         inventory_repository: InventoryRepository,
         obstacle_progress_repository: ObstacleProgressRepository,
         daily_goal_service: DailyGoalService | None = None,
+        achievement_service: AchievementService | None = None,
     ):
         self.child_repository = child_repository
         self.inventory_repository = inventory_repository
         self.obstacle_progress_repository = obstacle_progress_repository
         self.daily_goal_service = daily_goal_service
+        self.achievement_service = achievement_service
 
     def get_child_or_create_default(self, db: Session):
         child = self.child_repository.get_first(db)
@@ -80,6 +83,7 @@ class RewardService:
 
         rewards = {"xp": CORRECT_ANSWER_XP, "bricks": 0, "coins": 0, "stars": 0}
         events = []
+        newly_earned_achievements = []
 
         if obstacle_progress.completed:
             daily_goal_result = None
@@ -87,6 +91,35 @@ class RewardService:
             if self.daily_goal_service is not None:
                 daily_goal_result = self.daily_goal_service.record_correct_answer(db)
                 events.extend(daily_goal_result["events"])
+
+            if self.achievement_service is not None:
+                newly_earned_achievements.extend(
+                    self.achievement_service.evaluate(
+                        db,
+                        "correct_math_answer",
+                        child=child,
+                        source_adventure="math",
+                    )
+                )
+                if daily_goal_result and daily_goal_result["completed_today"]:
+                    newly_earned_achievements.extend(
+                        self.achievement_service.evaluate(
+                            db,
+                            "daily_goal_completed",
+                            child=child,
+                            source_adventure="math",
+                            daily_goal=daily_goal_result["daily_goal"],
+                        )
+                    )
+                    newly_earned_achievements.extend(
+                        self.achievement_service.evaluate(
+                            db,
+                            "streak_updated",
+                            child=child,
+                            source_adventure="math",
+                            streak=daily_goal_result["streak"],
+                        )
+                    )
 
             db.commit()
             db.refresh(inventory)
@@ -104,6 +137,7 @@ class RewardService:
                 "daily_goal_completed_today": (
                     daily_goal_result["completed_today"] if daily_goal_result else False
                 ),
+                "achievements_unlocked": newly_earned_achievements,
                 "rewards": rewards,
                 "events": events,
             }
@@ -122,9 +156,12 @@ class RewardService:
             obstacle_progress.current_progress += bricks_to_apply
             events.append("Brick Applied")
 
+        obstacle_completed_now = False
+
         if obstacle_progress.current_progress >= obstacle_progress.required_progress:
             obstacle_progress.current_progress = obstacle_progress.required_progress
             obstacle_progress.completed = True
+            obstacle_completed_now = True
             events.append("Obstacle Repaired")
 
             if not obstacle_progress.completion_reward_awarded:
@@ -138,6 +175,46 @@ class RewardService:
         if self.daily_goal_service is not None:
             daily_goal_result = self.daily_goal_service.record_correct_answer(db)
             events.extend(daily_goal_result["events"])
+
+        if self.achievement_service is not None:
+            newly_earned_achievements.extend(
+                self.achievement_service.evaluate(
+                    db,
+                    "correct_math_answer",
+                    child=child,
+                    source_adventure="math",
+                    obstacle_progress=obstacle_progress,
+                )
+            )
+            if obstacle_completed_now:
+                newly_earned_achievements.extend(
+                    self.achievement_service.evaluate(
+                        db,
+                        "obstacle_completed",
+                        child=child,
+                        source_adventure="math",
+                        obstacle_progress=obstacle_progress,
+                    )
+                )
+            if daily_goal_result and daily_goal_result["completed_today"]:
+                newly_earned_achievements.extend(
+                    self.achievement_service.evaluate(
+                        db,
+                        "daily_goal_completed",
+                        child=child,
+                        source_adventure="math",
+                        daily_goal=daily_goal_result["daily_goal"],
+                    )
+                )
+                newly_earned_achievements.extend(
+                    self.achievement_service.evaluate(
+                        db,
+                        "streak_updated",
+                        child=child,
+                        source_adventure="math",
+                        streak=daily_goal_result["streak"],
+                    )
+                )
 
         db.commit()
         db.refresh(inventory)
@@ -155,6 +232,7 @@ class RewardService:
             "daily_goal_completed_today": (
                 daily_goal_result["completed_today"] if daily_goal_result else False
             ),
+            "achievements_unlocked": newly_earned_achievements,
             "rewards": rewards,
             "events": events,
         }

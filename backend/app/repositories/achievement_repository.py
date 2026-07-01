@@ -35,10 +35,14 @@ class AchievementRepository:
         db: Session,
         child_id: int,
         achievement_id: str,
+        source_adventure: str | None = None,
+        metadata: str | None = None,
     ) -> AchievementUnlock:
         unlock = AchievementUnlock(
             child_id=child_id,
             achievement_id=achievement_id,
+            source_adventure=source_adventure,
+            metadata_json=metadata,
         )
         db.add(unlock)
         return unlock

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 
+from app.api.achievement_routes import router as achievement_router
 from app.api.adventure_routes import router as adventure_router
 from app.api.child_routes import router as child_router
 from app.api.daily_goal_routes import router as daily_goal_router
@@ -46,6 +47,13 @@ def ensure_dev_schema():
         "quest_completion_id",
         "quest_completion_id INTEGER",
     )
+    ensure_column(inspector, "achievements", "key", "key VARCHAR")
+    ensure_column(inspector, "achievements", "name", "name VARCHAR")
+    ensure_column(inspector, "achievements", "category", "category VARCHAR NOT NULL DEFAULT 'general'")
+    ensure_column(inspector, "achievements", "xp_bonus", "xp_bonus INTEGER NOT NULL DEFAULT 0")
+    ensure_column(inspector, "achievements", "active", "active BOOLEAN NOT NULL DEFAULT 1")
+    ensure_column(inspector, "achievement_unlocks", "source_adventure", "source_adventure VARCHAR")
+    ensure_column(inspector, "achievement_unlocks", "metadata", "metadata TEXT")
 
 
 ensure_dev_schema()
@@ -72,6 +80,7 @@ def health():
 
 
 app.include_router(child_router)
+app.include_router(achievement_router)
 app.include_router(daily_goal_router)
 app.include_router(adventure_router)
 app.include_router(quest_router)

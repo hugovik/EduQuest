@@ -10,4 +10,6 @@ export const queryKeys = {
   adventureUnlocks: ["adventure-unlocks"],
   dailyGoal: ["daily-goal"],
   dailyStreak: ["daily-streak"],
+  achievements: ["achievements"],
+  earnedAchievements: ["earned-achievements"],
 };
