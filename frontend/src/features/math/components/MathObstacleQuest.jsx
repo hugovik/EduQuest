@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { generateMathProblem } from "../utils/generateMathProblem";
 
-export default function MathObstacleQuest({ obstacle, onObstacleComplete }) {
+export default function MathObstacleQuest({
+  obstacle,
+  selectedOperation,
+  onObstacleComplete,
+}) {
   const [problem, setProblem] = useState(() =>
     generateMathProblem({
-        operation: obstacle.operation,
-        context: obstacle.id,
+      operation: selectedOperation,
+      context: obstacle.id,
     })
-    );
+  );
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -49,10 +53,12 @@ export default function MathObstacleQuest({ obstacle, onObstacleComplete }) {
       return;
     }
 
-    setProblem(generateMathProblem({
-      operation: obstacle.operation,
-      context: obstacle.id,
-    }));
+    setProblem(
+      generateMathProblem({
+        operation: selectedOperation,
+        context: obstacle.id,
+      })
+    );
   }
 
   return (
@@ -80,6 +86,7 @@ export default function MathObstacleQuest({ obstacle, onObstacleComplete }) {
 
       {!isComplete ? (
         <form onSubmit={handleSubmit}>
+          <p className="quest-realm">Helping Task</p>
           <p>{problem.story}</p>
 
           <h3>{problem.question} = ?</h3>
@@ -96,21 +103,17 @@ export default function MathObstacleQuest({ obstacle, onObstacleComplete }) {
           </button>
         </form>
       ) : (
-        <div className="quest-result success">
-          🎉 {obstacle.success}
-        </div>
+        <div className="quest-result success">🎉 {obstacle.success}</div>
       )}
 
       {feedback === "correct" && !isComplete && (
         <div className="quest-result success">
-          ✅ Correct! The workers are getting closer to repairing the bridge.
+          ✅ Correct! The workers are getting closer to opening the trail.
         </div>
       )}
 
       {feedback === "incorrect" && (
-        <div className="quest-result error">
-          ❌ Not quite. Try again.
-        </div>
+        <div className="quest-result error">❌ Not quite. Try again.</div>
       )}
     </section>
   );

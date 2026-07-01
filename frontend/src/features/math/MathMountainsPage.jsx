@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useQuests } from "../treehouse/hooks/useQuests";
 import { useCompleteQuest } from "../quests/hooks/useCompleteQuest";
 import MathObstacleQuest from "./components/MathObstacleQuest";
+import MathOperationSelector from "./components/MathOperationSelector";
 import { mathObstacles } from "./data/mathObstacles";
 import TrailMap from "../adventure/components/TrailMap";
 
 export default function MathMountainsPage({ onBack }) {
   const [currentObstacleIndex, setCurrentObstacleIndex] = useState(0);
+  const [selectedOperation, setSelectedOperation] = useState("addition");
   const { data: quests, isLoading, error } = useQuests();
   const completeQuest = useCompleteQuest();
 
@@ -58,19 +60,24 @@ export default function MathMountainsPage({ onBack }) {
         Obstacle {currentObstacleIndex + 1} of {mathObstacles.length}
       </p>
 
-    <TrailMap
+      <MathOperationSelector
+        selectedOperation={selectedOperation}
+        onSelectOperation={setSelectedOperation}
+      />
+
+      <TrailMap
         title="Rescue Trail"
         emoji="⛰️"
         obstacles={mathObstacles}
         currentObstacleIndex={currentObstacleIndex}
-     />
-
-      <MathObstacleQuest
-        key={currentObstacle.id}
-        obstacle={currentObstacle}
-        onObstacleComplete={handleObstacleComplete}
       />
 
+      <MathObstacleQuest
+        key={`${currentObstacle.id}-${selectedOperation}`}
+        obstacle={currentObstacle}
+        selectedOperation={selectedOperation}
+        onObstacleComplete={handleObstacleComplete}
+      />
 
       {completeQuest.isSuccess && (
         <div className="card quest-result success">
