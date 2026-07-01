@@ -137,6 +137,7 @@ def test_streak_achievement_unlocks_at_three_days(db_session, achievement_servic
 
 def test_xp_bonus_applied_once_only(db_session, achievement_service):
     child = achievement_service.get_child_or_create_default(db_session)
+    starting_xp = child.xp
     achievement_service.seed_achievements(db_session)
     achievement = achievement_service.achievement_repository.get_by_id(
         db_session,
@@ -160,5 +161,5 @@ def test_xp_bonus_applied_once_only(db_session, achievement_service):
     db_session.commit()
     db_session.refresh(child)
 
-    assert child.xp == 5
+    assert child.xp == starting_xp + 5
     assert db_session.query(AchievementUnlock).count() == 1

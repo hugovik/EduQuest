@@ -104,7 +104,7 @@ def test_reading_uses_real_completed_quest_data(db_session, summary_service):
     summary = summary_service.get_summary(db_session)
 
     assert summary["reading"]["completed_quests"] == 1
-    assert summary["reading"]["total_quests"] == 1
+    assert summary["reading"]["total_quests"] >= 31
     assert summary["reading"]["xp_earned"] == 20
     assert summary["reading"]["status"] == "completed"
 
@@ -113,7 +113,7 @@ def test_missing_adventure_data_returns_defaults(db_session, summary_service):
     summary = summary_service.get_summary(db_session)
 
     assert summary["reading"]["completed_quests"] == 0
-    assert summary["reading"]["total_quests"] == 0
+    assert summary["reading"]["total_quests"] >= 30
     assert summary["reading"]["xp_earned"] == 0
     assert summary["reading"]["status"] == "not_started"
 

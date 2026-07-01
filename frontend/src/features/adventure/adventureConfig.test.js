@@ -10,8 +10,12 @@ export function runAdventureConfigTests() {
   assert(adventures.length === 7, "Adventure Hub should list seven worlds.");
   assert(getAdventureById("math")?.enabled === true, "Math Mountains should be enabled.");
   assert(getAdventureById("math")?.route === "math", "Math Mountains should navigate to math.");
+  assert(getAdventureById("reading")?.enabled === true, "Reading Forest should be enabled.");
+  assert(getAdventureById("reading")?.route === "reading", "Reading Forest should navigate to reading.");
 
-  const comingSoonAdventures = adventures.filter((adventure) => adventure.id !== "math");
+  const comingSoonAdventures = adventures.filter(
+    (adventure) => !["math", "reading"].includes(adventure.id)
+  );
   assert(
     comingSoonAdventures.every((adventure) => adventure.enabled === false),
     "Future adventures should be disabled for now."

@@ -8,10 +8,12 @@ from app.repositories.obstacle_progress_repository import ObstacleProgressReposi
 from app.repositories.progress_event_repository import ProgressEventRepository
 from app.repositories.quest_completion_repository import QuestCompletionRepository
 from app.repositories.quest_repository import QuestRepository
+from app.repositories.reading_repository import ReadingPassageRepository, ReadingProgressRepository
 from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
 from app.services.achievement_service import AchievementService
 from app.services.daily_goal_service import DailyGoalService
 from app.services.quest_service import QuestService
+from app.services.reading_service import ReadingService
 
 
 def get_achievement_service() -> AchievementService:
@@ -52,6 +54,16 @@ def get_reward_service() -> RewardService:
     )
 
 from app.services.learning_preference_service import LearningPreferenceService
+
+
+def get_reading_service() -> ReadingService:
+    return ReadingService(
+        child_repository=ChildRepository(),
+        passage_repository=ReadingPassageRepository(),
+        progress_repository=ReadingProgressRepository(),
+        daily_goal_service=get_daily_goal_service(),
+        achievement_service=get_achievement_service(),
+    )
 
 
 def get_learning_preference_service() -> LearningPreferenceService:

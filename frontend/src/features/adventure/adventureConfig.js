@@ -14,8 +14,8 @@ export const adventures = [
     route: "reading",
     icon: "📖",
     description: "Explore story paths and discover new words.",
-    enabled: false,
-    status: "Coming Soon",
+    enabled: true,
+    status: "Ready",
   },
   {
     id: "writing",

@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 
 from app.models.quest import Quest
 from app.models.quest_completion import QuestCompletion
+from app.models.reading_passage import ReadingPassage
+from app.models.reading_progress import ReadingProgress
 from app.repositories.child_repository import ChildRepository
+from app.services.reading_service import READING_PASSAGES
 
 ADVENTURE_TYPES = [
     "math",
@@ -66,6 +69,48 @@ class AdventureProgressSummaryService:
             "status": self.get_status(completed_quests, total_quests),
         }
 
+    def get_reading_summary(self, db: Session, child_id: int, level: int) -> dict:
+        total_passages = max(db.query(ReadingPassage).count(), len(READING_PASSAGES))
+        total_reading_quests = db.query(Quest).filter(Quest.subject == "reading").count()
+        completed_passages = (
+            db.query(ReadingProgress)
+            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .count()
+        )
+        completed_reading_quests = (
+            db.query(QuestCompletion)
+            .join(Quest, QuestCompletion.quest_id == Quest.id)
+            .filter(
+                QuestCompletion.child_id == child_id,
+                Quest.subject == "reading",
+            )
+            .count()
+        )
+        passage_xp = (
+            db.query(func.coalesce(func.sum(ReadingProgress.xp_awarded), 0))
+            .filter(ReadingProgress.child_id == child_id)
+            .scalar()
+        )
+        quest_xp = (
+            db.query(func.coalesce(func.sum(QuestCompletion.xp_awarded), 0))
+            .join(Quest, QuestCompletion.quest_id == Quest.id)
+            .filter(
+                QuestCompletion.child_id == child_id,
+                Quest.subject == "reading",
+            )
+            .scalar()
+        )
+        completed = completed_passages + completed_reading_quests
+        total = total_passages + total_reading_quests
+
+        return {
+            "completed_quests": completed,
+            "total_quests": total,
+            "xp_earned": passage_xp + quest_xp,
+            "level": level,
+            "status": self.get_status(completed, total),
+        }
+
     def get_default_summary(self, level: int) -> dict:
         return {
             "completed_quests": 0,
@@ -87,10 +132,9 @@ class AdventureProgressSummaryService:
             "math",
             child.level,
         )
-        summary["reading"] = self.get_subject_summary(
+        summary["reading"] = self.get_reading_summary(
             db,
             child.id,
-            "reading",
             child.level,
         )
 

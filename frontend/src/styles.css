@@ -226,3 +226,95 @@
 .badge-earned {
   opacity: 1;
 }
+
+.reading-forest-page {
+  background: linear-gradient(180deg, #f4ffe8 0%, #e6f7d4 48%, #d9f0ee 100%);
+}
+
+.reading-forest-header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.reading-story-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.reading-story-button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #a6c96a;
+  border-radius: 8px;
+  color: #244026;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  min-height: 3rem;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.reading-story-button-active {
+  background: #f8ffd8;
+  border-color: #5f8d2b;
+}
+
+.reading-passage-card,
+.reading-question-card,
+.reading-results-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.reading-passage-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.reading-vocabulary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reading-vocabulary span {
+  background: #edf8c8;
+  border: 1px solid #a6c96a;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+}
+
+.reading-question {
+  border: 2px solid #c7ddb1;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 1rem;
+}
+
+.reading-question legend {
+  font-weight: 800;
+  padding: 0 0.35rem;
+}
+
+.reading-question label {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reading-question select {
+  border: 2px solid #c7ddb1;
+  border-radius: 8px;
+  font: inherit;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  width: 100%;
+}

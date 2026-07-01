@@ -1,0 +1,65 @@
+from datetime import datetime
+
+from pydantic import BaseModel
+
+from app.schemas.achievement import AchievementRead
+from app.schemas.child import ChildRead
+from app.schemas.daily_goal import DailyGoalRead, LearningStreakRead
+
+
+class ReadingQuestionRead(BaseModel):
+    id: str
+    type: str
+    prompt: str
+    options: list[str] | None = None
+    pairs: dict[str, str] | None = None
+    items: list[str] | None = None
+
+
+class ReadingPassageRead(BaseModel):
+    id: str
+    title: str
+    level: int
+    text: str
+    estimated_reading_time: str
+    vocabulary_words: list[str]
+    questions: list[ReadingQuestionRead]
+
+
+class ReadingProgressRead(BaseModel):
+    child_id: int
+    passage_id: str
+    level: int
+    questions_answered: int
+    correct_answers: int
+    vocabulary_learned: int
+    xp_awarded: int
+    completed: bool
+    completed_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class ReadingSubmitRequest(BaseModel):
+    answers: dict[str, object]
+
+
+class ReadingQuestionResult(BaseModel):
+    question_id: str
+    correct: bool
+    expected_answer: object
+
+
+class ReadingSubmitResponse(BaseModel):
+    child: ChildRead
+    progress: ReadingProgressRead
+    score: int
+    total_questions: int
+    accuracy: float
+    rewards: dict[str, int]
+    events: list[str]
+    question_results: list[ReadingQuestionResult]
+    daily_goal: DailyGoalRead | None = None
+    streak: LearningStreakRead | None = None
+    achievements_unlocked: list[AchievementRead] = []
+    duplicate: bool = False

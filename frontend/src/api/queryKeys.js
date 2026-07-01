@@ -12,4 +12,6 @@ export const queryKeys = {
   dailyStreak: ["daily-streak"],
   achievements: ["achievements"],
   earnedAchievements: ["earned-achievements"],
+  readingPassages: (level) => ["reading-passages", level],
+  readingProgress: ["reading-progress"],
 };
