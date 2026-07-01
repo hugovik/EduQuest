@@ -46,3 +46,12 @@ def get_adventure_progress_summary_service() -> AdventureProgressSummaryService:
     return AdventureProgressSummaryService(
         child_repository=ChildRepository(),
     )
+
+from app.services.adventure_unlock_service import AdventureUnlockService
+
+
+def get_adventure_unlock_service() -> AdventureUnlockService:
+    return AdventureUnlockService(
+        child_repository=ChildRepository(),
+        progress_summary_service=get_adventure_progress_summary_service(),
+    )

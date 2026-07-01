@@ -5,6 +5,7 @@ import { usePlayer } from "../treehouse/hooks/usePlayer";
 import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
 import { adventures } from "./adventureConfig";
 import { useAdventureProgressSummary } from "./hooks/useAdventureProgressSummary";
+import { useAdventureUnlocks } from "./hooks/useAdventureUnlocks";
 
 const statusLabels = {
   not_started: "Not started yet",
@@ -41,6 +42,14 @@ function getProgressPercent(progress) {
   );
 }
 
+function getEnterLabel(adventure, isUnlocked) {
+  if (!adventure.enabled) {
+    return "Coming Soon";
+  }
+
+  return isUnlocked ? "Enter" : "Unlocks Soon";
+}
+
 export default function AdventureHubPage({ onBack, onEnterAdventure }) {
   const { data: player, isLoading: playerLoading, error: playerError } = usePlayer();
   const {
@@ -56,8 +65,13 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
     loading: progressLoading,
     error: progressError,
   } = useAdventureProgressSummary();
+  const {
+    unlocks,
+    loading: unlocksLoading,
+    error: unlocksError,
+  } = useAdventureUnlocks();
 
-  if (playerLoading || preferencesLoading || progressLoading) {
+  if (playerLoading || preferencesLoading || progressLoading || unlocksLoading) {
     return <main className="dashboard">Loading Adventure Hub...</main>;
   }
 
@@ -86,16 +100,20 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
             overrideLevel: preference?.override_level ?? null,
           });
           const progress = progressSummary?.[adventure.id];
+          const unlock = unlocks?.[adventure.id];
+          const isUnlocked = Boolean(unlock?.unlocked);
+          const isComingSoon = !adventure.enabled;
+          const isEnterDisabled = isComingSoon || !isUnlocked;
           const statusLabel = statusLabels[progress?.status] ?? "Not started yet";
           const progressPercent = getProgressPercent(progress);
 
           return (
             <article
-              className={`card adventure-card${!adventure.enabled ? " adventure-card-disabled" : ""}`}
+              className={`card adventure-card${isEnterDisabled ? " adventure-card-disabled" : ""}`}
               key={adventure.id}
             >
               <div className="adventure-card-icon" aria-hidden="true">
-                {adventure.icon}
+                {!isComingSoon && !isUnlocked ? "🔒" : adventure.icon}
               </div>
               <div>
                 <p className="quest-realm">{adventure.status}</p>
@@ -122,15 +140,25 @@ export default function AdventureHubPage({ onBack, onEnterAdventure }) {
                     )}
                   </>
                 )}
+                {!isComingSoon && !isUnlocked && !unlocksError && (
+                  <span className="adventure-unlock-reason">
+                    {unlock?.reason ?? "Keep exploring to unlock this world"}
+                  </span>
+                )}
+                {!isComingSoon && unlocksError && (
+                  <span className="adventure-unlock-reason">
+                    Unlock info unavailable
+                  </span>
+                )}
               </div>
 
               <button
                 className="primary-button"
                 type="button"
-                disabled={!adventure.enabled}
+                disabled={isEnterDisabled}
                 onClick={() => onEnterAdventure(adventure.route)}
               >
-                {adventure.enabled ? "Enter" : "Coming Soon"}
+                {getEnterLabel(adventure, isUnlocked)}
               </button>
             </article>
           );

@@ -191,3 +191,8 @@
   height: 100%;
   transition: width 180ms ease;
 }
+
+.adventure-unlock-reason {
+  color: #6d4c1f;
+  font-weight: 700;
+}
