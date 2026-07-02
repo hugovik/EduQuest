@@ -31,6 +31,13 @@ class ReadingPassageRead(BaseModel):
     estimated_reading_time: str
     vocabulary_words: list[VocabularyWordRead]
     questions: list[ReadingQuestionRead]
+    map_node_name: str | None = None
+    unlocked: bool = False
+    locked: bool = True
+    completed: bool = False
+    best_score: int | None = None
+    best_accuracy: float | None = None
+    xp_awarded: int = 0
 
 
 class ReadingProgressRead(BaseModel):
@@ -50,6 +57,7 @@ class ReadingProgressRead(BaseModel):
 
 class ReadingProgressSummaryRead(BaseModel):
     completed_passage_ids: list[str]
+    unlocked_passage_ids: list[str]
     passages_completed: int
     questions_answered: int
     correct_answers: int

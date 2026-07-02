@@ -457,3 +457,37 @@
 .reading-review-card p {
   margin: 0;
 }
+
+.reading-forest-map {
+  position: relative;
+}
+
+.reading-map-node {
+  min-height: 8.25rem;
+  position: relative;
+}
+
+.reading-map-node-icon {
+  font-size: 1.5rem;
+}
+
+.reading-map-node-label {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.reading-story-button-recommended {
+  box-shadow: 0 0 0 3px rgba(255, 190, 80, 0.45);
+}
+
+.reading-story-button-locked {
+  background: rgba(238, 241, 231, 0.82);
+  border-color: #aab49d;
+  color: #5b6654;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.reading-story-button-locked:hover {
+  transform: none;
+}

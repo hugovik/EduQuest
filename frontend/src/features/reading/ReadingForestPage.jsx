@@ -59,7 +59,7 @@ export default function ReadingForestPage({ onBack }) {
     data: progressSummary,
     isLoading: progressSummaryLoading,
     error: progressSummaryError,
-  } = useReadingProgressSummary();
+  } = useReadingProgressSummary(readingLevel.effectiveLevel);
   const submitReadingAnswers = useSubmitReadingAnswers();
   const progressByPassage = getProgressByPassage(progress);
   const completedPassageIds = getCompletedPassageIds(progress);
@@ -71,7 +71,10 @@ export default function ReadingForestPage({ onBack }) {
     ? selectedPassage.questions.filter((question) => answers[question.id]).length
     : 0;
   const nextRecommendedPassage = passages.find(
-    (passage) => !completedPassageIds.has(passage.id) && passage.id !== selectedPassageId
+    (passage) => passage.unlocked && !passage.completed && passage.id !== selectedPassageId
+  );
+  const recommendedPassage = passages.find(
+    (passage) => passage.unlocked && !passage.completed
   );
 
   useEffect(() => {
@@ -85,11 +88,18 @@ export default function ReadingForestPage({ onBack }) {
       return;
     }
 
-    const firstOpen = passages.find((passage) => !completedPassageIds.has(passage.id));
-    setSelectedPassageId((firstOpen ?? passages[0]).id);
-  }, [completedPassageIds, passages, selectedPassageId]);
+    const firstOpen = passages.find((passage) => passage.unlocked && !passage.completed);
+    const firstUnlocked = passages.find((passage) => passage.unlocked);
+    setSelectedPassageId((firstOpen ?? firstUnlocked ?? passages[0]).id);
+  }, [passages, selectedPassageId]);
 
   function choosePassage(passageId) {
+    const passage = passages.find((item) => item.id === passageId);
+
+    if (!passage || passage.locked) {
+      return;
+    }
+
     setSelectedPassageId(passageId);
     setAnswers({});
     setResult(null);
@@ -165,29 +175,45 @@ export default function ReadingForestPage({ onBack }) {
       <section className="card reading-map-card">
         <p className="quest-realm">Forest Map</p>
         <h2>Choose a story path</h2>
-        <div className="reading-story-grid" aria-label="Reading Forest stories">
+        <div className="reading-story-grid reading-forest-map" aria-label="Reading Forest stories">
         {passages.map((passage) => {
-          const completed = completedPassageIds.has(passage.id);
+          const completed = passage.completed || completedPassageIds.has(passage.id);
+          const locked = passage.locked || !passage.unlocked;
+          const recommended = recommendedPassage?.id === passage.id;
           const passageProgress = progressByPassage.get(passage.id);
+          const bestScore = passage.best_score ?? passageProgress?.correct_answers ?? 0;
+          const bestTotal = passageProgress?.questions_answered ?? passage.questions.length;
+          const bestAccuracy = passage.best_accuracy ?? passageProgress?.accuracy ?? 0;
+          const xpAwarded = passage.xp_awarded ?? passageProgress?.xp_awarded ?? 0;
 
           return (
             <button
-              className={`reading-story-button${
+              aria-disabled={locked}
+              className={`reading-story-button reading-map-node${
                 passage.id === selectedPassageId ? " reading-story-button-active" : ""
-              }${completed ? " reading-story-button-completed" : ""}`}
+              }${completed ? " reading-story-button-completed" : ""}${
+                locked ? " reading-story-button-locked" : ""
+              }${recommended ? " reading-story-button-recommended" : ""}`}
+              disabled={locked}
               key={passage.id}
               type="button"
               onClick={() => choosePassage(passage.id)}
             >
-              <span>{completed ? "✓" : "✦"}</span>
-              <strong>{passage.title}</strong>
+              <span className="reading-map-node-icon">
+                {locked ? "🔒" : completed ? "✓" : recommended ? "★" : "✦"}
+              </span>
+              <span className="reading-map-node-label">
+                <strong>{passage.map_node_name ?? passage.title}</strong>
+                <small>{passage.title}</small>
+              </span>
               {completed ? (
                 <small>
-                  Completed · {passageProgress?.correct_answers ?? 0} /{" "}
-                  {passageProgress?.questions_answered ?? passage.questions.length} ·{" "}
-                  {formatPercent(passageProgress?.accuracy)}% ·{" "}
-                  {passageProgress?.xp_awarded ?? 0} XP claimed
+                  Completed · Best {bestScore} / {bestTotal} · {formatPercent(bestAccuracy)}% · {xpAwarded} XP claimed
                 </small>
+              ) : locked ? (
+                <small>Complete the previous story with 60% accuracy to unlock.</small>
+              ) : recommended ? (
+                <small>{passage.estimated_reading_time} · recommended next story</small>
               ) : (
                 <small>{passage.estimated_reading_time} · ready to explore</small>
               )}
@@ -199,7 +225,7 @@ export default function ReadingForestPage({ onBack }) {
 
       {selectedPassage ? (
         <>
-          {selectedProgress?.completed && (
+          {(selectedPassage.completed || selectedProgress?.completed) && (
             <div className="card quest-result success">
               Completed badge earned for this passage. Replay is welcome, but XP has already been claimed.
             </div>
@@ -224,14 +250,14 @@ export default function ReadingForestPage({ onBack }) {
                   Question {index + 1} of {selectedPassage.questions.length}
                 </p>
                 <ReadingQuestion
-                question={question}
-                value={answers[question.id]}
-                onChange={(value) =>
-                  setAnswers((currentAnswers) => ({
-                    ...currentAnswers,
-                    [question.id]: value,
-                  }))
-                }
+                  question={question}
+                  value={answers[question.id]}
+                  onChange={(value) =>
+                    setAnswers((currentAnswers) => ({
+                      ...currentAnswers,
+                      [question.id]: value,
+                    }))
+                  }
                 />
               </div>
             ))}
@@ -250,7 +276,7 @@ export default function ReadingForestPage({ onBack }) {
 
       {submitReadingAnswers.isError && (
         <div className="card quest-result error">
-          Story answers could not be saved. Try again.
+          Story answers could not be saved. If this story is locked, complete the previous forest stop first.
         </div>
       )}
 

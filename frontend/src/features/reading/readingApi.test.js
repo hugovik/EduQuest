@@ -25,7 +25,7 @@ export async function runReadingApiTests() {
       };
     }
 
-    if (String(url).endsWith("/reading/progress/summary")) {
+    if (String(url).includes("/reading/progress/summary?")) {
       return {
         ok: true,
         json: async () => ({
@@ -55,7 +55,7 @@ export async function runReadingApiTests() {
   try {
     const passages = await getReadingPassages(2);
     const progress = await getReadingProgress();
-    const summary = await getReadingProgressSummary();
+    const summary = await getReadingProgressSummary(2);
     const result = await submitReadingAnswers({
       passageId: "reading-l2-01",
       answers: { q1: "Beside the old tree" },
@@ -64,6 +64,7 @@ export async function runReadingApiTests() {
     assert(passages[0].level === 2, "Reading passages should load by level.");
     assert(progress[0].completed === true, "Reading progress should load.");
     assert(summary.passages_completed === 1, "Reading summary should load.");
+    assert(String(calls[2].url).includes("level=2"), "Reading summary should load by level.");
     assert(result.rewards.xp === 5, "Reading submit should return rewards.");
     assert(calls[3].options.method === "POST", "Reading submit should use POST.");
   } finally {

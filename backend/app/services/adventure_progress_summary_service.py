@@ -70,11 +70,21 @@ class AdventureProgressSummaryService:
         }
 
     def get_reading_summary(self, db: Session, child_id: int, level: int) -> dict:
-        total_passages = max(db.query(ReadingPassage).count(), len(READING_PASSAGES))
+        seeded_level_passages = len([
+            passage for passage in READING_PASSAGES if passage["level"] == level
+        ])
+        total_passages = max(
+            db.query(ReadingPassage).filter(ReadingPassage.level == level).count(),
+            seeded_level_passages,
+        )
         total_reading_quests = db.query(Quest).filter(Quest.subject == "reading").count()
         completed_passages = (
             db.query(ReadingProgress)
-            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .filter(
+                ReadingProgress.child_id == child_id,
+                ReadingProgress.level == level,
+                ReadingProgress.completed.is_(True),
+            )
             .count()
         )
         completed_reading_quests = (
@@ -88,7 +98,10 @@ class AdventureProgressSummaryService:
         )
         passage_xp = (
             db.query(func.coalesce(func.sum(ReadingProgress.xp_awarded), 0))
-            .filter(ReadingProgress.child_id == child_id)
+            .filter(
+                ReadingProgress.child_id == child_id,
+                ReadingProgress.level == level,
+            )
             .scalar()
         )
         quest_xp = (
@@ -102,17 +115,29 @@ class AdventureProgressSummaryService:
         )
         questions_answered = (
             db.query(func.coalesce(func.sum(ReadingProgress.questions_answered), 0))
-            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .filter(
+                ReadingProgress.child_id == child_id,
+                ReadingProgress.level == level,
+                ReadingProgress.completed.is_(True),
+            )
             .scalar()
         )
         correct_answers = (
             db.query(func.coalesce(func.sum(ReadingProgress.correct_answers), 0))
-            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .filter(
+                ReadingProgress.child_id == child_id,
+                ReadingProgress.level == level,
+                ReadingProgress.completed.is_(True),
+            )
             .scalar()
         )
         vocabulary_learned = (
             db.query(func.coalesce(func.sum(ReadingProgress.vocabulary_learned), 0))
-            .filter(ReadingProgress.child_id == child_id, ReadingProgress.completed.is_(True))
+            .filter(
+                ReadingProgress.child_id == child_id,
+                ReadingProgress.level == level,
+                ReadingProgress.completed.is_(True),
+            )
             .scalar()
         )
         completed = completed_passages + completed_reading_quests
@@ -153,7 +178,7 @@ class AdventureProgressSummaryService:
         summary["reading"] = self.get_reading_summary(
             db,
             child.id,
-            child.level,
+            child.grade or child.level,
         )
 
         return summary

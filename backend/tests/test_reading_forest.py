@@ -1,4 +1,5 @@
 import pytest
+from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -73,6 +74,52 @@ def test_level_selection_loads_ten_grade_one_passages(db_session, reading_servic
     assert all(passage["level"] == 1 for passage in passages)
 
 
+def test_first_passage_is_unlocked_by_default(db_session, reading_service):
+    passages = reading_service.list_passages(db_session, 2)
+
+    assert passages[0]["unlocked"] is True
+    assert passages[0]["locked"] is False
+    assert passages[1]["unlocked"] is False
+    assert passages[1]["locked"] is True
+
+
+def test_next_passage_unlocks_after_completion(db_session, reading_service):
+    first_passage = reading_service.list_passages(db_session, 2)[0]
+    reading_service.submit_answers(
+        db_session,
+        first_passage["id"],
+        correct_answers_for(first_passage),
+    )
+
+    passages = reading_service.list_passages(db_session, 2)
+
+    assert passages[0]["completed"] is True
+    assert passages[0]["best_score"] == 4
+    assert passages[0]["best_accuracy"] == 1
+    assert passages[1]["unlocked"] is True
+    assert passages[1]["locked"] is False
+
+
+def test_locked_passage_cannot_be_submitted_for_rewards_directly(db_session, reading_service):
+    child = reading_service.get_child_or_create_default(db_session)
+    passages = reading_service.list_passages(db_session, 2)
+    locked_passage = passages[1]
+
+    with pytest.raises(HTTPException) as error:
+        reading_service.submit_answers(
+            db_session,
+            locked_passage["id"],
+            correct_answers_for(locked_passage),
+        )
+
+    db_session.refresh(child)
+    progress = reading_service.get_progress(db_session)
+
+    assert error.value.status_code == 403
+    assert child.xp == 0
+    assert progress == []
+
+
 def test_passage_loading_hides_answers(db_session, reading_service):
     passage = reading_service.list_passages(db_session, 2)[0]
 
@@ -142,6 +189,10 @@ def test_daily_goal_and_achievement_integration(db_session, reading_service):
 
 
 def test_adventure_summary_uses_reading_progress(db_session, reading_service):
+    child = reading_service.get_child_or_create_default(db_session)
+    child.level = 3
+    child.grade = 3
+    db_session.commit()
     passage = reading_service.list_passages(db_session, 3)[0]
     reading_service.submit_answers(db_session, passage["id"], correct_answers_for(passage))
     summary_service = AdventureProgressSummaryService(child_repository=ChildRepository())
@@ -149,7 +200,7 @@ def test_adventure_summary_uses_reading_progress(db_session, reading_service):
     summary = summary_service.get_summary(db_session)
 
     assert summary["reading"]["completed_quests"] == 1
-    assert summary["reading"]["total_quests"] >= 30
+    assert summary["reading"]["total_quests"] >= 10
     assert summary["reading"]["xp_earned"] == 4 * READING_CORRECT_ANSWER_XP
     assert summary["reading"]["status"] == "in_progress"
 
@@ -161,6 +212,7 @@ def test_progress_summary_exposes_parent_friendly_reading_metrics(db_session, re
     summary = reading_service.get_progress_summary(db_session)
 
     assert summary["completed_passage_ids"] == [passage["id"]]
+    assert summary["unlocked_passage_ids"] == ["reading-l2-01", "reading-l2-02"]
     assert summary["passages_completed"] == 1
     assert summary["questions_answered"] == 4
     assert summary["correct_answers"] == 4

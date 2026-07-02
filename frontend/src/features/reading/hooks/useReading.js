@@ -21,10 +21,10 @@ export function useReadingProgress() {
   });
 }
 
-export function useReadingProgressSummary() {
+export function useReadingProgressSummary(level) {
   return useQuery({
-    queryKey: queryKeys.readingProgressSummary,
-    queryFn: getReadingProgressSummary,
+    queryKey: queryKeys.readingProgressSummary(level),
+    queryFn: () => getReadingProgressSummary(level),
   });
 }
 
@@ -35,7 +35,7 @@ export function useSubmitReadingAnswers() {
     mutationFn: submitReadingAnswers,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.readingProgress });
-      queryClient.invalidateQueries({ queryKey: queryKeys.readingProgressSummary });
+      queryClient.invalidateQueries({ queryKey: ["reading-progress-summary"] });
       queryClient.invalidateQueries({ queryKey: queryKeys.player });
       queryClient.invalidateQueries({ queryKey: queryKeys.dailyGoal });
       queryClient.invalidateQueries({ queryKey: queryKeys.dailyStreak });

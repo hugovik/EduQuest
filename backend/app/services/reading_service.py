@@ -20,6 +20,19 @@ from app.services.progression_rules import (
 )
 
 READING_CORRECT_ANSWER_XP = 5
+READING_UNLOCK_MIN_ACCURACY = 0.6
+READING_MAP_NODE_NAMES = [
+    "Forest Gate",
+    "Mossy Path",
+    "Owl Tree",
+    "River Bridge",
+    "Firefly Clearing",
+    "Hidden Grove",
+    "Cedar Steps",
+    "Moonlit Ferns",
+    "Lantern Hollow",
+    "Berry Bridge",
+]
 VOCABULARY_DEFINITIONS = {
     "trail": {
         "definition": "A path through a forest or park.",
@@ -1949,9 +1962,61 @@ class ReadingService:
     def serialize_answer(self, value):
         return value
 
-    def serialize_passage(self, passage: ReadingPassage) -> dict:
+    def get_progress_accuracy(self, progress: ReadingProgress | None) -> float:
+        if progress is None or not progress.questions_answered:
+            return 0
+
+        return progress.correct_answers / progress.questions_answered
+
+    def get_map_node_name(self, index: int) -> str:
+        if index < len(READING_MAP_NODE_NAMES):
+            return READING_MAP_NODE_NAMES[index]
+
+        return f"Forest Stop {index + 1}"
+
+    def get_progress_by_passage(self, db: Session, child_id: int) -> dict[str, ReadingProgress]:
+        return {
+            progress.passage_id: progress
+            for progress in self.progress_repository.list_by_child(db, child_id)
+        }
+
+    def get_unlocked_passage_ids(
+        self,
+        passages: list[ReadingPassage],
+        progress_by_passage: dict[str, ReadingProgress],
+    ) -> set[str]:
+        unlocked_ids = set()
+
+        for index, passage in enumerate(passages):
+            if index == 0:
+                unlocked_ids.add(passage.id)
+                continue
+
+            previous_passage = passages[index - 1]
+            previous_progress = progress_by_passage.get(previous_passage.id)
+
+            if (
+                previous_progress is not None
+                and previous_progress.completed
+                and self.get_progress_accuracy(previous_progress) >= READING_UNLOCK_MIN_ACCURACY
+            ):
+                unlocked_ids.add(passage.id)
+                continue
+
+            break
+
+        return unlocked_ids
+
+    def serialize_passage(
+        self,
+        passage: ReadingPassage,
+        progress: ReadingProgress | None = None,
+        unlocked: bool = False,
+        index: int = 0,
+    ) -> dict:
         questions = json.loads(passage.questions)
         safe_questions = []
+        completed = progress.completed if progress is not None else False
 
         for question in questions:
             safe_question = {
@@ -1972,14 +2037,31 @@ class ReadingService:
                 json.loads(passage.vocabulary_words)
             ),
             "questions": safe_questions,
+            "map_node_name": self.get_map_node_name(index),
+            "unlocked": unlocked or completed,
+            "locked": not (unlocked or completed),
+            "completed": completed,
+            "best_score": progress.correct_answers if progress is not None else None,
+            "best_accuracy": self.get_progress_accuracy(progress) if progress is not None else None,
+            "xp_awarded": progress.xp_awarded if progress is not None else 0,
         }
 
     def list_passages(self, db: Session, level: int) -> list[dict]:
         self.seed_passages(db)
         db.commit()
+        child = self.get_child_or_create_default(db)
+        passages = self.passage_repository.list_by_level(db, level)
+        progress_by_passage = self.get_progress_by_passage(db, child.id)
+        unlocked_passage_ids = self.get_unlocked_passage_ids(passages, progress_by_passage)
+
         return [
-            self.serialize_passage(passage)
-            for passage in self.passage_repository.list_by_level(db, level)
+            self.serialize_passage(
+                passage,
+                progress_by_passage.get(passage.id),
+                passage.id in unlocked_passage_ids,
+                index,
+            )
+            for index, passage in enumerate(passages)
         ]
 
     def get_passage(self, db: Session, passage_id: str) -> ReadingPassage:
@@ -1990,6 +2072,27 @@ class ReadingService:
             raise HTTPException(status_code=404, detail="Reading passage not found")
 
         return passage
+
+    def get_serialized_passage(self, db: Session, passage_id: str) -> dict:
+        child = self.get_child_or_create_default(db)
+        passage = self.get_passage(db, passage_id)
+        level_passages = self.passage_repository.list_by_level(db, passage.level)
+        progress_by_passage = self.get_progress_by_passage(db, child.id)
+        unlocked_passage_ids = self.get_unlocked_passage_ids(
+            level_passages,
+            progress_by_passage,
+        )
+        passage_index = next(
+            (index for index, item in enumerate(level_passages) if item.id == passage.id),
+            0,
+        )
+
+        return self.serialize_passage(
+            passage,
+            progress_by_passage.get(passage.id),
+            passage.id in unlocked_passage_ids,
+            passage_index,
+        )
 
     def serialize_progress(self, progress: ReadingProgress) -> dict:
         accuracy = (
@@ -2018,13 +2121,18 @@ class ReadingService:
             for progress in self.progress_repository.list_by_child(db, child.id)
         ]
 
-    def get_progress_summary(self, db: Session) -> dict:
+    def get_progress_summary(self, db: Session, level: int | None = None) -> dict:
+        self.seed_passages(db)
         child = self.get_child_or_create_default(db)
         progress_items = self.progress_repository.list_by_child(db, child.id)
         completed_items = [item for item in progress_items if item.completed]
         questions_answered = sum(item.questions_answered for item in completed_items)
         correct_answers = sum(item.correct_answers for item in completed_items)
         vocabulary_words = []
+        map_level = level or child.grade or 2
+        level_passages = self.passage_repository.list_by_level(db, map_level)
+        progress_by_passage = self.get_progress_by_passage(db, child.id)
+        unlocked_passage_ids = self.get_unlocked_passage_ids(level_passages, progress_by_passage)
 
         for item in completed_items:
             passage = self.passage_repository.get_by_id(db, item.passage_id)
@@ -2038,6 +2146,9 @@ class ReadingService:
 
         return {
             "completed_passage_ids": [item.passage_id for item in completed_items],
+            "unlocked_passage_ids": [
+                passage.id for passage in level_passages if passage.id in unlocked_passage_ids
+            ],
             "passages_completed": len(completed_items),
             "questions_answered": questions_answered,
             "correct_answers": correct_answers,
@@ -2090,6 +2201,20 @@ class ReadingService:
             child.id,
             passage.id,
         )
+
+        if existing_progress is None or not existing_progress.completed:
+            level_passages = self.passage_repository.list_by_level(db, passage.level)
+            progress_by_passage = self.get_progress_by_passage(db, child.id)
+            unlocked_passage_ids = self.get_unlocked_passage_ids(
+                level_passages,
+                progress_by_passage,
+            )
+
+            if passage.id not in unlocked_passage_ids:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Complete the previous Reading Forest story to unlock this passage.",
+                )
 
         if existing_progress is not None and existing_progress.completed:
             return {

@@ -14,5 +14,5 @@ export const queryKeys = {
   earnedAchievements: ["earned-achievements"],
   readingPassages: (level) => ["reading-passages", level],
   readingProgress: ["reading-progress"],
-  readingProgressSummary: ["reading-progress-summary"],
+  readingProgressSummary: (level) => ["reading-progress-summary", level],
 };

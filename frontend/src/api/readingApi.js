@@ -20,8 +20,8 @@ export async function getReadingProgress() {
   return response.json();
 }
 
-export async function getReadingProgressSummary() {
-  const response = await fetch(`${API_BASE_URL}/reading/progress/summary`);
+export async function getReadingProgressSummary(level = 2) {
+  const response = await fetch(`${API_BASE_URL}/reading/progress/summary?level=${level}`);
 
   if (!response.ok) {
     throw new Error("Unable to load reading progress summary.");
