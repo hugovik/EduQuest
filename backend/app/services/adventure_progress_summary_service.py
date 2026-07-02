@@ -180,5 +180,11 @@ class AdventureProgressSummaryService:
             child.id,
             child.grade or child.level,
         )
+        summary["writing"] = self.get_subject_summary(
+            db,
+            child.id,
+            "writing",
+            child.level,
+        )
 
         return summary

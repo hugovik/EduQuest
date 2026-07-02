@@ -9,7 +9,7 @@ import { usePlayer } from "./hooks/usePlayer";
 import { useQuests } from "./hooks/useQuests";
 import { useProgressSummary } from "./hooks/useProgressSummary";
 
-export function TreeHouseDashboard({ onGoToAdventures, onGoToMath }) {
+export function TreeHouseDashboard({ onGoToAdventures, onGoToMath, onGoToWorld }) {
   const { data: player, isLoading, error } = usePlayer();
   const { data: quests, isLoading: questsLoading } = useQuests();
   const {
@@ -31,6 +31,15 @@ export function TreeHouseDashboard({ onGoToAdventures, onGoToMath }) {
       <h1>🌳 EduQuest</h1>
 
       <PlayerCard player={player} />
+
+      <section className="card world-gateway-card">
+        <p className="quest-realm">World Map</p>
+        <h2>Explore EduQuest</h2>
+        <p>Choose a learning region, check progress, and see what opens next.</p>
+        <button className="primary-button" type="button" onClick={onGoToWorld}>
+          Open World Map
+        </button>
+      </section>
 
       <XPBar player={player} />
 

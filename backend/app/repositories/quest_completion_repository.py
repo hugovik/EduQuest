@@ -1,6 +1,7 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.models.quest import Quest
 from app.models.quest_completion import QuestCompletion
 
 
@@ -43,5 +44,27 @@ class QuestCompletionRepository:
         return (
             db.query(func.coalesce(func.sum(QuestCompletion.xp_awarded), 0))
             .filter(QuestCompletion.child_id == child_id)
+            .scalar()
+        )
+
+    def count_by_child_and_subject(self, db: Session, child_id: int, subject: str) -> int:
+        return (
+            db.query(QuestCompletion)
+            .join(Quest, QuestCompletion.quest_id == Quest.id)
+            .filter(
+                QuestCompletion.child_id == child_id,
+                Quest.subject == subject,
+            )
+            .count()
+        )
+
+    def total_xp_by_child_and_subject(self, db: Session, child_id: int, subject: str) -> int:
+        return (
+            db.query(func.coalesce(func.sum(QuestCompletion.xp_awarded), 0))
+            .join(Quest, QuestCompletion.quest_id == Quest.id)
+            .filter(
+                QuestCompletion.child_id == child_id,
+                Quest.subject == subject,
+            )
             .scalar()
         )
