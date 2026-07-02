@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 from app.models.child import Child
 from app.models.reading_passage import ReadingPassage
 from app.models.reading_progress import ReadingProgress
+from app.models.reading_story_state import ReadingStoryState
 from app.repositories.child_repository import ChildRepository
 from app.repositories.reading_repository import (
     ReadingPassageRepository,
     ReadingProgressRepository,
 )
+from app.repositories.reading_story_state_repository import ReadingStoryStateRepository
 from app.services.achievement_service import AchievementService
 from app.services.daily_goal_service import DailyGoalService
 from app.services.progression_rules import (
@@ -33,6 +35,59 @@ READING_MAP_NODE_NAMES = [
     "Lantern Hollow",
     "Berry Bridge",
 ]
+READING_STORY_CHARACTERS = {
+    "lena": {
+        "id": "lena",
+        "name": "Lena",
+        "role": "Explorer",
+        "description": "A curious reader who follows clues through Reading Forest.",
+        "portrait": "/assets/reading/characters/lena-placeholder.png",
+    },
+    "forest-owl": {
+        "id": "forest-owl",
+        "name": "Forest Owl",
+        "role": "Guide",
+        "description": "A gentle guide who helps Lena notice story clues.",
+        "portrait": "/assets/reading/characters/forest-owl-placeholder.png",
+    },
+    "friendly-fox": {
+        "id": "friendly-fox",
+        "name": "Friendly Fox",
+        "role": "Path Finder",
+        "description": "A quick friend who points out hidden forest paths.",
+        "portrait": "/assets/reading/characters/friendly-fox-placeholder.png",
+    },
+    "little-rabbit": {
+        "id": "little-rabbit",
+        "name": "Little Rabbit",
+        "role": "Clue Keeper",
+        "description": "A small friend who loves shiny leaves and signs.",
+        "portrait": "/assets/reading/characters/little-rabbit-placeholder.png",
+    },
+    "wise-turtle": {
+        "id": "wise-turtle",
+        "name": "Wise Turtle",
+        "role": "Memory Keeper",
+        "description": "A patient friend who remembers the forest's old stories.",
+        "portrait": "/assets/reading/characters/wise-turtle-placeholder.png",
+    },
+    "forest-fairy": {
+        "id": "forest-fairy",
+        "name": "Forest Fairy",
+        "role": "Wonder Maker",
+        "description": "A bright forest friend who protects the Hidden Grove.",
+        "portrait": "/assets/reading/characters/forest-fairy-placeholder.png",
+    },
+}
+READING_CHARACTER_SEQUENCE = [
+    ["lena", "forest-owl"],
+    ["lena", "friendly-fox"],
+    ["lena", "little-rabbit"],
+    ["lena", "wise-turtle"],
+    ["lena", "forest-fairy"],
+    ["lena", "forest-owl", "friendly-fox"],
+]
+READING_COLLECTIBLE_TYPES = ["leaf", "forest_gem", "animal_badge", "story_star"]
 VOCABULARY_DEFINITIONS = {
     "trail": {
         "definition": "A path through a forest or park.",
@@ -1870,12 +1925,14 @@ class ReadingService:
         child_repository: ChildRepository,
         passage_repository: ReadingPassageRepository,
         progress_repository: ReadingProgressRepository,
+        story_state_repository: ReadingStoryStateRepository | None = None,
         daily_goal_service: DailyGoalService | None = None,
         achievement_service: AchievementService | None = None,
     ):
         self.child_repository = child_repository
         self.passage_repository = passage_repository
         self.progress_repository = progress_repository
+        self.story_state_repository = story_state_repository or ReadingStoryStateRepository()
         self.daily_goal_service = daily_goal_service
         self.achievement_service = achievement_service
 
@@ -1974,6 +2031,254 @@ class ReadingService:
 
         return f"Forest Stop {index + 1}"
 
+    def load_json_value(self, value: str | None, fallback):
+        if not value:
+            return fallback
+
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return fallback
+
+    def dump_json_value(self, value) -> str:
+        return json.dumps(value)
+
+    def get_story_characters_for_index(self, index: int) -> list[dict]:
+        character_ids = READING_CHARACTER_SEQUENCE[index % len(READING_CHARACTER_SEQUENCE)]
+        return [READING_STORY_CHARACTERS[character_id] for character_id in character_ids]
+
+    def get_chapter_collectible(self, passage: ReadingPassage, index: int) -> dict:
+        collectible_type = READING_COLLECTIBLE_TYPES[index % len(READING_COLLECTIBLE_TYPES)]
+        return {
+            "id": f"{passage.id}-{collectible_type}",
+            "type": collectible_type,
+            "name": f"{self.get_map_node_name(index)} Keepsake",
+            "description": f"A small treasure found near {self.get_map_node_name(index)}.",
+            "icon": collectible_type.replace("_", " ").title(),
+        }
+
+    def get_story_choices(self, passage: ReadingPassage, index: int) -> list[dict]:
+        if index % 2 == 1:
+            return []
+
+        return [
+            {
+                "id": f"{passage.id}-river-path",
+                "label": "Follow the river",
+                "dialogue": "Forest Owl whispers, 'Listen to the water. It carries a clue.'",
+                "outcome_text": "The river path adds a shiny clue to Lena's journal.",
+                "bonus_vocabulary": [
+                    self.normalize_vocabulary_word(
+                        {
+                            "word": "ripple",
+                            "definition": "A small wave on water.",
+                            "example": "Lena watched a ripple move across the pond.",
+                        }
+                    )
+                ],
+            },
+            {
+                "id": f"{passage.id}-forest-path",
+                "label": "Walk into the forest",
+                "dialogue": "Friendly Fox smiles, 'The quiet path may hide a sign.'",
+                "outcome_text": "The forest path reveals a soft footprint beside the trail.",
+                "bonus_vocabulary": [
+                    self.normalize_vocabulary_word(
+                        {
+                            "word": "footprint",
+                            "definition": "A mark left by a foot or paw.",
+                            "example": "The fox's footprint showed where the trail turned.",
+                        }
+                    )
+                ],
+            },
+        ]
+
+    def get_story_interactions(self, passage: ReadingPassage, index: int) -> list[dict]:
+        return [
+            {
+                "id": f"{passage.id}-inspect-sign",
+                "label": "Inspect the forest sign",
+                "description": "A wooden sign has tiny letters carved into it.",
+                "action_label": "Reveal clue",
+                "result_text": "The sign reminds Lena to reread carefully before choosing.",
+                "collectible": self.get_chapter_collectible(passage, index),
+            }
+        ]
+
+    def get_story_artwork(self, index: int) -> dict:
+        chapter_slug = self.get_map_node_name(index).lower().replace(" ", "-")
+        return {
+            "illustration": f"/assets/reading/chapters/{chapter_slug}-illustration.png",
+            "background": f"/assets/reading/backgrounds/{chapter_slug}-background.png",
+            "character_portrait": "/assets/reading/characters/lena-placeholder.png",
+        }
+
+    def get_story_state(self, db: Session) -> ReadingStoryState:
+        child = self.get_child_or_create_default(db)
+        state = self.story_state_repository.get_or_create(db, child.id)
+        db.flush()
+        return state
+
+    def get_serialized_story_state(self, db: Session) -> dict:
+        state = self.get_story_state(db)
+        db.commit()
+        db.refresh(state)
+        return self.serialize_story_state(state)
+
+    def serialize_story_state(self, state: ReadingStoryState) -> dict:
+        choices_made = self.load_json_value(state.choices_made, {})
+        collectibles_found = self.load_json_value(state.collectibles_found, [])
+        journal_entries = self.load_json_value(state.journal_entries, [])
+        character_ids = self.load_json_value(state.characters_met, [])
+
+        return {
+            "child_id": state.child_id,
+            "current_chapter_id": state.current_chapter_id,
+            "choices_made": choices_made,
+            "collectibles_found": collectibles_found,
+            "journal_entries": journal_entries,
+            "characters_met": [
+                READING_STORY_CHARACTERS[character_id]
+                for character_id in character_ids
+                if character_id in READING_STORY_CHARACTERS
+            ],
+        }
+
+    def add_story_journal_entry(
+        self,
+        state: ReadingStoryState,
+        passage_id: str | None,
+        title: str,
+        text: str,
+        entry_type: str,
+    ) -> None:
+        journal_entries = self.load_json_value(state.journal_entries, [])
+        entry_id = f"{entry_type}-{passage_id or 'reading'}"
+
+        if any(entry.get("id") == entry_id for entry in journal_entries):
+            return
+
+        journal_entries.append(
+            {
+                "id": entry_id,
+                "passage_id": passage_id,
+                "title": title,
+                "text": text,
+                "type": entry_type,
+                "created_at": datetime.utcnow().isoformat(),
+            }
+        )
+        state.journal_entries = self.dump_json_value(journal_entries)
+
+    def add_characters_met(self, state: ReadingStoryState, characters: list[dict]) -> None:
+        character_ids = self.load_json_value(state.characters_met, [])
+
+        for character in characters:
+            if character["id"] not in character_ids:
+                character_ids.append(character["id"])
+
+        state.characters_met = self.dump_json_value(character_ids)
+
+    def add_collectible(self, state: ReadingStoryState, collectible: dict | None) -> bool:
+        if collectible is None:
+            return False
+
+        collectibles = self.load_json_value(state.collectibles_found, [])
+
+        if any(item.get("id") == collectible["id"] for item in collectibles):
+            return False
+
+        collectibles.append(collectible)
+        state.collectibles_found = self.dump_json_value(collectibles)
+        return True
+
+    def get_next_passage_id(
+        self,
+        passages: list[ReadingPassage],
+        passage_id: str,
+    ) -> str | None:
+        for index, passage in enumerate(passages):
+            if passage.id == passage_id and index + 1 < len(passages):
+                return passages[index + 1].id
+
+        return None
+
+    def record_story_choice(self, db: Session, passage_id: str, choice_id: str) -> dict:
+        child = self.get_child_or_create_default(db)
+        passage = self.get_passage(db, passage_id)
+        level_passages = self.passage_repository.list_by_level(db, passage.level)
+        passage_index = next(
+            (index for index, item in enumerate(level_passages) if item.id == passage.id),
+            0,
+        )
+        choices = self.get_story_choices(passage, passage_index)
+        choice = next((item for item in choices if item["id"] == choice_id), None)
+
+        if choice is None:
+            raise HTTPException(status_code=404, detail="Story choice not found")
+
+        state = self.story_state_repository.get_or_create(db, child.id)
+        choices_made = self.load_json_value(state.choices_made, {})
+        choices_made[passage.id] = choice_id
+        state.choices_made = self.dump_json_value(choices_made)
+        state.current_chapter_id = passage.id
+        self.add_characters_met(state, self.get_story_characters_for_index(passage_index))
+        self.add_story_journal_entry(
+            state,
+            passage.id,
+            "Story choice made",
+            choice["outcome_text"],
+            "choice",
+        )
+
+        db.commit()
+        db.refresh(state)
+
+        return {
+            "story_state": self.serialize_story_state(state),
+            "choice": choice,
+            "events": ["Story Choice Saved"],
+        }
+
+    def record_story_interaction(self, db: Session, passage_id: str, interaction_id: str) -> dict:
+        child = self.get_child_or_create_default(db)
+        passage = self.get_passage(db, passage_id)
+        level_passages = self.passage_repository.list_by_level(db, passage.level)
+        passage_index = next(
+            (index for index, item in enumerate(level_passages) if item.id == passage.id),
+            0,
+        )
+        interactions = self.get_story_interactions(passage, passage_index)
+        interaction = next((item for item in interactions if item["id"] == interaction_id), None)
+
+        if interaction is None:
+            raise HTTPException(status_code=404, detail="Story interaction not found")
+
+        state = self.story_state_repository.get_or_create(db, child.id)
+        state.current_chapter_id = passage.id
+        self.add_characters_met(state, self.get_story_characters_for_index(passage_index))
+        collectible_awarded = interaction.get("collectible")
+        is_new_collectible = self.add_collectible(state, collectible_awarded)
+        self.add_story_journal_entry(
+            state,
+            passage.id,
+            "Hidden clue found",
+            interaction["result_text"],
+            "interaction",
+        )
+
+        db.commit()
+        db.refresh(state)
+
+        return {
+            "story_state": self.serialize_story_state(state),
+            "interaction": interaction,
+            "collectible_awarded": collectible_awarded if is_new_collectible else None,
+            "duplicate": not is_new_collectible,
+            "events": ["Story Interaction Saved"],
+        }
+
     def get_progress_by_passage(self, db: Session, child_id: int) -> dict[str, ReadingProgress]:
         return {
             progress.passage_id: progress
@@ -2044,6 +2349,13 @@ class ReadingService:
             "best_score": progress.correct_answers if progress is not None else None,
             "best_accuracy": self.get_progress_accuracy(progress) if progress is not None else None,
             "xp_awarded": progress.xp_awarded if progress is not None else 0,
+            "chapter_id": passage.id,
+            "chapter_title": self.get_map_node_name(index),
+            "story_arc_title": "The Hidden Grove Adventure",
+            "characters": self.get_story_characters_for_index(index),
+            "artwork": self.get_story_artwork(index),
+            "choices": self.get_story_choices(passage, index),
+            "interactive_elements": self.get_story_interactions(passage, index),
         }
 
     def list_passages(self, db: Session, level: int) -> list[dict]:
@@ -2233,6 +2545,14 @@ class ReadingService:
                 "daily_goal": None,
                 "streak": None,
                 "achievements_unlocked": [],
+                "story_state": self.serialize_story_state(
+                    self.story_state_repository.get_or_create(db, child.id)
+                ),
+                "collectibles_found": self.load_json_value(
+                    self.story_state_repository.get_or_create(db, child.id).collectibles_found,
+                    [],
+                ),
+                "next_chapter_unlocked": None,
                 "duplicate": True,
             }
 
@@ -2273,6 +2593,28 @@ class ReadingService:
             self.progress_repository.create(db, progress)
 
         db.flush()
+
+        story_state = self.story_state_repository.get_or_create(db, child.id)
+        level_passages = self.passage_repository.list_by_level(db, passage.level)
+        passage_index = next(
+            (index for index, item in enumerate(level_passages) if item.id == passage.id),
+            0,
+        )
+        completion_accuracy = score / total_questions if total_questions else 0
+        next_chapter_id = (
+            self.get_next_passage_id(level_passages, passage.id)
+            if completion_accuracy >= READING_UNLOCK_MIN_ACCURACY
+            else None
+        )
+        story_state.current_chapter_id = next_chapter_id or passage.id
+        self.add_characters_met(story_state, self.get_story_characters_for_index(passage_index))
+        self.add_story_journal_entry(
+            story_state,
+            passage.id,
+            f"Chapter complete: {self.get_map_node_name(passage_index)}",
+            f"Lena completed {passage.title} with {score} of {total_questions} clues correct.",
+            "chapter_complete",
+        )
 
         if self.achievement_service is not None and completed_daily_goal_result:
             if completed_daily_goal_result["completed_today"]:
@@ -2315,5 +2657,8 @@ class ReadingService:
             "daily_goal": daily_goal_result["daily_goal"] if daily_goal_result else None,
             "streak": daily_goal_result["streak"] if daily_goal_result else None,
             "achievements_unlocked": achievements_unlocked,
+            "story_state": self.serialize_story_state(story_state),
+            "collectibles_found": self.load_json_value(story_state.collectibles_found, []),
+            "next_chapter_unlocked": next_chapter_id,
             "duplicate": False,
         }

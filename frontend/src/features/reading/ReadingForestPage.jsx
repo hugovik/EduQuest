@@ -3,14 +3,20 @@ import LearningLevelSelector from "../learning/components/LearningLevelSelector"
 import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
 import { useLearningLevelPreference } from "../learning/hooks/useLearningLevelPreference";
 import { usePlayer } from "../treehouse/hooks/usePlayer";
-import ReadingPassage from "./components/ReadingPassage";
 import ReadingProgressCard from "./components/ReadingProgressCard";
 import ReadingQuestion from "./components/ReadingQuestion";
 import ReadingResults from "./components/ReadingResults";
+import CollectiblePopup from "./components/CollectiblePopup";
+import StoryChapter from "./components/StoryChapter";
+import StoryChoice from "./components/StoryChoice";
+import StoryJournal from "./components/StoryJournal";
 import {
   useReadingPassages,
   useReadingProgress,
   useReadingProgressSummary,
+  useReadingStoryState,
+  useSaveReadingStoryChoice,
+  useSaveReadingStoryInteraction,
   useSubmitReadingAnswers,
 } from "./hooks/useReading";
 
@@ -32,6 +38,8 @@ export default function ReadingForestPage({ onBack }) {
   const [selectedPassageId, setSelectedPassageId] = useState(null);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
+  const [choiceFeedback, setChoiceFeedback] = useState(null);
+  const [collectiblePopup, setCollectiblePopup] = useState(null);
   const { data: player, isLoading: playerLoading, error: playerError } = usePlayer();
   const {
     overrideLevel,
@@ -60,6 +68,13 @@ export default function ReadingForestPage({ onBack }) {
     isLoading: progressSummaryLoading,
     error: progressSummaryError,
   } = useReadingProgressSummary(readingLevel.effectiveLevel);
+  const {
+    data: storyState,
+    isLoading: storyStateLoading,
+    error: storyStateError,
+  } = useReadingStoryState();
+  const saveStoryChoice = useSaveReadingStoryChoice();
+  const saveStoryInteraction = useSaveReadingStoryInteraction();
   const submitReadingAnswers = useSubmitReadingAnswers();
   const progressByPassage = getProgressByPassage(progress);
   const completedPassageIds = getCompletedPassageIds(progress);
@@ -67,6 +82,12 @@ export default function ReadingForestPage({ onBack }) {
   const selectedProgress = selectedPassage
     ? progressByPassage.get(selectedPassage.id)
     : null;
+  const selectedChoiceId = selectedPassage
+    ? storyState?.choices_made?.[selectedPassage.id]
+    : null;
+  const selectedChoice = selectedPassage?.choices?.find(
+    (choice) => choice.id === selectedChoiceId
+  );
   const answeredCount = selectedPassage
     ? selectedPassage.questions.filter((question) => answers[question.id]).length
     : 0;
@@ -81,6 +102,8 @@ export default function ReadingForestPage({ onBack }) {
     setSelectedPassageId(null);
     setAnswers({});
     setResult(null);
+    setChoiceFeedback(null);
+    setCollectiblePopup(null);
   }, [readingLevel.effectiveLevel]);
 
   useEffect(() => {
@@ -103,6 +126,42 @@ export default function ReadingForestPage({ onBack }) {
     setSelectedPassageId(passageId);
     setAnswers({});
     setResult(null);
+    setChoiceFeedback(null);
+    setCollectiblePopup(null);
+  }
+
+  async function handleChoice(choice) {
+    if (!selectedPassage) {
+      return;
+    }
+
+    const response = await saveStoryChoice.mutateAsync({
+      passageId: selectedPassage.id,
+      choiceId: choice.id,
+    });
+    setChoiceFeedback(response.choice);
+  }
+
+  async function handleInteraction(interaction) {
+    if (!selectedPassage) {
+      return;
+    }
+
+    const response = await saveStoryInteraction.mutateAsync({
+      passageId: selectedPassage.id,
+      interactionId: interaction.id,
+    });
+
+    if (response.collectible_awarded) {
+      setCollectiblePopup(response.collectible_awarded);
+    } else {
+      setChoiceFeedback({
+        dialogue: interaction.result_text,
+        outcome_text: response.duplicate
+          ? "You already found this keepsake. It is safe in your journal."
+          : interaction.result_text,
+      });
+    }
   }
 
   async function handleSubmit(event) {
@@ -124,7 +183,8 @@ export default function ReadingForestPage({ onBack }) {
     preferenceLoading ||
     passagesLoading ||
     progressLoading ||
-    progressSummaryLoading
+    progressSummaryLoading ||
+    storyStateLoading
   ) {
     return <main className="dashboard">Loading Reading Forest...</main>;
   }
@@ -134,7 +194,8 @@ export default function ReadingForestPage({ onBack }) {
     preferenceError ||
     passagesError ||
     progressError ||
-    progressSummaryError
+    progressSummaryError ||
+    storyStateError
   ) {
     return <main className="dashboard">Unable to load Reading Forest.</main>;
   }
@@ -162,6 +223,7 @@ export default function ReadingForestPage({ onBack }) {
       </section>
 
       <ReadingProgressCard summary={progressSummary} />
+      <StoryJournal storyState={storyState} onReplayChapter={choosePassage} />
 
       <LearningLevelSelector
         childGrade={player?.grade}
@@ -231,7 +293,39 @@ export default function ReadingForestPage({ onBack }) {
             </div>
           )}
 
-          <ReadingPassage passage={selectedPassage} />
+          <StoryChapter
+            passage={selectedPassage}
+            selectedChoice={choiceFeedback ?? selectedChoice}
+          />
+
+          <StoryChoice
+            choices={selectedPassage.choices}
+            isSaving={saveStoryChoice.isPending}
+            selectedChoiceId={selectedChoiceId}
+            onChoose={handleChoice}
+          />
+
+          {selectedPassage.interactive_elements?.length > 0 && (
+            <section className="card reading-interactions-card">
+              <p className="quest-realm">Explore the Chapter</p>
+              <h2>Find the hidden clue</h2>
+              <div className="reading-interaction-grid">
+                {selectedPassage.interactive_elements.map((interaction) => (
+                  <button
+                    className="reading-interaction-button"
+                    disabled={saveStoryInteraction.isPending}
+                    key={interaction.id}
+                    type="button"
+                    onClick={() => handleInteraction(interaction)}
+                  >
+                    <strong>{interaction.label}</strong>
+                    <small>{interaction.description}</small>
+                    <span>{interaction.action_label}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
           <form className="card reading-question-card" onSubmit={handleSubmit}>
             <p className="quest-realm">Comprehension Clues</p>
@@ -279,6 +373,11 @@ export default function ReadingForestPage({ onBack }) {
           Story answers could not be saved. If this story is locked, complete the previous forest stop first.
         </div>
       )}
+
+      <CollectiblePopup
+        collectible={collectiblePopup}
+        onClose={() => setCollectiblePopup(null)}
+      />
 
       <ReadingResults
         result={result}

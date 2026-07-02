@@ -25,6 +25,7 @@ export default function ReadingResults({ result, nextPassageTitle, onChooseAnoth
 
   const vocabularyLearned = result.progress?.vocabulary_learned ?? 0;
   const rewardsClaimed = !result.duplicate && result.rewards.xp > 0;
+  const collectiblesFound = result.collectibles_found ?? [];
 
   return (
     <section className="card reading-results-card">
@@ -35,12 +36,29 @@ export default function ReadingResults({ result, nextPassageTitle, onChooseAnoth
         <span>{formatPercent(result.accuracy)}% accuracy</span>
         <span>{result.rewards.xp} XP earned this try</span>
         <span>{vocabularyLearned} vocabulary words learned</span>
+        <span>{collectiblesFound.length} collectibles found</span>
       </div>
       <p className={rewardsClaimed ? "quest-result success" : "quest-result error"}>
         {result.duplicate
           ? "Rewards were already claimed for this passage, so replay gives no duplicate XP."
           : "Rewards claimed for this passage."}
       </p>
+      {result.next_chapter_unlocked && (
+        <p className="quest-result success">Next chapter unlocked: {result.next_chapter_unlocked}</p>
+      )}
+
+      {collectiblesFound.length > 0 && (
+        <section className="reading-review-section">
+          <p className="quest-realm">Collectibles</p>
+          {collectiblesFound.map((item) => (
+            <article className="reading-review-card correct" key={item.id}>
+              <strong>{item.name}</strong>
+              <p>{item.description}</p>
+            </article>
+          ))}
+        </section>
+      )}
+
       {result.achievements_unlocked?.length > 0 && (
         <p className="quest-result success">
           Badge unlocked: {getAchievementName(result.achievements_unlocked[0])}!

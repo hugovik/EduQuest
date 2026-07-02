@@ -7,6 +7,11 @@ from app.schemas.reading import (
     ReadingPassageRead,
     ReadingProgressRead,
     ReadingProgressSummaryRead,
+    ReadingStoryChoiceRequest,
+    ReadingStoryChoiceResponse,
+    ReadingStoryInteractionRequest,
+    ReadingStoryInteractionResponse,
+    ReadingStoryStateRead,
     ReadingSubmitRequest,
     ReadingSubmitResponse,
 )
@@ -48,6 +53,38 @@ def get_reading_progress_summary(
     reading_service: ReadingService = Depends(get_reading_service),
 ):
     return reading_service.get_progress_summary(db, level)
+
+
+
+
+@router.get("/story/state", response_model=ReadingStoryStateRead)
+def get_reading_story_state(
+    db: Session = Depends(get_db),
+    reading_service: ReadingService = Depends(get_reading_service),
+):
+    return reading_service.get_serialized_story_state(db)
+
+
+@router.post("/story/choices", response_model=ReadingStoryChoiceResponse)
+def save_reading_story_choice(
+    request: ReadingStoryChoiceRequest,
+    db: Session = Depends(get_db),
+    reading_service: ReadingService = Depends(get_reading_service),
+):
+    return reading_service.record_story_choice(db, request.passage_id, request.choice_id)
+
+
+@router.post("/story/interactions", response_model=ReadingStoryInteractionResponse)
+def save_reading_story_interaction(
+    request: ReadingStoryInteractionRequest,
+    db: Session = Depends(get_db),
+    reading_service: ReadingService = Depends(get_reading_service),
+):
+    return reading_service.record_story_interaction(
+        db,
+        request.passage_id,
+        request.interaction_id,
+    )
 
 
 @router.post("/passages/{passage_id}/submit", response_model=ReadingSubmitResponse)

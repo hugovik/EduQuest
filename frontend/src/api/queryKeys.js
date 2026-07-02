@@ -15,4 +15,5 @@ export const queryKeys = {
   readingPassages: (level) => ["reading-passages", level],
   readingProgress: ["reading-progress"],
   readingProgressSummary: (level) => ["reading-progress-summary", level],
+  readingStoryState: ["reading-story-state"],
 };

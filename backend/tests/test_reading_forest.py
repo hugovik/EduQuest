@@ -120,6 +120,70 @@ def test_locked_passage_cannot_be_submitted_for_rewards_directly(db_session, rea
     assert progress == []
 
 
+def test_passage_exposes_story_chapter_metadata(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+
+    assert passage["chapter_id"] == passage["id"]
+    assert passage["chapter_title"] == "Forest Gate"
+    assert passage["characters"]
+    assert passage["artwork"]["background"]
+    assert passage["choices"]
+    assert passage["interactive_elements"]
+    assert passage["interactive_elements"][0]["collectible"]
+
+
+def test_story_choice_persists_in_journal(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+    choice = passage["choices"][0]
+
+    result = reading_service.record_story_choice(db_session, passage["id"], choice["id"])
+    state = result["story_state"]
+
+    assert result["choice"]["id"] == choice["id"]
+    assert state["choices_made"][passage["id"]] == choice["id"]
+    assert state["journal_entries"]
+    assert state["characters_met"]
+
+
+def test_story_interaction_persists_collectible_once(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+    interaction = passage["interactive_elements"][0]
+
+    first = reading_service.record_story_interaction(
+        db_session,
+        passage["id"],
+        interaction["id"],
+    )
+    second = reading_service.record_story_interaction(
+        db_session,
+        passage["id"],
+        interaction["id"],
+    )
+
+    assert first["collectible_awarded"]["id"] == interaction["collectible"]["id"]
+    assert first["duplicate"] is False
+    assert second["collectible_awarded"] is None
+    assert second["duplicate"] is True
+    assert len(second["story_state"]["collectibles_found"]) == 1
+
+
+def test_chapter_completion_updates_story_journal_and_next_chapter(db_session, reading_service):
+    passage = reading_service.list_passages(db_session, 2)[0]
+
+    result = reading_service.submit_answers(
+        db_session,
+        passage["id"],
+        correct_answers_for(passage),
+    )
+
+    assert result["story_state"]["current_chapter_id"] == "reading-l2-02"
+    assert result["next_chapter_unlocked"] == "reading-l2-02"
+    assert any(
+        entry["type"] == "chapter_complete"
+        for entry in result["story_state"]["journal_entries"]
+    )
+
+
 def test_passage_loading_hides_answers(db_session, reading_service):
     passage = reading_service.list_passages(db_session, 2)[0]
 

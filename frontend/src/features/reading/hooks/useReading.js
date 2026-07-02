@@ -3,6 +3,9 @@ import {
   getReadingPassages,
   getReadingProgress,
   getReadingProgressSummary,
+  getReadingStoryState,
+  saveReadingStoryChoice,
+  saveReadingStoryInteraction,
   submitReadingAnswers,
 } from "../../../api/readingApi";
 import { queryKeys } from "../../../api/queryKeys";
@@ -28,6 +31,35 @@ export function useReadingProgressSummary(level) {
   });
 }
 
+export function useReadingStoryState() {
+  return useQuery({
+    queryKey: queryKeys.readingStoryState,
+    queryFn: getReadingStoryState,
+  });
+}
+
+export function useSaveReadingStoryChoice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: saveReadingStoryChoice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.readingStoryState });
+    },
+  });
+}
+
+export function useSaveReadingStoryInteraction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: saveReadingStoryInteraction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.readingStoryState });
+    },
+  });
+}
+
 export function useSubmitReadingAnswers() {
   const queryClient = useQueryClient();
 
@@ -35,6 +67,7 @@ export function useSubmitReadingAnswers() {
     mutationFn: submitReadingAnswers,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.readingProgress });
+      queryClient.invalidateQueries({ queryKey: queryKeys.readingStoryState });
       queryClient.invalidateQueries({ queryKey: ["reading-progress-summary"] });
       queryClient.invalidateQueries({ queryKey: queryKeys.player });
       queryClient.invalidateQueries({ queryKey: queryKeys.dailyGoal });
