@@ -9,6 +9,22 @@ export function useRewardCorrectAnswer() {
     mutationFn: rewardCorrectAnswer,
     onSuccess: (result) => {
       queryClient.setQueryData(queryKeys.inventory, result.inventory);
+
+      if (result.daily_goal) {
+        queryClient.setQueryData(queryKeys.dailyGoal, result.daily_goal);
+      }
+
+      if (result.streak) {
+        queryClient.setQueryData(queryKeys.dailyStreak, result.streak);
+      }
+
+      if (result.achievements_unlocked?.length) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.achievements });
+        queryClient.invalidateQueries({ queryKey: queryKeys.earnedAchievements });
+        queryClient.invalidateQueries({ queryKey: queryKeys.progressSummary });
+        queryClient.invalidateQueries({ queryKey: queryKeys.adventureUnlocks });
+      }
+
       queryClient.setQueryData(queryKeys.obstacleProgress, (existing = []) => {
         const nextProgress = result.obstacle_progress;
         const hasProgress = existing.some(
@@ -25,6 +41,8 @@ export function useRewardCorrectAnswer() {
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.inventory });
       queryClient.invalidateQueries({ queryKey: queryKeys.obstacleProgress });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dailyGoal });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dailyStreak });
     },
   });
 }

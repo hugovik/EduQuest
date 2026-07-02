@@ -143,3 +143,486 @@
   font: inherit;
   padding: 0.75rem 1rem;
 }
+
+.adventure-hub-header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.adventure-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.adventure-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.adventure-card-disabled {
+  opacity: 0.72;
+}
+
+.adventure-card-icon {
+  font-size: 2.5rem;
+}
+
+.adventure-card-meta {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+
+.adventure-gateway-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.adventure-progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  height: 0.65rem;
+  overflow: hidden;
+}
+
+.adventure-progress-fill {
+  background: #73a942;
+  height: 100%;
+  transition: width 180ms ease;
+}
+
+.adventure-unlock-reason {
+  color: #6d4c1f;
+  font-weight: 700;
+}
+
+.daily-goal-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.daily-goal-progress-bar {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  height: 0.75rem;
+  overflow: hidden;
+}
+
+.daily-goal-progress-fill {
+  background: #73a942;
+  height: 100%;
+  transition: width 180ms ease;
+}
+
+.badge-list li {
+  transition: opacity 180ms ease;
+}
+
+.badge-unearned {
+  opacity: 0.55;
+}
+
+.badge-earned {
+  opacity: 1;
+}
+
+.reading-forest-page {
+  background: linear-gradient(180deg, #f4ffe8 0%, #e6f7d4 48%, #d9f0ee 100%);
+}
+
+.reading-forest-header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.reading-story-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.reading-story-button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #a6c96a;
+  border-radius: 8px;
+  color: #244026;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  min-height: 3rem;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.reading-story-button-active {
+  background: #f8ffd8;
+  border-color: #5f8d2b;
+}
+
+.reading-passage-card,
+.reading-question-card,
+.reading-results-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.reading-passage-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.reading-vocabulary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reading-vocabulary span {
+  background: #edf8c8;
+  border: 1px solid #a6c96a;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+}
+
+.reading-question {
+  border: 2px solid #c7ddb1;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 1rem;
+}
+
+.reading-question legend {
+  font-weight: 800;
+  padding: 0 0.35rem;
+}
+
+.reading-question label {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reading-question select {
+  border: 2px solid #c7ddb1;
+  border-radius: 8px;
+  font: inherit;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  width: 100%;
+}
+
+.reading-step-card,
+.reading-map-card,
+.reading-progress-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reading-step-track {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.reading-step-track span {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #a6c96a;
+  border-radius: 999px;
+  font-weight: 800;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
+
+.reading-progress-metrics,
+.reading-results-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.reading-progress-metrics span,
+.reading-results-grid span {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  font-weight: 800;
+  padding: 0.65rem;
+}
+
+.reading-story-button {
+  flex-direction: column;
+}
+
+.reading-story-button small {
+  font-weight: 700;
+  opacity: 0.78;
+}
+
+.reading-story-button-completed {
+  border-color: #5f8d2b;
+}
+
+.reading-question-shell {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reading-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.reading-vocabulary-section {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.reading-vocabulary-card {
+  background: #edf8c8;
+  border: 1px solid #a6c96a;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.reading-vocabulary-card strong {
+  color: #244026;
+  font-size: 1.05rem;
+}
+
+.reading-vocabulary-card p {
+  margin: 0;
+}
+
+.reading-vocabulary-card small {
+  color: #4f673a;
+  font-weight: 700;
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px solid #a6c96a;
+  border-radius: 8px;
+  color: #244026;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0.5rem 0.75rem;
+}
+
+.reading-hint-box {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.reading-hint-box p {
+  background: #f8ffd8;
+  border-left: 4px solid #73a942;
+  margin: 0;
+  padding: 0.65rem;
+}
+
+.reading-review-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reading-review-card {
+  border: 2px solid #c7ddb1;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.reading-review-card.correct {
+  background: #eefbd8;
+}
+
+.reading-review-card.incorrect {
+  background: #fff4e8;
+}
+
+.reading-review-card p {
+  margin: 0;
+}
+
+.reading-forest-map {
+  position: relative;
+}
+
+.reading-map-node {
+  min-height: 8.25rem;
+  position: relative;
+}
+
+.reading-map-node-icon {
+  font-size: 1.5rem;
+}
+
+.reading-map-node-label {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.reading-story-button-recommended {
+  box-shadow: 0 0 0 3px rgba(255, 190, 80, 0.45);
+}
+
+.reading-story-button-locked {
+  background: rgba(238, 241, 231, 0.82);
+  border-color: #aab49d;
+  color: #5b6654;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.reading-story-button-locked:hover {
+  transform: none;
+}
+
+.reading-story-chapter {
+  display: grid;
+  gap: 1rem;
+}
+
+.reading-chapter-hero,
+.reading-interactions-card,
+.reading-journal-card,
+.reading-story-choice-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reading-art-placeholder {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(237, 248, 200, 0.9), rgba(217, 240, 238, 0.9));
+  border: 2px dashed #a6c96a;
+  border-radius: 8px;
+  color: #244026;
+  display: grid;
+  min-height: 8rem;
+  padding: 1rem;
+  place-items: center;
+  text-align: center;
+}
+
+.reading-art-placeholder span {
+  font-weight: 800;
+}
+
+.reading-character-grid,
+.reading-choice-grid,
+.reading-interaction-grid,
+.reading-journal-metrics,
+.reading-journal-columns {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.reading-character-card,
+.reading-choice-button,
+.reading-interaction-button {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #a6c96a;
+  border-radius: 8px;
+  color: #244026;
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem;
+  text-align: left;
+}
+
+.reading-character-card {
+  align-items: center;
+  grid-template-columns: auto 1fr;
+}
+
+.reading-character-card p,
+.reading-character-card small,
+.reading-dialogue p,
+.reading-dialogue small,
+.reading-journal-card p {
+  margin: 0;
+}
+
+.reading-character-portrait {
+  align-items: center;
+  background: #edf8c8;
+  border: 2px solid #a6c96a;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 900;
+  height: 2.75rem;
+  justify-content: center;
+  width: 2.75rem;
+}
+
+.reading-dialogue {
+  background: rgba(255, 255, 255, 0.82);
+  border-left: 4px solid #73a942;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.reading-choice-button,
+.reading-interaction-button {
+  cursor: pointer;
+  font: inherit;
+}
+
+.reading-choice-button.selected,
+.reading-interaction-button:hover {
+  box-shadow: 0 0 0 3px rgba(115, 169, 66, 0.25);
+}
+
+.reading-choice-button:disabled,
+.reading-interaction-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.reading-interaction-button span {
+  font-weight: 800;
+}
+
+.reading-journal-card article {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  padding: 0.65rem;
+}
+
+.reading-journal-metrics span {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  font-weight: 800;
+  padding: 0.65rem;
+}
+
+.reading-collectible-popup {
+  align-items: center;
+  background: #f8ffd8;
+  border: 2px solid #73a942;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(36, 64, 38, 0.18);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem;
+}

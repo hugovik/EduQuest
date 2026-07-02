@@ -133,6 +133,9 @@ class QuestService:
             if already_unlocked is not None:
                 continue
 
+            if achievement.trigger_type not in {"completed_quests", "total_xp"}:
+                continue
+
             value = completed_quests
             if achievement.trigger_type == "total_xp":
                 value = total_xp_awarded

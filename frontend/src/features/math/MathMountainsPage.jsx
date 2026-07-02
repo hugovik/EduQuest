@@ -15,6 +15,10 @@ import { getAdventureLevelConfig } from "../learning/learningLevelConfig";
 import { useLearningLevelPreference } from "../learning/hooks/useLearningLevelPreference";
 import TrailMap from "../adventure/components/TrailMap";
 
+function getAchievementName(achievement) {
+  return achievement?.name || achievement?.title || "Badge";
+}
+
 export default function MathMountainsPage({ onBack }) {
   const [currentObstacleIndex, setCurrentObstacleIndex] = useState(0);
   const [selectedOperation, setSelectedOperation] = useState("addition");
@@ -118,7 +122,7 @@ export default function MathMountainsPage({ onBack }) {
     return (
       <main className="dashboard">
         <button className="primary-button" onClick={onBack}>
-          Back to Tree House
+          Back to Adventure Hub
         </button>
 
         <div className="card">No Math Mountains quest found yet.</div>
@@ -129,7 +133,7 @@ export default function MathMountainsPage({ onBack }) {
   return (
     <main className="dashboard math-mountains-page">
       <button className="primary-button" onClick={onBack}>
-        Back to Tree House
+        Back to Adventure Hub
       </button>
 
       <h1>⛰️ Math Mountains</h1>
@@ -176,6 +180,14 @@ export default function MathMountainsPage({ onBack }) {
         onIncorrectAnswer={handleIncorrectAnswer}
         onObstacleComplete={handleObstacleComplete}
       />
+
+      {rewardCorrectAnswer.data?.achievements_unlocked?.length > 0 && (
+        <div className="card quest-result success">
+          Badge unlocked: {getAchievementName(
+            rewardCorrectAnswer.data.achievements_unlocked[0]
+          )}!
+        </div>
+      )}
 
       {rewardCorrectAnswer.isError && (
         <div className="card quest-result error">

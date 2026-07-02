@@ -2,7 +2,9 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from app.schemas.achievement import AchievementRead
 from app.schemas.child import ChildRead
+from app.schemas.daily_goal import DailyGoalRead, LearningStreakRead
 
 
 class InventoryRead(BaseModel):
@@ -36,6 +38,10 @@ class RewardRequest(BaseModel):
 class RewardResponse(BaseModel):
     inventory: InventoryRead
     obstacle_progress: ObstacleProgressRead
+    daily_goal: DailyGoalRead | None = None
+    streak: LearningStreakRead | None = None
+    daily_goal_completed_today: bool = False
+    achievements_unlocked: list[AchievementRead] = []
     rewards: dict[str, int]
     events: list[str]
 
