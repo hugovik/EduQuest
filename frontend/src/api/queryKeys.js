@@ -8,6 +8,7 @@ export const queryKeys = {
   learningPreference: (adventureType) => ["learning-preference", adventureType],
   adventureProgressSummary: ["adventure-progress-summary"],
   adventureUnlocks: ["adventure-unlocks"],
+  worldState: ["world-state"],
   dailyGoal: ["daily-goal"],
   dailyStreak: ["daily-streak"],
   achievements: ["achievements"],

@@ -13,6 +13,9 @@ class QuestRepository:
     def list_by_subject(self, db: Session, subject: str) -> list[Quest]:
         return db.query(Quest).filter(Quest.subject == subject).all()
 
+    def count_by_subject(self, db: Session, subject: str) -> int:
+        return db.query(Quest).filter(Quest.subject == subject).count()
+
     def create(self, db: Session, quest: Quest) -> Quest:
         db.add(quest)
         db.commit()

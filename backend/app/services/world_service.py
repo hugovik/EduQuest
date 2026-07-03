@@ -1,0 +1,159 @@
+import json
+from datetime import datetime
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.repositories.child_repository import ChildRepository
+from app.repositories.inventory_repository import InventoryRepository
+from app.services.inventory_service import InventoryService
+from app.repositories.world_state_repository import WorldStateRepository
+from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
+from app.services.adventure_unlock_service import AdventureUnlockService
+
+ALLOWED_WORLD_LOCATIONS = {"treehouse", "world", "math", "reading"}
+REGION_LOCATIONS = {"math", "reading"}
+
+
+class WorldService:
+    def __init__(
+        self,
+        child_repository: ChildRepository,
+        world_state_repository: WorldStateRepository,
+        inventory_repository: InventoryRepository,
+        inventory_service: InventoryService,
+        progress_summary_service: AdventureProgressSummaryService,
+        adventure_unlock_service: AdventureUnlockService,
+    ):
+        self.child_repository = child_repository
+        self.world_state_repository = world_state_repository
+        self.inventory_repository = inventory_repository
+        self.inventory_service = inventory_service
+        self.progress_summary_service = progress_summary_service
+        self.adventure_unlock_service = adventure_unlock_service
+
+    def get_child_or_create_default(self, db: Session):
+        child = self.child_repository.get_first(db)
+
+        if child is None:
+            child = self.child_repository.create_default_child(db)
+
+        return child
+
+    def parse_list(self, value: str | None) -> list[str]:
+        if not value:
+            return []
+
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return []
+
+        if not isinstance(parsed, list):
+            return []
+
+        return [item for item in parsed if isinstance(item, str)]
+
+    def get_state_model(self, db: Session, child_id: int):
+        world_state = self.world_state_repository.get_by_child_id(db, child_id)
+
+        if world_state is None:
+            world_state = self.world_state_repository.create_for_child(db, child_id)
+
+        changed = False
+        if world_state.unlocked_regions is None:
+            world_state.unlocked_regions = "[]"
+            changed = True
+        if world_state.visited_regions is None:
+            world_state.visited_regions = "[]"
+            changed = True
+        if world_state.updated_at is None:
+            world_state.updated_at = datetime.utcnow()
+            changed = True
+        if changed:
+            db.commit()
+            db.refresh(world_state)
+
+        return world_state
+
+    def get_unlocks(self, db: Session) -> dict:
+        return self.adventure_unlock_service.get_unlocks(db)
+
+    def get_unlocked_regions(self, unlocks: dict) -> list[str]:
+        return [
+            adventure_type
+            for adventure_type, unlock in unlocks.items()
+            if isinstance(unlock, dict) and unlock.get("unlocked") is True
+        ]
+
+    def get_locked_regions(self, unlocks: dict) -> list[str]:
+        return [
+            adventure_type
+            for adventure_type, unlock in unlocks.items()
+            if isinstance(unlock, dict) and unlock.get("unlocked") is not True
+        ]
+
+    def serialize(self, db: Session, world_state, child) -> dict:
+        unlocks = self.get_unlocks(db)
+        unlocked_regions = self.get_unlocked_regions(unlocks)
+        inventory = self.inventory_service.get_inventory(db, child.id)
+        progress_summary = self.progress_summary_service.get_summary(db)
+
+        world_state.unlocked_regions = json.dumps(unlocked_regions)
+        if world_state.updated_at is None:
+            world_state.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(world_state)
+        return {
+            "active_location": world_state.active_location,
+            "last_region": world_state.last_region,
+            "visited_regions": self.parse_list(world_state.visited_regions),
+            "available_regions": list(ALLOWED_WORLD_LOCATIONS),
+            "unlocked_regions": unlocked_regions,
+            "locked_regions": self.get_locked_regions(unlocks),
+            "inventory": inventory,
+            "progress_summary": progress_summary,
+            "unlocks": unlocks,
+            "updated_at": world_state.updated_at,
+        }
+
+    def get_state(self, db: Session) -> dict:
+        child = self.get_child_or_create_default(db)
+        world_state = self.get_state_model(db, child.id)
+        return self.serialize(db, world_state, child)
+
+    def validate_location(self, location: str):
+        if location not in ALLOWED_WORLD_LOCATIONS:
+            raise HTTPException(status_code=400, detail="Invalid world location.")
+
+    def validate_unlocked(self, db: Session, location: str):
+        if location not in REGION_LOCATIONS:
+            return
+
+        unlocks = self.get_unlocks(db)
+        unlock = unlocks.get(location)
+
+        if not unlock or unlock.get("unlocked") is not True:
+            raise HTTPException(status_code=403, detail="This region is not unlocked yet.")
+
+    def travel(self, db: Session, location: str) -> dict:
+        self.validate_location(location)
+        self.validate_unlocked(db, location)
+
+        child = self.get_child_or_create_default(db)
+        world_state = self.get_state_model(db, child.id)
+        visited_regions = self.parse_list(world_state.visited_regions)
+
+        world_state.active_location = location
+
+        if location in REGION_LOCATIONS:
+            world_state.last_region = location
+            if location not in visited_regions:
+                visited_regions.append(location)
+            world_state.visited_regions = json.dumps(visited_regions)
+
+        world_state.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(world_state)
+
+        return self.serialize(db, world_state, child)

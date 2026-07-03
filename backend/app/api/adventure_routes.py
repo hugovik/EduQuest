@@ -8,9 +8,7 @@ from app.core.dependencies import (
 from app.database.database import get_db
 from app.schemas.adventure_progress import AdventureProgressSummaryResponse
 from app.schemas.adventure_unlock import AdventureUnlockSummaryResponse
-from app.services.adventure_progress_summary_service import (
-    AdventureProgressSummaryService,
-)
+from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_unlock_service import AdventureUnlockService
 
 router = APIRouter(prefix="/adventures", tags=["adventures"])

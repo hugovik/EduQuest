@@ -1,26 +1,111 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getWorldState, travelToWorldLocation } from "./api/worldApi";
 import AdventureHubPage from "./features/adventure/AdventureHubPage";
 import { TreeHouseDashboard } from "./features/treehouse/TreeHouseDashboard";
 import MathMountainsPage from "./features/math/MathMountainsPage";
 import ReadingForestPage from "./features/reading/ReadingForestPage";
+import WorldMapPage from "./features/world/WorldMapPage";
+import { getResumeLocationFromWorldState, normalizeWorldLocation } from "./features/world/worldLocation";
 import "./styles.css";
 
+function ComingSoonScreen({ title, onBack }) {
+  return (
+    <main className="dashboard">
+      <button className="primary-button" type="button" onClick={onBack}>
+        Back to World Map
+      </button>
+      <div className="card state-card">
+        <h1>{title}</h1>
+        <p>This region is visible on the World Map and will open in a future sprint.</p>
+      </div>
+    </main>
+  );
+}
+
+const screenTitles = {
+  writing: "Writing Kingdom",
+  science: "Science Lab",
+  geography: "Geography Harbor",
+  music: "Music Meadow",
+};
+
 export default function App() {
-  const [screen, setScreen] = useState("treehouse");
+  const [screen, setScreen] = useState(null);
+  const [worldState, setWorldState] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadWorldState() {
+      try {
+        const nextWorldState = await getWorldState();
+        if (!cancelled) {
+          setWorldState(nextWorldState);
+          setScreen(getResumeLocationFromWorldState(nextWorldState));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setScreen("treehouse");
+        }
+      }
+    }
+
+    loadWorldState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function navigateTo(nextScreen) {
+    const normalizedScreen = normalizeWorldLocation(nextScreen);
+
+    try {
+      const nextWorldState = await travelToWorldLocation(normalizedScreen);
+      setWorldState(nextWorldState);
+    } catch (error) {
+      // Keep navigation usable if the local API is temporarily unavailable.
+    }
+
+    setScreen(normalizedScreen);
+  }
+
+  if (screen === null) {
+    return <main className="dashboard">Loading EduQuest...</main>;
+  }
+
+  if (screen === "world") {
+    return (
+      <WorldMapPage
+        worldState={worldState}
+        onBack={() => navigateTo("treehouse")}
+        onNavigate={(nextScreen) => navigateTo(nextScreen)}
+      />
+    );
+  }
 
   if (screen === "math") {
-    return <MathMountainsPage onBack={() => setScreen("adventures")} />;
+    return <MathMountainsPage onBack={() => navigateTo("world")} />;
   }
 
   if (screen === "reading") {
-    return <ReadingForestPage onBack={() => setScreen("adventures")} />;
+    return <ReadingForestPage onBack={() => navigateTo("world")} />;
   }
 
   if (screen === "adventures") {
     return (
       <AdventureHubPage
-        onBack={() => setScreen("treehouse")}
-        onEnterAdventure={(route) => setScreen(route)}
+        onBack={() => navigateTo("treehouse")}
+        onEnterAdventure={(route) => navigateTo(route)}
+      />
+    );
+  }
+
+  if (screenTitles[screen]) {
+    return (
+      <ComingSoonScreen
+        title={screenTitles[screen]}
+        onBack={() => navigateTo("world")}
       />
     );
   }
@@ -28,7 +113,8 @@ export default function App() {
   return (
     <TreeHouseDashboard
       onGoToAdventures={() => setScreen("adventures")}
-      onGoToMath={() => setScreen("math")}
+      onGoToMath={() => navigateTo("math")}
+      onGoToWorld={() => navigateTo("world")}
     />
   );
 }
