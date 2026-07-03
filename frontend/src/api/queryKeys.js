@@ -9,6 +9,7 @@ export const queryKeys = {
   adventureProgressSummary: ["adventure-progress-summary"],
   adventureUnlocks: ["adventure-unlocks"],
   worldState: ["world-state"],
+  worldProgressSummary: ["world-progress-summary"],
   dailyGoal: ["daily-goal"],
   dailyStreak: ["daily-streak"],
   achievements: ["achievements"],

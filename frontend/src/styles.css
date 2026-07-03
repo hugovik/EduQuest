@@ -623,6 +623,45 @@
   gap: 0.65rem;
 }
 
+.world-adventure-summary-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.world-adventure-summary-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.world-adventure-summary-grid span,
+.world-adventure-quest-progress {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  font-weight: 800;
+  padding: 0.65rem;
+}
+
+.world-adventure-quest-progress {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.world-adventure-quest-progress small {
+  color: #51624d;
+  display: block;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.world-adventure-quest-progress span {
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
 .world-current-location-label {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid #c7ddb1;

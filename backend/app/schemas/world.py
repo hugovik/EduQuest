@@ -47,3 +47,22 @@ class WorldStateRead(BaseModel):
     quest_progress_percent: int
     quest_status: str
     updated_at: datetime
+
+
+class WorldQuestSummaryRead(BaseModel):
+    title: str
+    progress_percent: int
+    status: str
+
+
+class WorldProgressSummaryRead(BaseModel):
+    active_location: str
+    last_region: str | None = None
+    visited_regions: list[str]
+    total_regions: int
+    unlocked_regions: int
+    completed_regions: int
+    world_quest: WorldQuestSummaryRead
+    inventory_count: int
+    math: dict[str, Any]
+    reading: dict[str, Any]

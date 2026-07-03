@@ -1,4 +1,4 @@
-import { getWorldState, travelToWorldLocation } from "../../api/worldApi.js";
+import { getWorldProgressSummary, getWorldState, travelToWorldLocation } from "../../api/worldApi.js";
 import { getResumeLocationFromWorldState, normalizeWorldLocation } from "./worldLocation.js";
 
 function assert(condition, message) {
@@ -68,6 +68,28 @@ export async function runWorldApiTests() {
       };
     }
 
+    if (String(url).endsWith("/world/progress/summary")) {
+      return {
+        ok: true,
+        json: async () => ({
+          active_location: "reading",
+          last_region: "reading",
+          visited_regions: ["math", "reading"],
+          total_regions: 6,
+          unlocked_regions: 2,
+          completed_regions: 0,
+          world_quest: {
+            title: "Restore the EduQuest World",
+            progress_percent: 50,
+            status: "in_progress",
+          },
+          inventory_count: 3,
+          math: { completed_quests: 1 },
+          reading: { completed_quests: 1 },
+        }),
+      };
+    }
+
     if (String(url).endsWith("/world/travel")) {
       return {
         ok: true,
@@ -80,6 +102,7 @@ export async function runWorldApiTests() {
 
   try {
     const state = await getWorldState();
+    const worldSummary = await getWorldProgressSummary();
     const travelState = await travelToWorldLocation("math");
 
     assert(state.active_location === "reading", "World state should load active location.");
@@ -92,10 +115,14 @@ export async function runWorldApiTests() {
     assert(state.overarching_quest.quest_key === "restore_eduquest_magic", "World state should include overarching quest.");
     assert(state.quest_progress_percent === 50, "World state should include quest progress percent.");
     assert(state.quest_steps[0].status === "completed", "World state should include quest steps.");
+    assert(worldSummary.active_location === "reading", "World progress summary should include active location.");
+    assert(worldSummary.world_quest.progress_percent === 50, "World progress summary should include quest progress.");
+    assert(worldSummary.inventory_count === 3, "World progress summary should include inventory count.");
     assert(travelState.active_location === "math", "World travel should return saved location.");
     assert(calls[0].url.endsWith("/world/state"), "World state URL should be used.");
-    assert(calls[1].url.endsWith("/world/travel"), "World travel URL should be used.");
-    assert(calls[1].options.method === "POST", "World travel should post.");
+    assert(calls[1].url.endsWith("/world/progress/summary"), "World progress summary URL should be used.");
+    assert(calls[2].url.endsWith("/world/travel"), "World travel URL should be used.");
+    assert(calls[2].options.method === "POST", "World travel should post.");
     assert(normalizeWorldLocation("reading") === "reading", "Reading should be resumable.");
     assert(normalizeWorldLocation("science") === "treehouse", "Invalid resume location should fall back.");
     assert(getResumeLocationFromWorldState({ active_location: "world" }) === "world", "App should resume World Map.");

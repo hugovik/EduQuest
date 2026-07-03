@@ -147,6 +147,38 @@ class WorldService:
         world_state = self.get_state_model(db, child.id)
         return self.serialize(db, world_state, child)
 
+    def get_progress_summary(self, db: Session) -> dict:
+        state = self.get_state(db)
+        adventure_regions = [
+            region for region in state["regions"]
+            if region["region_key"] not in {"treehouse", "world"}
+        ]
+        inventory_items = state["inventory"].get("items", [])
+        inventory_count = sum(item.get("quantity", 0) for item in inventory_items)
+
+        return {
+            "active_location": state["active_location"],
+            "last_region": state["last_region"],
+            "visited_regions": state["visited_regions"],
+            "total_regions": len(adventure_regions),
+            "unlocked_regions": len([
+                region for region in adventure_regions
+                if region.get("is_unlocked") is True and region.get("is_available") is True
+            ]),
+            "completed_regions": len([
+                region for region in adventure_regions
+                if region.get("progress", {}).get("status") == "completed"
+            ]),
+            "world_quest": {
+                "title": state["overarching_quest"]["title"],
+                "progress_percent": state["overarching_quest"]["progress_percent"],
+                "status": state["overarching_quest"]["status"],
+            },
+            "inventory_count": inventory_count,
+            "math": state["progress_summary"].get("math", {}),
+            "reading": state["progress_summary"].get("reading", {}),
+        }
+
     def validate_location(self, location: str):
         if location not in ALLOWED_WORLD_LOCATIONS:
             raise HTTPException(status_code=400, detail="Invalid world location.")

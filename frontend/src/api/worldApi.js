@@ -10,6 +10,16 @@ export async function getWorldState() {
   return response.json();
 }
 
+export async function getWorldProgressSummary() {
+  const response = await fetch(`${API_BASE_URL}/world/progress/summary`);
+
+  if (!response.ok) {
+    throw new Error("Unable to load world progress summary.");
+  }
+
+  return response.json();
+}
+
 export async function travelToWorldLocation(location) {
   const response = await fetch(`${API_BASE_URL}/world/travel`, {
     method: "POST",

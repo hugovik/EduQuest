@@ -4,14 +4,21 @@ import TreeOfGrowth from "./components/TreeOfGrowth";
 import QuestBoard from "./components/QuestBoard";
 import DragonNest from "./components/DragonNest";
 import AchievementShelf from "./components/AchievementShelf";
+import WorldAdventureSummary from "./components/WorldAdventureSummary";
 
 import { usePlayer } from "./hooks/usePlayer";
 import { useQuests } from "./hooks/useQuests";
 import { useProgressSummary } from "./hooks/useProgressSummary";
+import { useWorldProgressSummary } from "./hooks/useWorldProgressSummary";
 
 export function TreeHouseDashboard({ onGoToAdventures, onGoToMath, onGoToWorld }) {
   const { data: player, isLoading, error } = usePlayer();
   const { data: quests, isLoading: questsLoading } = useQuests();
+  const {
+    data: worldProgressSummary,
+    isLoading: worldProgressLoading,
+    error: worldProgressError,
+  } = useWorldProgressSummary();
   const {
     data: progressSummary,
     isLoading: progressSummaryLoading,
@@ -32,14 +39,12 @@ export function TreeHouseDashboard({ onGoToAdventures, onGoToMath, onGoToWorld }
 
       <PlayerCard player={player} />
 
-      <section className="card world-gateway-card">
-        <p className="quest-realm">World Map</p>
-        <h2>Explore EduQuest</h2>
-        <p>Choose a learning region, check progress, and see what opens next.</p>
-        <button className="primary-button" type="button" onClick={onGoToWorld}>
-          Open World Map
-        </button>
-      </section>
+      <WorldAdventureSummary
+        summary={worldProgressSummary}
+        isLoading={worldProgressLoading}
+        error={worldProgressError}
+        onOpenWorld={onGoToWorld}
+      />
 
       <XPBar player={player} />
 

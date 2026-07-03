@@ -146,6 +146,50 @@ def test_world_state_includes_progress_summary_and_unlocks(db_session, world_ser
     assert len(state["quest_steps"]) == 4
 
 
+def test_world_progress_summary_returns_parent_visible_world_progress(db_session, world_service):
+    child = ChildRepository().create_default_child(db_session)
+    quest = Quest(
+        id="math-summary-test",
+        title="Math Summary Test",
+        realm="Math Mountains",
+        subject="math",
+        xp_reward=25,
+    )
+    db_session.add(quest)
+    db_session.flush()
+    db_session.add(QuestCompletion(child_id=child.id, quest_id=quest.id, xp_awarded=25))
+    db_session.add(
+        ReadingProgress(
+            child_id=child.id,
+            passage_id="reading-l2-01",
+            level=2,
+            questions_answered=4,
+            correct_answers=3,
+            vocabulary_learned=2,
+            xp_awarded=15,
+            completed=True,
+        )
+    )
+    db_session.commit()
+
+    world_service.travel(db_session, "math")
+    state = world_service.travel(db_session, "reading")
+    summary = world_service.get_progress_summary(db_session)
+
+    assert summary["active_location"] == "reading"
+    assert summary["last_region"] == "reading"
+    assert summary["visited_regions"] == ["math", "reading"]
+    assert summary["total_regions"] == 6
+    assert summary["unlocked_regions"] == 2
+    assert summary["completed_regions"] >= 1
+    assert summary["world_quest"]["title"] == "Restore the EduQuest World"
+    assert summary["world_quest"]["progress_percent"] == state["quest_progress_percent"]
+    assert summary["world_quest"]["status"] == "completed"
+    assert summary["inventory_count"] == 1
+    assert summary["math"]["completed_quests"] == 1
+    assert summary["reading"]["completed_quests"] == 1
+
+
 def test_repeated_travel_does_not_duplicate_visited_regions(db_session, world_service):
     world_service.travel(db_session, "math")
     state = world_service.travel(db_session, "math")
