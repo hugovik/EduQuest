@@ -12,8 +12,8 @@ from app.services.adventure_progress_summary_service import AdventureProgressSum
 from app.services.adventure_unlock_service import AdventureUnlockService
 from app.services.world_quest_service import WorldQuestService
 
-ALLOWED_WORLD_LOCATIONS = {"treehouse", "world", "math", "reading"}
-REGION_LOCATIONS = {"math", "reading"}
+ALLOWED_WORLD_LOCATIONS = {"treehouse", "world", "math", "reading", "writing", "science", "geography", "music"}
+REGION_LOCATIONS = {"math", "reading", "writing", "science", "geography", "music"}
 
 
 class WorldService:
@@ -96,8 +96,16 @@ class WorldService:
             if isinstance(unlock, dict) and unlock.get("unlocked") is not True
         ]
 
+    def get_region(self, db: Session, location: str) -> dict | None:
+        regions = self.adventure_unlock_service.get_regions(db)
+        return next(
+            (region for region in regions if region["region_key"] == location),
+            None,
+        )
+
     def serialize(self, db: Session, world_state, child) -> dict:
         unlocks = self.get_unlocks(db)
+        regions = self.adventure_unlock_service.get_regions(db)
         unlocked_regions = self.get_unlocked_regions(unlocks)
         inventory = self.inventory_service.get_inventory(db, child.id)
         progress_summary = self.progress_summary_service.get_summary(db)
@@ -126,6 +134,7 @@ class WorldService:
             "inventory": inventory,
             "progress_summary": progress_summary,
             "unlocks": unlocks,
+            "regions": regions,
             "overarching_quest": overarching_quest,
             "quest_steps": overarching_quest["steps"],
             "quest_progress_percent": overarching_quest["progress_percent"],
@@ -146,11 +155,19 @@ class WorldService:
         if location not in REGION_LOCATIONS:
             return
 
-        unlocks = self.get_unlocks(db)
-        unlock = unlocks.get(location)
+        region = self.get_region(db, location)
 
-        if not unlock or unlock.get("unlocked") is not True:
-            raise HTTPException(status_code=403, detail="This region is not unlocked yet.")
+        if region is None:
+            raise HTTPException(status_code=400, detail="Invalid world location.")
+
+        if region.get("coming_soon") is True:
+            raise HTTPException(status_code=403, detail=region["lock_reason"])
+
+        if region.get("is_unlocked") is not True or region.get("is_available") is not True:
+            raise HTTPException(
+                status_code=403,
+                detail=region.get("unlock_requirement") or region.get("lock_reason") or "This region is not unlocked yet.",
+            )
 
     def travel(self, db: Session, location: str) -> dict:
         self.validate_location(location)

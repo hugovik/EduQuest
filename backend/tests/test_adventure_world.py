@@ -105,4 +105,4 @@ def test_adventure_unlocks_default_and_locked_regions(db_session, progress_summa
     assert unlocks["math"]["unlocked"] is True
     assert unlocks["reading"]["unlocked"] is True
     assert unlocks["science"]["unlocked"] is False
-    assert unlocks["science"]["required"] == 100
+    assert unlocks["science"]["coming_soon"] is True

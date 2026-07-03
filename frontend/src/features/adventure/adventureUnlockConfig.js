@@ -1,28 +1,24 @@
 export const adventureUnlockRules = {
   math: { type: "default", reason: "Unlocked by default" },
   reading: { type: "default", reason: "Unlocked by default" },
-  writing: { type: "default", reason: "Unlocked by default" },
-  story: {
-    type: "completed_quests",
-    adventure: "reading",
-    required: 3,
-    reason: "Complete 3 Reading Forest quests to unlock Story Cave",
+  writing: {
+    type: "coming_soon",
+    reason: "Writing Kingdom is coming soon.",
+    requirement: "Complete Math Mountains and Reading Forest milestones to unlock Writing Kingdom.",
   },
   geography: {
-    type: "completed_quests",
-    adventure: "math",
-    required: 2,
-    reason: "Complete 2 Math Mountains quests to unlock Geography Trail",
+    type: "coming_soon",
+    reason: "Geography Harbor is coming soon.",
+    requirement: "Complete the first Science Lab milestone to unlock Geography Harbor.",
   },
   science: {
-    type: "total_xp",
-    required: 100,
-    reason: "Earn 100 XP to unlock Science Lab",
+    type: "coming_soon",
+    reason: "Science Lab is coming soon.",
+    requirement: "Complete the first Writing Kingdom milestone to unlock Science Lab.",
   },
   music: {
-    type: "achievement_or_xp",
-    requiredXp: 150,
-    requiredAchievements: 1,
-    reason: "Unlock your first achievement or earn 150 XP to open Music Meadow",
+    type: "coming_soon",
+    reason: "Music Meadow is coming soon.",
+    requirement: "Complete the first Geography Harbor milestone to unlock Music Meadow.",
   },
 };

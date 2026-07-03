@@ -31,9 +31,10 @@ function formatQuestStatus(status) {
 }
 
 export default function WorldRegionNode({ region, progress, questStatus, unlock, onEnter }) {
-  const comingSoon = !region.enabled;
-  const unlocked = region.unlockedByDefault || unlock?.unlocked || region.adventureType === "achievements";
-  const disabled = comingSoon || !unlocked;
+  const comingSoon = region.comingSoon ?? !region.enabled;
+  const unlocked = region.isUnlocked ?? region.unlockedByDefault ?? unlock?.unlocked ?? region.adventureType === "achievements";
+  const available = region.isAvailable ?? (region.enabled && unlocked);
+  const disabled = comingSoon || !unlocked || !available;
   const progressPercent = getProgressPercent(progress);
   const totalCount = progress?.total_quests ?? 0;
   const completedCount = progress?.completed_quests ?? 0;
@@ -66,7 +67,8 @@ export default function WorldRegionNode({ region, progress, questStatus, unlock,
       <div className="world-region-meta">
         <span>{progress?.xp_earned ?? 0} XP earned</span>
         {questStatus && <span>{formatQuestStatus(questStatus)}</span>}
-        {!comingSoon && !unlocked && <span>{unlock?.reason ?? "Keep exploring to unlock."}</span>}
+        {comingSoon && <span>{region.lockReason ?? region.comingSoonLabel ?? "Coming soon"}</span>}
+        {!comingSoon && !unlocked && <span>{region.unlockRequirement ?? unlock?.reason ?? "Keep exploring to unlock."}</span>}
       </div>
 
       <button
@@ -75,7 +77,7 @@ export default function WorldRegionNode({ region, progress, questStatus, unlock,
         type="button"
         onClick={() => onEnter(region.screen)}
       >
-        {comingSoon ? "Coming Soon" : unlocked ? "Travel" : "Locked"}
+        {comingSoon ? "Coming Soon" : unlocked && available ? "Travel" : "Locked"}
       </button>
     </article>
   );

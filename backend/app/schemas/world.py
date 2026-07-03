@@ -18,6 +18,19 @@ class WorldInventoryRead(BaseModel):
     items: list[InventoryItemRead] = []
 
 
+class WorldRegionRead(BaseModel):
+    region_key: str
+    title: str
+    adventure_type: str
+    status: str
+    is_unlocked: bool
+    is_available: bool
+    lock_reason: str | None = None
+    unlock_requirement: str | None = None
+    coming_soon: bool
+    progress: dict[str, Any] = {}
+
+
 class WorldStateRead(BaseModel):
     active_location: str
     last_region: str | None = None
@@ -28,6 +41,7 @@ class WorldStateRead(BaseModel):
     inventory: WorldInventoryRead
     progress_summary: dict[str, Any]
     unlocks: dict[str, Any]
+    regions: list[WorldRegionRead]
     overarching_quest: WorldQuestRead
     quest_steps: list[WorldQuestStepRead]
     quest_progress_percent: int

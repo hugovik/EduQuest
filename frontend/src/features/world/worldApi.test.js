@@ -26,6 +26,32 @@ export async function runWorldApiTests() {
           inventory: { bricks: 0, coins: 0, stars: 0, items: [{ item_key: "reading_leaf", item_name: "Reading Leaf", quantity: 1, source_region: "reading" }] },
           progress_summary: { reading: { completed_quests: 1 } },
           unlocks: { reading: { unlocked: true } },
+          regions: [
+            {
+              region_key: "math",
+              title: "Math Mountains",
+              adventure_type: "math",
+              status: "unlocked",
+              is_unlocked: true,
+              is_available: true,
+              lock_reason: null,
+              unlock_requirement: null,
+              coming_soon: false,
+              progress: { completed_quests: 0, total_quests: 1 },
+            },
+            {
+              region_key: "writing",
+              title: "Writing Kingdom",
+              adventure_type: "writing",
+              status: "coming_soon",
+              is_unlocked: false,
+              is_available: false,
+              lock_reason: "Writing Kingdom is coming soon.",
+              unlock_requirement: "Complete Math Mountains and Reading Forest milestones to unlock Writing Kingdom.",
+              coming_soon: true,
+              progress: { completed_quests: 0, total_quests: 0 },
+            },
+          ],
           overarching_quest: {
             quest_key: "restore_eduquest_magic",
             title: "Restore the EduQuest World",
@@ -60,6 +86,9 @@ export async function runWorldApiTests() {
     assert(state.progress_summary.reading.completed_quests === 1, "World state should include progress summary.");
     assert(state.unlocks.reading.unlocked === true, "World state should include unlocks.");
     assert(state.inventory.items[0].item_key === "reading_leaf", "World state should include inventory items.");
+    assert(state.regions[0].region_key === "math", "World state should include normalized regions.");
+    assert(state.regions[1].coming_soon === true, "World state should identify coming soon regions.");
+    assert(state.regions[1].lock_reason.includes("Writing Kingdom"), "World state should include lock reason.");
     assert(state.overarching_quest.quest_key === "restore_eduquest_magic", "World state should include overarching quest.");
     assert(state.quest_progress_percent === 50, "World state should include quest progress percent.");
     assert(state.quest_steps[0].status === "completed", "World state should include quest steps.");

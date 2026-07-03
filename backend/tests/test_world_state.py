@@ -82,6 +82,7 @@ def test_default_world_state_is_created(db_session, world_service):
     assert state["overarching_quest"]["quest_key"] == "restore_eduquest_magic"
     assert state["quest_status"] == "not_started"
     assert state["quest_progress_percent"] == 0
+    assert any(region["region_key"] == "math" for region in state["regions"])
     assert state["updated_at"] is not None
 
 
@@ -119,9 +120,17 @@ def test_travel_to_reading_persists_and_updates_visited_regions(db_session, worl
 
 def test_invalid_location_rejected(db_session, world_service):
     with pytest.raises(HTTPException) as exc_info:
-        world_service.travel(db_session, "science")
+        world_service.travel(db_session, "unknown")
 
     assert exc_info.value.status_code == 400
+
+
+def test_travel_to_coming_soon_region_is_blocked(db_session, world_service):
+    with pytest.raises(HTTPException) as exc_info:
+        world_service.travel(db_session, "writing")
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Writing Kingdom is coming soon."
 
 
 def test_world_state_includes_progress_summary_and_unlocks(db_session, world_service):
@@ -131,6 +140,8 @@ def test_world_state_includes_progress_summary_and_unlocks(db_session, world_ser
     assert "reading" in state["progress_summary"]
     assert state["unlocks"]["math"]["unlocked"] is True
     assert state["unlocks"]["reading"]["unlocked"] is True
+    assert state["regions"][0]["region_key"] == "treehouse"
+    assert any(region["coming_soon"] for region in state["regions"] if region["region_key"] == "writing")
     assert state["overarching_quest"]["title"] == "Restore the EduQuest World"
     assert len(state["quest_steps"]) == 4
 

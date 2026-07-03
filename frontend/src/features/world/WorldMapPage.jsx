@@ -58,6 +58,42 @@ function getRegionQuestStatus(overarchingQuest, adventureType) {
   return "not_started";
 }
 
+function findRegionConfig(region) {
+  return worldRegions.find((item) => (
+    item.screen === region.region_key ||
+    item.adventureType === region.adventure_type ||
+    item.id === region.region_key
+  ));
+}
+
+function getDisplayRegions(worldState) {
+  if (!worldState?.regions?.length) {
+    return worldRegions;
+  }
+
+  return worldState.regions.map((region) => {
+    const config = findRegionConfig(region);
+
+    return {
+      ...config,
+      id: config?.id ?? region.region_key,
+      title: region.title,
+      adventureType: region.adventure_type,
+      screen: region.region_key,
+      description: config?.description ?? region.unlock_requirement ?? "Keep exploring EduQuest.",
+      icon: config?.icon ?? "✨",
+      enabled: region.is_available,
+      backendStatus: region.status,
+      isUnlocked: region.is_unlocked,
+      isAvailable: region.is_available,
+      comingSoon: region.coming_soon,
+      lockReason: region.lock_reason,
+      unlockRequirement: region.unlock_requirement,
+      progress: region.progress,
+    };
+  });
+}
+
 export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   const {
     data: progressSummaryResponse = {},
@@ -72,6 +108,7 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   const progressSummary = worldState?.progress_summary ?? progressSummaryResponse;
   const unlocks = worldState?.unlocks ?? unlocksResponse;
   const overarchingQuest = worldState?.overarching_quest;
+  const displayRegions = getDisplayRegions(worldState);
 
   if ((progressLoading || unlocksLoading) && !worldState) {
     return <main className="dashboard world-map-page">Loading World Map...</main>;
@@ -190,10 +227,10 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
       )}
 
       <section className="world-map-grid" aria-label="EduQuest world regions">
-        {worldRegions.map((region) => (
+        {displayRegions.map((region) => (
           <WorldRegionNode
             key={region.id}
-            progress={progressSummary[region.adventureType]}
+            progress={region.progress ?? progressSummary[region.adventureType]}
             questStatus={getRegionQuestStatus(overarchingQuest, region.adventureType)}
             region={region}
             unlock={unlocks[region.adventureType]}
