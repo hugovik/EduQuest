@@ -11,14 +11,17 @@ from app.repositories.quest_repository import QuestRepository
 from app.repositories.reading_repository import ReadingPassageRepository, ReadingProgressRepository
 from app.repositories.reading_story_state_repository import ReadingStoryStateRepository
 from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
+from app.repositories.world_state_repository import WorldStateRepository
 from app.services.achievement_service import AchievementService
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_unlock_service import AdventureUnlockService
 from app.services.daily_goal_service import DailyGoalService
+from app.services.inventory_service import InventoryService
 from app.services.learning_preference_service import LearningPreferenceService
 from app.services.quest_service import QuestService
 from app.services.reading_service import ReadingService
 from app.services.reward_service import RewardService
+from app.services.world_service import WorldService
 
 
 def get_achievement_service() -> AchievementService:
@@ -47,6 +50,13 @@ def get_daily_goal_service() -> DailyGoalService:
     )
 
 
+def get_inventory_service() -> InventoryService:
+    return InventoryService(
+        child_repository=ChildRepository(),
+        inventory_repository=InventoryRepository(),
+    )
+
+
 def get_reward_service() -> RewardService:
     return RewardService(
         child_repository=ChildRepository(),
@@ -54,6 +64,7 @@ def get_reward_service() -> RewardService:
         obstacle_progress_repository=ObstacleProgressRepository(),
         daily_goal_service=get_daily_goal_service(),
         achievement_service=get_achievement_service(),
+        inventory_service=get_inventory_service(),
     )
 
 
@@ -65,6 +76,7 @@ def get_reading_service() -> ReadingService:
         story_state_repository=ReadingStoryStateRepository(),
         daily_goal_service=get_daily_goal_service(),
         achievement_service=get_achievement_service(),
+        inventory_service=get_inventory_service(),
     )
 
 
@@ -85,4 +97,15 @@ def get_adventure_unlock_service() -> AdventureUnlockService:
     return AdventureUnlockService(
         child_repository=ChildRepository(),
         progress_summary_service=get_adventure_progress_summary_service(),
+    )
+
+
+def get_world_state_service() -> WorldService:
+    return WorldService(
+        child_repository=ChildRepository(),
+        world_state_repository=WorldStateRepository(),
+        inventory_repository=InventoryRepository(),
+        inventory_service=get_inventory_service(),
+        progress_summary_service=get_adventure_progress_summary_service(),
+        adventure_unlock_service=get_adventure_unlock_service(),
     )

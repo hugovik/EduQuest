@@ -10,6 +10,7 @@ from app.api.inventory_routes import router as inventory_router
 from app.api.learning_routes import router as learning_router
 from app.api.quest_routes import router as quest_router
 from app.api.reading_routes import router as reading_router
+from app.api.world_routes import router as world_router
 from app.database.database import Base, engine
 from app.api.dev_routes import router as dev_router
 
@@ -55,6 +56,10 @@ def ensure_dev_schema():
     ensure_column(inspector, "achievements", "active", "active BOOLEAN NOT NULL DEFAULT 1")
     ensure_column(inspector, "achievement_unlocks", "source_adventure", "source_adventure VARCHAR")
     ensure_column(inspector, "achievement_unlocks", "metadata", "metadata TEXT")
+    ensure_column(inspector, "world_states", "last_region", "last_region VARCHAR")
+    ensure_column(inspector, "world_states", "unlocked_regions", "unlocked_regions TEXT NOT NULL DEFAULT '[]'")
+    ensure_column(inspector, "world_states", "visited_regions", "visited_regions TEXT NOT NULL DEFAULT '[]'")
+    ensure_column(inspector, "world_states", "updated_at", "updated_at DATETIME")
 
 
 ensure_dev_schema()
@@ -86,6 +91,7 @@ app.include_router(daily_goal_router)
 app.include_router(adventure_router)
 app.include_router(quest_router)
 app.include_router(reading_router)
+app.include_router(world_router)
 app.include_router(inventory_router)
 app.include_router(learning_router)
 app.include_router(dev_router)

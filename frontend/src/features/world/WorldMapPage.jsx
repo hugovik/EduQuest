@@ -3,23 +3,48 @@ import { useAdventureProgressSummary } from "./hooks/useAdventureProgressSummary
 import { useAdventureUnlocks } from "./hooks/useAdventureUnlocks";
 import { worldRegions } from "./worldRegionConfig";
 
-export default function WorldMapPage({ onBack, onNavigate }) {
+const locationLabels = {
+  treehouse: "Treehouse",
+  world: "World Map",
+  math: "Math Mountains",
+  reading: "Reading Forest",
+};
+
+function formatLocation(location) {
+  return locationLabels[location] ?? "Treehouse";
+}
+
+function formatSourceRegion(sourceRegion) {
+  return formatLocation(sourceRegion);
+}
+
+function formatVisitedRegions(visitedRegions = []) {
+  if (visitedRegions.length === 0) {
+    return "No regions visited yet";
+  }
+
+  return visitedRegions.map(formatLocation).join(", ");
+}
+
+export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   const {
-    data: progressSummary = {},
+    data: progressSummaryResponse = {},
     isLoading: progressLoading,
     error: progressError,
   } = useAdventureProgressSummary();
   const {
-    data: unlocks = {},
+    data: unlocksResponse = {},
     isLoading: unlocksLoading,
     error: unlocksError,
   } = useAdventureUnlocks();
+  const progressSummary = worldState?.progress_summary ?? progressSummaryResponse;
+  const unlocks = worldState?.unlocks ?? unlocksResponse;
 
-  if (progressLoading || unlocksLoading) {
+  if ((progressLoading || unlocksLoading) && !worldState) {
     return <main className="dashboard world-map-page">Loading World Map...</main>;
   }
 
-  if (progressError || unlocksError) {
+  if ((progressError || unlocksError) && !worldState) {
     return (
       <main className="dashboard world-map-page">
         <button className="primary-button" type="button" onClick={onBack}>
@@ -44,6 +69,45 @@ export default function WorldMapPage({ onBack, onNavigate }) {
         <h1>🗺️ World Map</h1>
         <p>Choose a region, follow your progress, and open new learning worlds.</p>
       </header>
+
+      {worldState && (
+        <section className="card world-state-card" aria-label="Current world state">
+          <div>
+            <p className="quest-realm">Current Location</p>
+            <h2>{formatLocation(worldState.active_location)}</h2>
+          </div>
+          <div className="world-state-meta">
+            <span>Last region: {worldState.last_region ? formatLocation(worldState.last_region) : "None yet"}</span>
+            <span>Visited: {formatVisitedRegions(worldState.visited_regions)}</span>
+            <span>{worldState.visited_regions?.length ?? 0} visited region{worldState.visited_regions?.length === 1 ? "" : "s"}</span>
+          </div>
+        </section>
+      )}
+
+      {worldState?.inventory && (
+        <section className="card world-inventory-card" aria-label="World inventory">
+          <div>
+            <p className="quest-realm">Inventory</p>
+            <h2>Collected Items</h2>
+          </div>
+          {worldState.inventory.items?.length > 0 ? (
+            <div className="world-inventory-list">
+              {worldState.inventory.items.map((item) => (
+                <article className="world-inventory-item" key={item.item_key}>
+                  <div>
+                    <strong>{item.item_name}</strong>
+                    <small>{item.description}</small>
+                  </div>
+                  <span>Qty {item.quantity}</span>
+                  <span>{formatSourceRegion(item.source_region)}</span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p>No items yet. Complete quests to collect rewards.</p>
+          )}
+        </section>
+      )}
 
       <section className="world-map-grid" aria-label="EduQuest world regions">
         {worldRegions.map((region) => (

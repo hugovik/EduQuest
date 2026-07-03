@@ -16,6 +16,7 @@ from app.repositories.reading_repository import (
 from app.repositories.reading_story_state_repository import ReadingStoryStateRepository
 from app.services.achievement_service import AchievementService
 from app.services.daily_goal_service import DailyGoalService
+from app.services.inventory_service import InventoryService
 from app.services.progression_rules import (
     calculate_level_from_xp,
     calculate_tree_stage_from_xp,
@@ -1928,6 +1929,7 @@ class ReadingService:
         story_state_repository: ReadingStoryStateRepository | None = None,
         daily_goal_service: DailyGoalService | None = None,
         achievement_service: AchievementService | None = None,
+        inventory_service: InventoryService | None = None,
     ):
         self.child_repository = child_repository
         self.passage_repository = passage_repository
@@ -1935,6 +1937,7 @@ class ReadingService:
         self.story_state_repository = story_state_repository or ReadingStoryStateRepository()
         self.daily_goal_service = daily_goal_service
         self.achievement_service = achievement_service
+        self.inventory_service = inventory_service
 
     def get_child_or_create_default(self, db: Session) -> Child:
         child = self.child_repository.get_first(db)
@@ -2615,6 +2618,31 @@ class ReadingService:
             f"Lena completed {passage.title} with {score} of {total_questions} clues correct.",
             "chapter_complete",
         )
+
+        if self.inventory_service is not None and score > 0:
+            awarded_leaf = self.inventory_service.add_item_once(
+                db,
+                child.id,
+                "reading_leaf",
+                source_region="reading",
+                commit=False,
+            )
+            if awarded_leaf is not None:
+                events.append(f"Inventory Item Earned: {awarded_leaf['item_name']}")
+
+            completed_reading_count = len([
+                item for item in self.progress_repository.list_by_child(db, child.id)
+                if item.completed
+            ])
+            if completed_reading_count >= 3:
+                awarded_gem = self.inventory_service.add_item_once(
+                    db,
+                    child.id,
+                    "forest_gem",
+                    source_region="reading",
+                )
+                if awarded_gem is not None:
+                    events.append(f"Inventory Item Earned: {awarded_gem['item_name']}")
 
         if self.achievement_service is not None and completed_daily_goal_result:
             if completed_daily_goal_result["completed_today"]:

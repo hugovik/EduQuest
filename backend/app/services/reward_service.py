@@ -7,6 +7,7 @@ from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.obstacle_progress_repository import ObstacleProgressRepository
 from app.services.achievement_service import AchievementService
 from app.services.daily_goal_service import DailyGoalService
+from app.services.inventory_service import InventoryService
 from app.services.progression_rules import (
     calculate_level_from_xp,
     calculate_tree_stage_from_xp,
@@ -32,12 +33,14 @@ class RewardService:
         obstacle_progress_repository: ObstacleProgressRepository,
         daily_goal_service: DailyGoalService | None = None,
         achievement_service: AchievementService | None = None,
+        inventory_service: InventoryService | None = None,
     ):
         self.child_repository = child_repository
         self.inventory_repository = inventory_repository
         self.obstacle_progress_repository = obstacle_progress_repository
         self.daily_goal_service = daily_goal_service
         self.achievement_service = achievement_service
+        self.inventory_service = inventory_service
 
     def get_child_or_create_default(self, db: Session):
         child = self.child_repository.get_first(db)
@@ -169,6 +172,18 @@ class RewardService:
                 obstacle_progress.completion_reward_awarded = True
                 rewards["coins"] = OBSTACLE_COMPLETION_COINS
                 events.append("Coins Awarded")
+
+            if self.inventory_service is not None:
+                item_key = "math_crystal" if obstacle_id == "rockfall-001" else "mountain_brick"
+                awarded_item = self.inventory_service.add_item_once(
+                    db,
+                    child.id,
+                    item_key,
+                    source_region="math",
+                    commit=False,
+                )
+                if awarded_item is not None:
+                    events.append(f"Inventory Item Earned: {awarded_item['item_name']}")
 
         daily_goal_result = None
 

@@ -686,3 +686,48 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.world-state-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.world-state-meta {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.world-state-meta span {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  font-weight: 800;
+  padding: 0.65rem;
+}
+
+.world-inventory-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.world-inventory-list {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.world-inventory-item {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #c7ddb1;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.world-inventory-item small,
+.world-inventory-item span {
+  font-weight: 700;
+}

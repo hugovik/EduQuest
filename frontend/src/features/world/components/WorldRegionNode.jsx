@@ -62,7 +62,7 @@ export default function WorldRegionNode({ region, progress, unlock, onEnter }) {
         type="button"
         onClick={() => onEnter(region.screen)}
       >
-        {comingSoon ? "Coming Soon" : unlocked ? "Enter" : "Locked"}
+        {comingSoon ? "Coming Soon" : unlocked ? "Travel" : "Locked"}
       </button>
     </article>
   );

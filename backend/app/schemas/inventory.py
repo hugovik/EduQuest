@@ -1,10 +1,20 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.achievement import AchievementRead
 from app.schemas.child import ChildRead
 from app.schemas.daily_goal import DailyGoalRead, LearningStreakRead
+
+
+class InventoryItemRead(BaseModel):
+    item_key: str
+    item_name: str
+    item_type: str
+    quantity: int
+    source_region: str | None = None
+    description: str | None = None
+    earned_at: datetime
 
 
 class InventoryRead(BaseModel):
@@ -12,10 +22,25 @@ class InventoryRead(BaseModel):
     bricks: int
     coins: int
     stars: int
+    items: list[InventoryItemRead] = []
 
     model_config = {
         "from_attributes": True
     }
+
+
+class InventoryItemRequest(BaseModel):
+    item_key: str = Field(..., min_length=1)
+    quantity: int = 1
+    source_region: str | None = None
+    item_name: str | None = None
+    item_type: str | None = None
+    description: str | None = None
+
+
+class InventoryConsumeRequest(BaseModel):
+    item_key: str = Field(..., min_length=1)
+    quantity: int = 1
 
 
 class ObstacleProgressRead(BaseModel):
