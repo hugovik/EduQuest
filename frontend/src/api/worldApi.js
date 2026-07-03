@@ -20,7 +20,16 @@ export async function travelToWorldLocation(location) {
   });
 
   if (!response.ok) {
-    throw new Error("Unable to save world travel.");
+    let message = "Unable to save world travel.";
+
+    try {
+      const errorBody = await response.json();
+      message = errorBody.detail ?? message;
+    } catch (error) {
+      // Keep the friendly fallback when the API does not return JSON.
+    }
+
+    throw new Error(message);
   }
 
   return response.json();

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import WorldRegionNode from "./components/WorldRegionNode";
 import { useAdventureProgressSummary } from "./hooks/useAdventureProgressSummary";
 import { useAdventureUnlocks } from "./hooks/useAdventureUnlocks";
@@ -8,10 +9,14 @@ const locationLabels = {
   world: "World Map",
   math: "Math Mountains",
   reading: "Reading Forest",
+  writing: "Writing Kingdom",
+  science: "Science Lab",
+  geography: "Geography Harbor",
+  music: "Music Meadow",
 };
 
 function formatLocation(location) {
-  return locationLabels[location] ?? "Treehouse";
+  return locationLabels[location] ?? "EduQuest";
 }
 
 function formatSourceRegion(sourceRegion) {
@@ -95,6 +100,8 @@ function getDisplayRegions(worldState) {
 }
 
 export default function WorldMapPage({ worldState, onBack, onNavigate }) {
+  const [travelingTo, setTravelingTo] = useState(null);
+  const [travelError, setTravelError] = useState("");
   const {
     data: progressSummaryResponse = {},
     isLoading: progressLoading,
@@ -109,6 +116,23 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   const unlocks = worldState?.unlocks ?? unlocksResponse;
   const overarchingQuest = worldState?.overarching_quest;
   const displayRegions = getDisplayRegions(worldState);
+  const visitedRegions = worldState?.visited_regions ?? [];
+  const currentLocation = worldState?.active_location ?? "world";
+  const currentLocationLabel = formatLocation(currentLocation);
+
+  async function handleNavigate(nextScreen) {
+    const destinationLabel = formatLocation(nextScreen);
+    setTravelError("");
+    setTravelingTo(nextScreen);
+
+    try {
+      await onNavigate(nextScreen);
+    } catch (error) {
+      setTravelError(error.message || `Travel to ${destinationLabel} is not available yet.`);
+    } finally {
+      setTravelingTo(null);
+    }
+  }
 
   if ((progressLoading || unlocksLoading) && !worldState) {
     return <main className="dashboard world-map-page">Loading World Map...</main>;
@@ -138,10 +162,24 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
         <p className="quest-realm">EduQuest World Engine</p>
         <h1>🗺️ World Map</h1>
         <p>Choose a region, follow your progress, and open new learning worlds.</p>
+        <strong className="world-current-location-label">Current location: {currentLocationLabel}</strong>
       </header>
 
+      {(travelingTo || travelError) && (
+        <section
+          aria-live="polite"
+          className={`card world-travel-feedback${travelError ? " world-travel-feedback-error" : ""}`}
+        >
+          {travelingTo ? (
+            <p>Traveling to {formatLocation(travelingTo)}...</p>
+          ) : (
+            <p>{travelError}</p>
+          )}
+        </section>
+      )}
+
       {worldState && (
-        <section className="card world-state-card" aria-label="Current world state">
+        <section className="card world-state-card" aria-label={`Current location: ${currentLocationLabel}`}>
           <div>
             <p className="quest-realm">Current Location</p>
             <h2>{formatLocation(worldState.active_location)}</h2>
@@ -154,31 +192,7 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
         </section>
       )}
 
-      {worldState?.inventory && (
-        <section className="card world-inventory-card" aria-label="World inventory">
-          <div>
-            <p className="quest-realm">Inventory</p>
-            <h2>Collected Items</h2>
-          </div>
-          {worldState.inventory.items?.length > 0 ? (
-            <div className="world-inventory-list">
-              {worldState.inventory.items.map((item) => (
-                <article className="world-inventory-item" key={item.item_key}>
-                  <div>
-                    <strong>{item.item_name}</strong>
-                    <small>{item.description}</small>
-                  </div>
-                  <span>Qty {item.quantity}</span>
-                  <span>{formatSourceRegion(item.source_region)}</span>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p>No items yet. Complete quests to collect rewards.</p>
-          )}
-        </section>
-      )}
-
+      <section className="world-overview-grid" aria-label="World quest and inventory">
       {overarchingQuest && (
         <section className="card world-quest-card" aria-label="Main world quest">
           <div className="world-quest-header">
@@ -226,15 +240,53 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
         </section>
       )}
 
-      <section className="world-map-grid" aria-label="EduQuest world regions">
+      {worldState?.inventory ? (
+        <section className="card world-inventory-card" aria-label="World inventory">
+          <div>
+            <p className="quest-realm">Inventory</p>
+            <h2>Collected Items</h2>
+          </div>
+          {worldState.inventory.items?.length > 0 ? (
+            <div className="world-inventory-list">
+              {worldState.inventory.items.map((item) => (
+                <article className="world-inventory-item" key={item.item_key}>
+                  <div>
+                    <strong>{item.item_name}</strong>
+                    <small>{item.description}</small>
+                  </div>
+                  <span>Qty {item.quantity}</span>
+                  <span>{formatSourceRegion(item.source_region)}</span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p>No items yet. Complete quests to collect rewards.</p>
+          )}
+        </section>
+      ) : (
+        <section className="card world-inventory-card" aria-label="World inventory">
+          <div>
+            <p className="quest-realm">Inventory</p>
+            <h2>Collected Items</h2>
+          </div>
+          <p>No items yet. Complete quests to collect rewards.</p>
+        </section>
+      )}
+      </section>
+
+      <section className="world-region-map" aria-label="Connected EduQuest world regions">
         {displayRegions.map((region) => (
           <WorldRegionNode
             key={region.id}
+            currentLocation={currentLocation}
+            isTraveling={travelingTo !== null}
             progress={region.progress ?? progressSummary[region.adventureType]}
             questStatus={getRegionQuestStatus(overarchingQuest, region.adventureType)}
             region={region}
+            travelingTo={travelingTo}
             unlock={unlocks[region.adventureType]}
-            onEnter={onNavigate}
+            visited={visitedRegions.includes(region.screen)}
+            onEnter={handleNavigate}
           />
         ))}
       </section>

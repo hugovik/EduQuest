@@ -604,6 +604,17 @@
 
 .world-map-page {
   background: linear-gradient(180deg, #f4ffe8 0%, #e8f3ff 52%, #f7f1d8 100%);
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
+.world-map-page > * {
+  grid-column: 1 / -1;
+}
+
+.world-map-page > .primary-button {
+  align-self: start;
+  justify-self: start;
 }
 
 .world-map-header,
@@ -612,10 +623,54 @@
   gap: 0.65rem;
 }
 
-.world-map-grid {
+.world-current-location-label {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #c7ddb1;
+  border-radius: 999px;
+  color: #244026;
+  display: inline-flex;
+  font-size: 0.98rem;
+  padding: 0.5rem 0.8rem;
+  width: fit-content;
+}
+
+.world-travel-feedback {
+  border-left: 6px solid #73a942;
+  font-weight: 800;
+}
+
+.world-travel-feedback-error {
+  border-left-color: #b95f44;
+  color: #7b2f1c;
+}
+
+.world-overview-grid {
+  align-items: start;
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+}
+
+.world-region-map {
+  display: grid;
+  gap: 1.15rem;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  position: relative;
+}
+
+.world-region-map::before {
+  background: linear-gradient(90deg, transparent, rgba(115, 169, 66, 0.36), transparent);
+  border: 2px dashed rgba(115, 169, 66, 0.38);
+  border-left: 0;
+  border-right: 0;
+  content: "";
+  height: 1.1rem;
+  left: 4%;
+  position: absolute;
+  right: 4%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
 }
 
 .world-region-node {
@@ -628,10 +683,26 @@
   gap: 0.85rem;
   min-height: 18rem;
   padding: 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .world-region-node-disabled {
   opacity: 0.68;
+}
+
+.world-region-node-current {
+  border-color: #ffad2f;
+  box-shadow: 0 0 0 4px rgba(255, 173, 47, 0.2), 0 14px 28px rgba(36, 64, 38, 0.16);
+}
+
+.world-region-node-visited:not(.world-region-node-current) {
+  border-color: #73a942;
+}
+
+.world-region-node-coming-soon,
+.world-region-node-locked {
+  background: rgba(245, 249, 244, 0.78);
 }
 
 .world-region-node-header {
@@ -650,6 +721,27 @@
   height: 3.5rem;
   justify-content: center;
   width: 3.5rem;
+}
+
+.world-region-node-current .world-region-icon {
+  background: #fff3c7;
+  border-color: #ffad2f;
+}
+
+.world-region-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.world-region-badges span {
+  background: #f8ffd8;
+  border: 1px solid #c7ddb1;
+  border-radius: 999px;
+  color: #244026;
+  font-size: 0.85rem;
+  font-weight: 900;
+  padding: 0.3rem 0.55rem;
 }
 
 .world-region-progress {
@@ -715,7 +807,7 @@
 .world-inventory-list {
   display: grid;
   gap: 0.65rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .world-inventory-item {
@@ -809,5 +901,35 @@
 @media (max-width: 720px) {
   .world-quest-header {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .world-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-region-map {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .world-region-map::before {
+    bottom: 4%;
+    height: auto;
+    left: 50%;
+    right: auto;
+    top: 4%;
+    transform: translateX(-50%);
+    width: 1.1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .world-region-map {
+    grid-template-columns: 1fr;
+  }
+
+  .world-region-node {
+    min-height: auto;
   }
 }
