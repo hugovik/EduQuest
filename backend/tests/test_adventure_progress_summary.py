@@ -10,6 +10,7 @@ from app.services.adventure_progress_summary_service import (
     ADVENTURE_TYPES,
     AdventureProgressSummaryService,
 )
+from app.services.reading_service import READING_PASSAGES
 
 
 @pytest.fixture()
@@ -102,18 +103,25 @@ def test_reading_uses_real_completed_quest_data(db_session, summary_service):
     db_session.commit()
 
     summary = summary_service.get_summary(db_session)
+    current_level_passages = len([
+        passage for passage in READING_PASSAGES if passage["level"] == child.grade
+    ])
 
     assert summary["reading"]["completed_quests"] == 1
-    assert summary["reading"]["total_quests"] >= 31
+    assert summary["reading"]["total_quests"] == current_level_passages + 1
     assert summary["reading"]["xp_earned"] == 20
-    assert summary["reading"]["status"] == "completed"
+    assert summary["reading"]["status"] == "in_progress"
 
 
 def test_missing_adventure_data_returns_defaults(db_session, summary_service):
     summary = summary_service.get_summary(db_session)
+    child = summary_service.get_child_or_create_default(db_session)
+    current_level_passages = len([
+        passage for passage in READING_PASSAGES if passage["level"] == child.grade
+    ])
 
     assert summary["reading"]["completed_quests"] == 0
-    assert summary["reading"]["total_quests"] >= 30
+    assert summary["reading"]["total_quests"] == current_level_passages
     assert summary["reading"]["xp_earned"] == 0
     assert summary["reading"]["status"] == "not_started"
 

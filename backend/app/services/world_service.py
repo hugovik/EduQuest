@@ -10,6 +10,7 @@ from app.services.inventory_service import InventoryService
 from app.repositories.world_state_repository import WorldStateRepository
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_unlock_service import AdventureUnlockService
+from app.services.world_quest_service import WorldQuestService
 
 ALLOWED_WORLD_LOCATIONS = {"treehouse", "world", "math", "reading"}
 REGION_LOCATIONS = {"math", "reading"}
@@ -24,6 +25,7 @@ class WorldService:
         inventory_service: InventoryService,
         progress_summary_service: AdventureProgressSummaryService,
         adventure_unlock_service: AdventureUnlockService,
+        world_quest_service: WorldQuestService,
     ):
         self.child_repository = child_repository
         self.world_state_repository = world_state_repository
@@ -31,6 +33,7 @@ class WorldService:
         self.inventory_service = inventory_service
         self.progress_summary_service = progress_summary_service
         self.adventure_unlock_service = adventure_unlock_service
+        self.world_quest_service = world_quest_service
 
     def get_child_or_create_default(self, db: Session):
         child = self.child_repository.get_first(db)
@@ -98,22 +101,35 @@ class WorldService:
         unlocked_regions = self.get_unlocked_regions(unlocks)
         inventory = self.inventory_service.get_inventory(db, child.id)
         progress_summary = self.progress_summary_service.get_summary(db)
+        visited_regions = self.parse_list(world_state.visited_regions)
+        overarching_quest = self.world_quest_service.evaluate_restore_quest(
+            db,
+            child,
+            visited_regions,
+            progress_summary,
+        )
 
         world_state.unlocked_regions = json.dumps(unlocked_regions)
         if world_state.updated_at is None:
             world_state.updated_at = datetime.utcnow()
         db.commit()
         db.refresh(world_state)
+        inventory = self.inventory_service.get_inventory(db, child.id)
+
         return {
             "active_location": world_state.active_location,
             "last_region": world_state.last_region,
-            "visited_regions": self.parse_list(world_state.visited_regions),
+            "visited_regions": visited_regions,
             "available_regions": list(ALLOWED_WORLD_LOCATIONS),
             "unlocked_regions": unlocked_regions,
             "locked_regions": self.get_locked_regions(unlocks),
             "inventory": inventory,
             "progress_summary": progress_summary,
             "unlocks": unlocks,
+            "overarching_quest": overarching_quest,
+            "quest_steps": overarching_quest["steps"],
+            "quest_progress_percent": overarching_quest["progress_percent"],
+            "quest_status": overarching_quest["status"],
             "updated_at": world_state.updated_at,
         }
 

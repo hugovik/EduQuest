@@ -26,6 +26,38 @@ function formatVisitedRegions(visitedRegions = []) {
   return visitedRegions.map(formatLocation).join(", ");
 }
 
+function formatQuestStatus(status) {
+  if (status === "completed") {
+    return "World restored";
+  }
+
+  if (status === "in_progress") {
+    return "Quest in progress";
+  }
+
+  return "Ready to begin";
+}
+
+function getRegionQuestStatus(overarchingQuest, adventureType) {
+  const regionSteps = overarchingQuest?.steps?.filter((step) => step.region === adventureType) ?? [];
+
+  if (regionSteps.length === 0) {
+    return null;
+  }
+
+  const completedSteps = regionSteps.filter((step) => step.status === "completed").length;
+
+  if (completedSteps === regionSteps.length) {
+    return "completed";
+  }
+
+  if (completedSteps > 0) {
+    return "in_progress";
+  }
+
+  return "not_started";
+}
+
 export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   const {
     data: progressSummaryResponse = {},
@@ -39,6 +71,7 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   } = useAdventureUnlocks();
   const progressSummary = worldState?.progress_summary ?? progressSummaryResponse;
   const unlocks = worldState?.unlocks ?? unlocksResponse;
+  const overarchingQuest = worldState?.overarching_quest;
 
   if ((progressLoading || unlocksLoading) && !worldState) {
     return <main className="dashboard world-map-page">Loading World Map...</main>;
@@ -109,11 +142,59 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
         </section>
       )}
 
+      {overarchingQuest && (
+        <section className="card world-quest-card" aria-label="Main world quest">
+          <div className="world-quest-header">
+            <div>
+              <p className="quest-realm">{formatQuestStatus(overarchingQuest.status)}</p>
+              <h2>{overarchingQuest.title}</h2>
+              <p>{overarchingQuest.description}</p>
+            </div>
+            <div className="world-quest-progress-badge">
+              <strong>{overarchingQuest.progress_percent}%</strong>
+              <span>restored</span>
+            </div>
+          </div>
+
+          <div className="world-region-progress" aria-label="World quest progress">
+            <div className="world-region-progress-bar">
+              <div
+                className="world-region-progress-fill"
+                style={{ width: `${overarchingQuest.progress_percent}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="world-quest-steps">
+            {overarchingQuest.steps.map((step) => (
+              <div
+                className={`world-quest-step world-quest-step-${step.status}`}
+                key={step.key}
+              >
+                <span aria-hidden="true">{step.status === "completed" ? "✓" : "○"}</span>
+                <div>
+                  <strong>{step.title}</strong>
+                  <small>{step.description}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="world-quest-reward">
+            <span>Reward: {overarchingQuest.reward_xp} XP</span>
+            {overarchingQuest.reward_items.map((item) => (
+              <span key={item.item_key}>{item.item_name}</span>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="world-map-grid" aria-label="EduQuest world regions">
         {worldRegions.map((region) => (
           <WorldRegionNode
             key={region.id}
             progress={progressSummary[region.adventureType]}
+            questStatus={getRegionQuestStatus(overarchingQuest, region.adventureType)}
             region={region}
             unlock={unlocks[region.adventureType]}
             onEnter={onNavigate}

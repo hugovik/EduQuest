@@ -18,7 +18,19 @@ function getProgressPercent(progress) {
   return Math.min(100, Math.round((progress.completed_quests / progress.total_quests) * 100));
 }
 
-export default function WorldRegionNode({ region, progress, unlock, onEnter }) {
+function formatQuestStatus(status) {
+  if (status === "completed") {
+    return "World quest step complete";
+  }
+
+  if (status === "in_progress") {
+    return "World quest in progress";
+  }
+
+  return "World quest not started";
+}
+
+export default function WorldRegionNode({ region, progress, questStatus, unlock, onEnter }) {
   const comingSoon = !region.enabled;
   const unlocked = region.unlockedByDefault || unlock?.unlocked || region.adventureType === "achievements";
   const disabled = comingSoon || !unlocked;
@@ -53,6 +65,7 @@ export default function WorldRegionNode({ region, progress, unlock, onEnter }) {
 
       <div className="world-region-meta">
         <span>{progress?.xp_earned ?? 0} XP earned</span>
+        {questStatus && <span>{formatQuestStatus(questStatus)}</span>}
         {!comingSoon && !unlocked && <span>{unlock?.reason ?? "Keep exploring to unlock."}</span>}
       </div>
 

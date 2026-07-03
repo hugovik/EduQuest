@@ -102,6 +102,7 @@ def test_next_passage_unlocks_after_completion(db_session, reading_service):
 
 def test_locked_passage_cannot_be_submitted_for_rewards_directly(db_session, reading_service):
     child = reading_service.get_child_or_create_default(db_session)
+    starting_xp = child.xp
     passages = reading_service.list_passages(db_session, 2)
     locked_passage = passages[1]
 
@@ -116,7 +117,7 @@ def test_locked_passage_cannot_be_submitted_for_rewards_directly(db_session, rea
     progress = reading_service.get_progress(db_session)
 
     assert error.value.status_code == 403
-    assert child.xp == 0
+    assert child.xp == starting_xp
     assert progress == []
 
 

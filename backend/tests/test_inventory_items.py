@@ -8,10 +8,12 @@ from app.database.database import Base
 from app.repositories.child_repository import ChildRepository
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.world_state_repository import WorldStateRepository
+from app.repositories.world_quest_repository import WorldQuestRepository
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_unlock_service import AdventureUnlockService
 from app.services.inventory_service import InventoryService
 from app.services.world_service import WorldService
+from app.services.world_quest_service import WorldQuestService
 
 
 @pytest.fixture()
@@ -57,6 +59,11 @@ def world_service(inventory_service):
         inventory_service=inventory_service,
         progress_summary_service=progress_summary_service,
         adventure_unlock_service=adventure_unlock_service,
+        world_quest_service=WorldQuestService(
+            child_repository=child_repository,
+            world_quest_repository=WorldQuestRepository(),
+            inventory_service=inventory_service,
+        ),
     )
 
 

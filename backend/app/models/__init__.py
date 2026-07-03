@@ -1,6 +1,7 @@
 from .child import Child
 from .quest import Quest
 from .world_state import WorldState
+from .world_quest import WorldQuest
 from .quest_completion import QuestCompletion
 from .progress_event import ProgressEvent
 from .tree_growth_event import TreeGrowthEvent
