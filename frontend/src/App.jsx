@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getWorldState, travelToWorldLocation } from "./api/worldApi";
 import AdventureHubPage from "./features/adventure/AdventureHubPage";
 import { TreeHouseDashboard } from "./features/treehouse/TreeHouseDashboard";

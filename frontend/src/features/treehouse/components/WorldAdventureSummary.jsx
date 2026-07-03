@@ -31,6 +31,9 @@ export default function WorldAdventureSummary({
   error,
   onOpenWorld,
 }) {
+  const worldQuest = summary?.world_quest;
+  const questProgressPercent = worldQuest?.progress_percent ?? 0;
+
   return (
     <section className="card world-adventure-summary-card" aria-label="World adventure summary">
       <div>
@@ -45,25 +48,29 @@ export default function WorldAdventureSummary({
       ) : summary ? (
         <>
           <div className="world-adventure-summary-grid">
-            <span>Current location: {formatLocation(summary.active_location)}</span>
+            <span>Current location: {formatLocation(summary.active_location ?? "treehouse")}</span>
             <span>Last visited: {summary.last_region ? formatLocation(summary.last_region) : "None yet"}</span>
-            <span>{summary.unlocked_regions} / {summary.total_regions} regions open</span>
-            <span>{summary.inventory_count} collected item{summary.inventory_count === 1 ? "" : "s"}</span>
+            <span>{summary.unlocked_regions ?? 0} / {summary.total_regions ?? 0} regions open</span>
+            <span>{summary.inventory_count ?? 0} collected item{summary.inventory_count === 1 ? "" : "s"}</span>
           </div>
 
-          <div className="world-adventure-quest-progress">
-            <div>
-              <strong>{summary.world_quest.title}</strong>
-              <small>{formatQuestStatus(summary.world_quest.status)}</small>
+          {worldQuest ? (
+            <div className="world-adventure-quest-progress">
+              <div>
+                <strong>{worldQuest.title}</strong>
+                <small>{formatQuestStatus(worldQuest.status)}</small>
+              </div>
+              <span>{questProgressPercent}%</span>
             </div>
-            <span>{summary.world_quest.progress_percent}%</span>
-          </div>
+          ) : (
+            <p>World quest progress will appear after the first adventure.</p>
+          )}
 
           <div className="world-region-progress" aria-label="World quest progress">
             <div className="world-region-progress-bar">
               <div
                 className="world-region-progress-fill"
-                style={{ width: `${summary.world_quest.progress_percent}%` }}
+                style={{ width: `${questProgressPercent}%` }}
               />
             </div>
           </div>

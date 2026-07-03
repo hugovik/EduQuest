@@ -115,6 +115,9 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
   const progressSummary = worldState?.progress_summary ?? progressSummaryResponse;
   const unlocks = worldState?.unlocks ?? unlocksResponse;
   const overarchingQuest = worldState?.overarching_quest;
+  const questSteps = overarchingQuest?.steps ?? [];
+  const questRewardItems = overarchingQuest?.reward_items ?? [];
+  const questProgressPercent = overarchingQuest?.progress_percent ?? 0;
   const displayRegions = getDisplayRegions(worldState);
   const visitedRegions = worldState?.visited_regions ?? [];
   const currentLocation = worldState?.active_location ?? "world";
@@ -202,7 +205,7 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
               <p>{overarchingQuest.description}</p>
             </div>
             <div className="world-quest-progress-badge">
-              <strong>{overarchingQuest.progress_percent}%</strong>
+              <strong>{questProgressPercent}%</strong>
               <span>restored</span>
             </div>
           </div>
@@ -211,13 +214,13 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
             <div className="world-region-progress-bar">
               <div
                 className="world-region-progress-fill"
-                style={{ width: `${overarchingQuest.progress_percent}%` }}
+                style={{ width: `${questProgressPercent}%` }}
               />
             </div>
           </div>
 
           <div className="world-quest-steps">
-            {overarchingQuest.steps.map((step) => (
+            {questSteps.map((step) => (
               <div
                 className={`world-quest-step world-quest-step-${step.status}`}
                 key={step.key}
@@ -233,7 +236,7 @@ export default function WorldMapPage({ worldState, onBack, onNavigate }) {
 
           <div className="world-quest-reward">
             <span>Reward: {overarchingQuest.reward_xp} XP</span>
-            {overarchingQuest.reward_items.map((item) => (
+            {questRewardItems.map((item) => (
               <span key={item.item_key}>{item.item_name}</span>
             ))}
           </div>
