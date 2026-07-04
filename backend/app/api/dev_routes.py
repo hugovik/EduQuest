@@ -2,19 +2,50 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
+from app.models.achievement_unlock import AchievementUnlock
+from app.models.adventure_level_preference import AdventureLevelPreference
 from app.models.child import Child
+from app.models.daily_goal import DailyGoal
+from app.models.learning_streak import LearningStreak
+from app.models.obstacle_progress import ObstacleProgress
+from app.models.player_inventory import InventoryItem, PlayerInventory
 from app.models.progress_event import ProgressEvent
 from app.models.quest_completion import QuestCompletion
+from app.models.reading_progress import ReadingProgress
+from app.models.reading_story_state import ReadingStoryState
 from app.models.tree_growth_event import TreeGrowthEvent
+from app.models.world_state import WorldState
+from app.models.world_quest import WorldQuest
 
 router = APIRouter(prefix="/dev", tags=["dev"])
 
 
+RESET_TABLES = [
+    AchievementUnlock,
+    AdventureLevelPreference,
+    DailyGoal,
+    LearningStreak,
+    InventoryItem,
+    PlayerInventory,
+    ObstacleProgress,
+    ReadingProgress,
+    ReadingStoryState,
+    WorldState,
+    WorldQuest,
+    QuestCompletion,
+    ProgressEvent,
+    TreeGrowthEvent,
+]
+
+
 @router.post("/reset-progress")
 def reset_progress(db: Session = Depends(get_db)):
-    db.query(QuestCompletion).delete()
-    db.query(ProgressEvent).delete()
-    db.query(TreeGrowthEvent).delete()
+    deleted_rows = {}
+
+    for model in RESET_TABLES:
+        deleted_rows[model.__tablename__] = db.query(model).delete(
+            synchronize_session=False,
+        )
 
     children = db.query(Child).all()
 
@@ -29,4 +60,5 @@ def reset_progress(db: Session = Depends(get_db)):
         "status": "ok",
         "message": "Progress reset for development testing.",
         "children_reset": len(children),
+        "deleted_rows": deleted_rows,
     }

@@ -12,6 +12,7 @@ from app.repositories.reading_repository import ReadingPassageRepository, Readin
 from app.repositories.reading_story_state_repository import ReadingStoryStateRepository
 from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
 from app.repositories.world_state_repository import WorldStateRepository
+from app.repositories.world_quest_repository import WorldQuestRepository
 from app.services.achievement_service import AchievementService
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_unlock_service import AdventureUnlockService
@@ -22,6 +23,8 @@ from app.services.quest_service import QuestService
 from app.services.reading_service import ReadingService
 from app.services.reward_service import RewardService
 from app.services.world_service import WorldService
+from app.services.world_quest_service import WorldQuestService
+from app.services.xp_audit_service import XPAuditService
 
 
 def get_achievement_service() -> AchievementService:
@@ -108,4 +111,19 @@ def get_world_state_service() -> WorldService:
         inventory_service=get_inventory_service(),
         progress_summary_service=get_adventure_progress_summary_service(),
         adventure_unlock_service=get_adventure_unlock_service(),
+        world_quest_service=get_world_quest_service(),
+    )
+
+
+def get_world_quest_service() -> WorldQuestService:
+    return WorldQuestService(
+        child_repository=ChildRepository(),
+        world_quest_repository=WorldQuestRepository(),
+        inventory_service=get_inventory_service(),
+    )
+
+
+def get_xp_audit_service() -> XPAuditService:
+    return XPAuditService(
+        child_repository=ChildRepository(),
     )

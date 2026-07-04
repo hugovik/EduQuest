@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.schemas.inventory import InventoryItemRead
+from app.schemas.world_quest import WorldQuestRead, WorldQuestStepRead
 
 
 class WorldTravelRequest(BaseModel):
@@ -17,6 +18,19 @@ class WorldInventoryRead(BaseModel):
     items: list[InventoryItemRead] = []
 
 
+class WorldRegionRead(BaseModel):
+    region_key: str
+    title: str
+    adventure_type: str
+    status: str
+    is_unlocked: bool
+    is_available: bool
+    lock_reason: str | None = None
+    unlock_requirement: str | None = None
+    coming_soon: bool
+    progress: dict[str, Any] = {}
+
+
 class WorldStateRead(BaseModel):
     active_location: str
     last_region: str | None = None
@@ -27,4 +41,28 @@ class WorldStateRead(BaseModel):
     inventory: WorldInventoryRead
     progress_summary: dict[str, Any]
     unlocks: dict[str, Any]
+    regions: list[WorldRegionRead]
+    overarching_quest: WorldQuestRead
+    quest_steps: list[WorldQuestStepRead]
+    quest_progress_percent: int
+    quest_status: str
     updated_at: datetime
+
+
+class WorldQuestSummaryRead(BaseModel):
+    title: str
+    progress_percent: int
+    status: str
+
+
+class WorldProgressSummaryRead(BaseModel):
+    active_location: str
+    last_region: str | None = None
+    visited_regions: list[str]
+    total_regions: int
+    unlocked_regions: int
+    completed_regions: int
+    world_quest: WorldQuestSummaryRead
+    inventory_count: int
+    math: dict[str, Any]
+    reading: dict[str, Any]

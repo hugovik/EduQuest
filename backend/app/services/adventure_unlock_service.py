@@ -2,39 +2,84 @@ from sqlalchemy.orm import Session
 
 from app.models.achievement_unlock import AchievementUnlock
 from app.repositories.child_repository import ChildRepository
-from app.services.adventure_progress_summary_service import (
-    ADVENTURE_TYPES,
-    AdventureProgressSummaryService,
-)
+from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 
-ADVENTURE_UNLOCK_RULES = {
-    "math": {"type": "default", "reason": "Unlocked by default"},
-    "reading": {"type": "default", "reason": "Unlocked by default"},
-    "writing": {"type": "default", "reason": "Unlocked by default"},
-    "story": {
-        "type": "completed_quests",
-        "adventure": "reading",
-        "required": 3,
-        "reason": "Complete 3 Reading Forest quests to unlock Story Cave",
+WORLD_REGION_RULES = [
+    {
+        "region_key": "treehouse",
+        "title": "Treehouse",
+        "adventure_type": "home",
+        "status": "unlocked",
+        "lock_reason": None,
+        "unlock_requirement": None,
+        "coming_soon": False,
     },
-    "geography": {
-        "type": "completed_quests",
-        "adventure": "math",
-        "required": 2,
-        "reason": "Complete 2 Math Mountains quests to unlock Geography Trail",
+    {
+        "region_key": "world",
+        "title": "World Map",
+        "adventure_type": "world",
+        "status": "unlocked",
+        "lock_reason": None,
+        "unlock_requirement": None,
+        "coming_soon": False,
     },
-    "science": {
-        "type": "total_xp",
-        "required": 100,
-        "reason": "Earn 100 XP to unlock Science Lab",
+    {
+        "region_key": "math",
+        "title": "Math Mountains",
+        "adventure_type": "math",
+        "status": "unlocked",
+        "lock_reason": None,
+        "unlock_requirement": None,
+        "coming_soon": False,
     },
-    "music": {
-        "type": "achievement_or_xp",
-        "required_xp": 150,
-        "required_achievements": 1,
-        "reason": "Unlock your first achievement or earn 150 XP to open Music Meadow",
+    {
+        "region_key": "reading",
+        "title": "Reading Forest",
+        "adventure_type": "reading",
+        "status": "unlocked",
+        "lock_reason": None,
+        "unlock_requirement": None,
+        "coming_soon": False,
     },
-}
+    {
+        "region_key": "writing",
+        "title": "Writing Kingdom",
+        "adventure_type": "writing",
+        "status": "coming_soon",
+        "lock_reason": "Writing Kingdom is coming soon.",
+        "unlock_requirement": "Complete Math Mountains and Reading Forest milestones to unlock Writing Kingdom.",
+        "coming_soon": True,
+    },
+    {
+        "region_key": "science",
+        "title": "Science Lab",
+        "adventure_type": "science",
+        "status": "coming_soon",
+        "lock_reason": "Science Lab is coming soon.",
+        "unlock_requirement": "Complete the first Writing Kingdom milestone to unlock Science Lab.",
+        "coming_soon": True,
+    },
+    {
+        "region_key": "geography",
+        "title": "Geography Harbor",
+        "adventure_type": "geography",
+        "status": "coming_soon",
+        "lock_reason": "Geography Harbor is coming soon.",
+        "unlock_requirement": "Complete the first Science Lab milestone to unlock Geography Harbor.",
+        "coming_soon": True,
+    },
+    {
+        "region_key": "music",
+        "title": "Music Meadow",
+        "adventure_type": "music",
+        "status": "coming_soon",
+        "lock_reason": "Music Meadow is coming soon.",
+        "unlock_requirement": "Complete the first Geography Harbor milestone to unlock Music Meadow.",
+        "coming_soon": True,
+    },
+]
+
+ADVENTURE_UNLOCK_KEYS = ["math", "reading", "writing", "science", "geography", "music"]
 
 
 class AdventureUnlockService:
@@ -69,15 +114,25 @@ class AdventureUnlockService:
     def unlocked(self, reason: str, current: int | None = None, required: int | None = None) -> dict:
         return {
             "unlocked": True,
+            "is_unlocked": True,
+            "is_available": True,
+            "coming_soon": False,
             "reason": reason,
+            "lock_reason": None,
+            "unlock_requirement": None,
             "current": current,
             "required": required,
         }
 
-    def locked(self, reason: str, current: int, required: int) -> dict:
+    def locked(self, reason: str, current: int = 0, required: int = 1, coming_soon: bool = False) -> dict:
         return {
             "unlocked": False,
+            "is_unlocked": False,
+            "is_available": False,
+            "coming_soon": coming_soon,
             "reason": reason,
+            "lock_reason": reason,
+            "unlock_requirement": reason,
             "current": current,
             "required": required,
         }
@@ -89,44 +144,51 @@ class AdventureUnlockService:
         progress_summary: dict,
         adventure_type: str,
     ) -> dict:
-        rule = ADVENTURE_UNLOCK_RULES.get(adventure_type)
+        region = self.get_region_rule(adventure_type)
 
-        if rule is None:
-            return self.locked("Keep exploring to unlock this world", 0, 1)
+        if region is None:
+            return self.locked("Keep exploring to unlock this world")
 
-        if rule["type"] == "default":
-            return self.unlocked(rule["reason"])
+        if region["status"] == "unlocked":
+            return self.unlocked("Unlocked by default")
 
-        if rule["type"] == "completed_quests":
-            adventure_progress = progress_summary.get(rule["adventure"], {})
-            current = adventure_progress.get("completed_quests", 0)
-            required = rule["required"]
+        return self.locked(
+            region["lock_reason"],
+            coming_soon=region["coming_soon"],
+        )
 
-            if current >= required:
-                return self.unlocked("Adventure unlocked", current, required)
+    def get_region_rule(self, region_key: str) -> dict | None:
+        return next(
+            (region for region in WORLD_REGION_RULES if region["region_key"] == region_key),
+            None,
+        )
 
-            return self.locked(rule["reason"], current, required)
+    def serialize_region(self, region: dict, progress_summary: dict) -> dict:
+        is_unlocked = region["status"] == "unlocked"
+        progress = progress_summary.get(region["adventure_type"], {})
+        return {
+            "region_key": region["region_key"],
+            "title": region["title"],
+            "adventure_type": region["adventure_type"],
+            "status": region["status"],
+            "is_unlocked": is_unlocked,
+            "is_available": is_unlocked and not region["coming_soon"],
+            "lock_reason": region["lock_reason"],
+            "unlock_requirement": region["unlock_requirement"],
+            "coming_soon": region["coming_soon"],
+            "progress": progress,
+        }
 
-        if rule["type"] == "total_xp":
-            current = self.get_total_xp(progress_summary)
-            required = rule["required"]
+    def get_regions(self, db: Session) -> list[dict]:
+        try:
+            progress_summary = self.progress_summary_service.get_summary(db)
+        except Exception:
+            progress_summary = {}
 
-            if current >= required:
-                return self.unlocked("Adventure unlocked", current, required)
-
-            return self.locked(rule["reason"], current, required)
-
-        if rule["type"] == "achievement_or_xp":
-            total_xp = self.get_total_xp(progress_summary)
-            achievement_count = self.get_achievement_count(db, child_id)
-            current = max(total_xp, achievement_count)
-
-            if total_xp >= rule["required_xp"] or achievement_count >= rule["required_achievements"]:
-                return self.unlocked("Adventure unlocked", current, rule["required_xp"])
-
-            return self.locked(rule["reason"], total_xp, rule["required_xp"])
-
-        return self.locked("Keep exploring to unlock this world", 0, 1)
+        return [
+            self.serialize_region(region, progress_summary)
+            for region in WORLD_REGION_RULES
+        ]
 
     def get_unlocks(self, db: Session) -> dict:
         child = self.get_child_or_create_default(db)
@@ -143,5 +205,5 @@ class AdventureUnlockService:
                 progress_summary,
                 adventure_type,
             )
-            for adventure_type in ADVENTURE_TYPES
+            for adventure_type in ADVENTURE_UNLOCK_KEYS
         }

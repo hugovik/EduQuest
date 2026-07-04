@@ -13,12 +13,15 @@ export async function runAdventureUnlocksApiTests() {
   globalThis.fetch = async () => ({
     ok: true,
     json: async () => ({
-      math: { unlocked: true, reason: "Unlocked by default" },
-      story: {
+      math: { unlocked: true, is_unlocked: true, is_available: true, coming_soon: false, reason: "Unlocked by default" },
+      writing: {
         unlocked: false,
-        reason: adventureUnlockRules.story.reason,
-        current: 1,
-        required: 3,
+        is_unlocked: false,
+        is_available: false,
+        coming_soon: true,
+        reason: adventureUnlockRules.writing.reason,
+        lock_reason: adventureUnlockRules.writing.reason,
+        unlock_requirement: adventureUnlockRules.writing.requirement,
       },
     }),
   });
@@ -27,10 +30,10 @@ export async function runAdventureUnlocksApiTests() {
     const unlocks = await getAdventureUnlocks();
 
     assert(unlocks.math.unlocked === true, "Unlocked card should allow navigation.");
-    assert(unlocks.story.unlocked === false, "Locked card should be locked.");
-    assert(unlocks.story.required === 3, "Locked card should include requirement.");
+    assert(unlocks.writing.unlocked === false, "Coming soon card should be locked.");
+    assert(unlocks.writing.coming_soon === true, "Coming soon state should be exposed.");
     assert(
-      adventureUnlockRules.story.reason.includes("Reading Forest"),
+      adventureUnlockRules.writing.requirement.includes("Reading Forest"),
       "Unlock copy should be child-friendly and specific."
     );
   } finally {

@@ -30,6 +30,11 @@ ITEM_CATALOG = {
         "item_type": "key",
         "description": "A key for future story paths.",
     },
+    "world_heart": {
+        "item_name": "World Heart",
+        "item_type": "artifact",
+        "description": "A glowing crystal that restores magic to EduQuest.",
+    },
 }
 
 

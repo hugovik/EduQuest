@@ -307,6 +307,21 @@ Done means production-ready.
 
 ---
 
+# Development Reset Maintenance
+
+The development reset endpoint is part of the local testing workflow.
+
+When adding a new player-owned gameplay table, location state, adventure progress table, inventory table, achievement unlock table, streak/goal table, or saved preference table:
+
+- update `POST /dev/reset-progress`
+- update the reset-progress regression test
+- preserve static content definitions such as quests, passages, and achievement definitions
+- verify XP audits do not include stale progress after reset
+
+Reset behavior should clear user progress completely while keeping reusable seed/content data intact.
+
+---
+
 # Technical Debt
 
 Technical debt should be:

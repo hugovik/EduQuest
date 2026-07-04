@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 
 from app.models.obstacle_progress import ObstacleProgress
 from app.models.player_inventory import PlayerInventory
+from app.models.progress_event import ProgressEvent
 from app.repositories.child_repository import ChildRepository
 from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.obstacle_progress_repository import ObstacleProgressRepository
@@ -267,6 +268,17 @@ class RewardService:
         child.level = max(1, calculate_level_from_xp(child.xp))
         child.tree_stage = calculate_tree_stage_from_xp(child.xp)
         applied_penalty = child.xp - previous_xp
+
+        if applied_penalty < 0:
+            db.add(
+                ProgressEvent(
+                    child_id=child.id,
+                    event_type="xp_penalty",
+                    title="Incorrect answer penalty",
+                    description="A small XP penalty was applied after an incorrect answer.",
+                    xp_change=applied_penalty,
+                )
+            )
 
         db.commit()
         db.refresh(child)

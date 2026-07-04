@@ -992,6 +992,22 @@ Business logic should remain independently testable.
 
 ---
 
+## Development Reset Maintenance
+
+`POST /dev/reset-progress` must stay synchronized with player-owned persistence.
+
+When adding a new gameplay table, location state, adventure progress table, inventory table, achievement unlock table, daily goal/streak table, saved preference table, or any other child/player-owned state:
+
+- update the reset-progress endpoint in the same change
+- update the reset-progress regression test
+- clear user progress completely
+- preserve reusable definitions such as quests, passages, and achievement seed data
+- verify XP audit data does not include stale progress after reset
+
+This prevents local testing from showing mismatched XP, progress, inventory, unlock, or world-state data after a reset.
+
+---
+
 ## Before Completing Any Backend Task
 
 Verify:

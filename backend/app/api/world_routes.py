@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_world_state_service
 from app.database.database import get_db
-from app.schemas.world import WorldStateRead, WorldTravelRequest
+from app.schemas.world import WorldProgressSummaryRead, WorldStateRead, WorldTravelRequest
 from app.services.world_service import WorldService
 
 router = APIRouter(prefix="/world", tags=["world"])
@@ -15,6 +15,14 @@ def get_world_state(
     world_state_service: WorldService = Depends(get_world_state_service),
 ):
     return world_state_service.get_state(db)
+
+
+@router.get("/progress/summary", response_model=WorldProgressSummaryRead)
+def get_world_progress_summary(
+    db: Session = Depends(get_db),
+    world_state_service: WorldService = Depends(get_world_state_service),
+):
+    return world_state_service.get_progress_summary(db)
 
 
 @router.post("/travel", response_model=WorldStateRead)

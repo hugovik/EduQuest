@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getWorldState, travelToWorldLocation } from "./api/worldApi";
 import AdventureHubPage from "./features/adventure/AdventureHubPage";
 import { TreeHouseDashboard } from "./features/treehouse/TreeHouseDashboard";
@@ -57,17 +57,21 @@ export default function App() {
     };
   }, []);
 
-  async function navigateTo(nextScreen) {
+  async function navigateTo(nextScreen, options = {}) {
     const normalizedScreen = normalizeWorldLocation(nextScreen);
+    const { allowOfflineFallback = true } = options;
 
     try {
       const nextWorldState = await travelToWorldLocation(normalizedScreen);
       setWorldState(nextWorldState);
     } catch (error) {
-      // Keep navigation usable if the local API is temporarily unavailable.
+      if (!allowOfflineFallback) {
+        throw error;
+      }
     }
 
     setScreen(normalizedScreen);
+    return normalizedScreen;
   }
 
   if (screen === null) {
@@ -79,7 +83,7 @@ export default function App() {
       <WorldMapPage
         worldState={worldState}
         onBack={() => navigateTo("treehouse")}
-        onNavigate={(nextScreen) => navigateTo(nextScreen)}
+        onNavigate={(nextScreen) => navigateTo(nextScreen, { allowOfflineFallback: false })}
       />
     );
   }

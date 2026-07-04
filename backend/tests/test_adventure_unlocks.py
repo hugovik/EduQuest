@@ -7,7 +7,6 @@ from app.database.database import Base
 from app.models import AchievementUnlock, Quest, QuestCompletion
 from app.repositories.child_repository import ChildRepository
 from app.services.adventure_progress_summary_service import (
-    ADVENTURE_TYPES,
     AdventureProgressSummaryService,
 )
 from app.services.adventure_unlock_service import AdventureUnlockService
@@ -72,19 +71,19 @@ def test_default_adventures_are_unlocked(db_session, unlock_service):
 
     assert unlocks["math"]["unlocked"] is True
     assert unlocks["reading"]["unlocked"] is True
-    assert unlocks["writing"]["unlocked"] is True
+    assert unlocks["writing"]["unlocked"] is False
+    assert unlocks["writing"]["coming_soon"] is True
 
 
-def test_locked_adventure_returns_reason(db_session, unlock_service):
+def test_coming_soon_adventure_returns_reason(db_session, unlock_service):
     unlocks = unlock_service.get_unlocks(db_session)
 
-    assert unlocks["story"]["unlocked"] is False
-    assert "Reading Forest" in unlocks["story"]["reason"]
-    assert unlocks["story"]["current"] == 0
-    assert unlocks["story"]["required"] == 3
+    assert unlocks["writing"]["unlocked"] is False
+    assert "Writing Kingdom" in unlocks["writing"]["reason"]
+    assert unlocks["writing"]["coming_soon"] is True
 
 
-def test_story_unlocks_after_reading_requirement(db_session, unlock_service):
+def test_future_regions_remain_coming_soon_even_when_future_gate_is_met(db_session, unlock_service):
     child = unlock_service.get_child_or_create_default(db_session)
 
     for index in range(3):
@@ -93,28 +92,30 @@ def test_story_unlocks_after_reading_requirement(db_session, unlock_service):
 
     unlocks = unlock_service.get_unlocks(db_session)
 
-    assert unlocks["story"]["unlocked"] is True
-    assert unlocks["story"]["current"] == 3
+    assert unlocks["writing"]["unlocked"] is False
+    assert unlocks["writing"]["coming_soon"] is True
 
 
-def test_science_unlocks_after_xp_requirement(db_session, unlock_service):
+def test_science_stays_coming_soon_after_xp_requirement(db_session, unlock_service):
     child = unlock_service.get_child_or_create_default(db_session)
     quest = seed_quest(db_session, "math-xp", "math", xp_reward=100)
     complete_quest(db_session, child.id, quest, xp_awarded=100)
 
     unlocks = unlock_service.get_unlocks(db_session)
 
-    assert unlocks["science"]["unlocked"] is True
+    assert unlocks["science"]["unlocked"] is False
+    assert unlocks["science"]["coming_soon"] is True
 
 
-def test_music_unlocks_after_first_achievement(db_session, unlock_service):
+def test_music_stays_coming_soon_after_first_achievement(db_session, unlock_service):
     child = unlock_service.get_child_or_create_default(db_session)
     db_session.add(AchievementUnlock(child_id=child.id, achievement_id="first-quest"))
     db_session.commit()
 
     unlocks = unlock_service.get_unlocks(db_session)
 
-    assert unlocks["music"]["unlocked"] is True
+    assert unlocks["music"]["unlocked"] is False
+    assert unlocks["music"]["coming_soon"] is True
 
 
 def test_missing_progress_fails_safely(db_session):
@@ -130,10 +131,24 @@ def test_missing_progress_fails_safely(db_session):
     unlocks = unlock_service.get_unlocks(db_session)
 
     assert unlocks["math"]["unlocked"] is True
-    assert unlocks["story"]["unlocked"] is False
+    assert unlocks["writing"]["unlocked"] is False
 
 
 def test_all_adventure_keys_returned(db_session, unlock_service):
     unlocks = unlock_service.get_unlocks(db_session)
 
-    assert set(unlocks.keys()) == set(ADVENTURE_TYPES)
+    assert set(unlocks.keys()) == {"math", "reading", "writing", "science", "geography", "music"}
+
+
+def test_normalized_regions_return_world_region_state(db_session, unlock_service):
+    regions = unlock_service.get_regions(db_session)
+    by_key = {region["region_key"]: region for region in regions}
+
+    assert by_key["treehouse"]["is_available"] is True
+    assert by_key["world"]["is_available"] is True
+    assert by_key["math"]["is_unlocked"] is True
+    assert by_key["reading"]["is_unlocked"] is True
+    assert by_key["writing"]["coming_soon"] is True
+    assert by_key["science"]["coming_soon"] is True
+    assert by_key["geography"]["coming_soon"] is True
+    assert by_key["music"]["coming_soon"] is True
