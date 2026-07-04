@@ -7,8 +7,9 @@ function assert(condition, message) {
 }
 
 export function runAdventureConfigTests() {
-  assert(adventures.length === 7, "Adventure Hub should list seven worlds.");
+  assert(adventures.length === 6, "Adventure Hub should list six learning worlds.");
   assert(getAdventureById("math")?.enabled === true, "Math Mountains should be enabled.");
+  assert(getAdventureById("math-mountains")?.enabled === true, "Math Mountains should resolve by registry id.");
   assert(getAdventureById("math")?.route === "math", "Math Mountains should navigate to math.");
   assert(getAdventureById("reading")?.enabled === true, "Reading Forest should be enabled.");
   assert(getAdventureById("reading")?.route === "reading", "Reading Forest should navigate to reading.");

@@ -1,80 +1,33 @@
-export const worldRegions = [
-  {
-    id: "treehouse",
-    title: "Treehouse",
-    adventureType: "home",
-    screen: "treehouse",
-    description: "Return home, check your tree, and see today's quest.",
-    icon: "🌳",
-    enabled: true,
-    unlockedByDefault: true,
-  },
-  {
-    id: "math-mountains",
-    title: "Math Mountains",
-    adventureType: "math",
-    screen: "math",
-    description: "Clear mountain obstacles by solving number challenges.",
-    icon: "⛰️",
-    enabled: true,
-  },
-  {
-    id: "reading-forest",
-    title: "Reading Forest",
-    adventureType: "reading",
-    screen: "reading",
-    description: "Follow forest stories, clues, and comprehension quests.",
-    icon: "📖",
-    enabled: true,
-  },
-  {
-    id: "writing-kingdom",
-    title: "Writing Kingdom",
-    adventureType: "writing",
-    screen: "writing",
-    description: "Build sentences, stories, and brave royal messages.",
-    icon: "🏰",
-    enabled: false,
-    comingSoonLabel: "Coming soon",
-  },
-  {
-    id: "science-lab",
-    title: "Science Lab",
-    adventureType: "science",
-    screen: "science",
-    description: "Experiment, observe, and unlock curious discoveries.",
-    icon: "🔬",
-    enabled: false,
-    comingSoonLabel: "Coming soon",
-  },
-  {
-    id: "geography-harbor",
-    title: "Geography Harbor",
-    adventureType: "geography",
-    screen: "geography",
-    description: "Sail maps, places, landforms, and world clues.",
-    icon: "⚓",
-    enabled: false,
-    comingSoonLabel: "Coming soon",
-  },
-  {
-    id: "music-meadow",
-    title: "Music Meadow",
-    adventureType: "music",
-    screen: "music",
-    description: "Explore rhythm, sound, and musical patterns.",
-    icon: "🎵",
-    enabled: false,
-    comingSoonLabel: "Coming soon",
-  },
-  {
-    id: "achievement-castle",
-    title: "Achievement Castle",
-    adventureType: "achievements",
-    screen: "treehouse",
-    description: "Celebrate badges, milestones, and brave learning wins.",
-    icon: "🏆",
-    enabled: true,
-    unlockedByDefault: true,
-  },
+import { adventureRegistry, getAdventureByRoute } from "../adventure/adventureRegistry.js";
+
+const worldRegionIds = [
+  "tree-house",
+  "math-mountains",
+  "reading-forest",
+  "writing-kingdom",
+  "science-lab",
+  "geography-island",
+  "music-valley",
 ];
+
+export const worldRegions = worldRegionIds.map((adventureId) => {
+  const adventure = adventureRegistry.find((item) => item.id === adventureId);
+
+  return {
+    id: adventure.id,
+    title: adventure.title,
+    adventureType: adventure.subject,
+    screen: adventure.route,
+    description: adventure.description,
+    icon: adventure.icon,
+    enabled: adventure.isPlayable,
+    unlockedByDefault: adventure.isPlayable,
+    comingSoonLabel: adventure.isComingSoon ? "Coming soon" : undefined,
+    registryId: adventure.id,
+  };
+});
+
+export function getWorldRegionByRoute(route) {
+  const adventure = getAdventureByRoute(route);
+  return adventure ? worldRegions.find((region) => region.registryId === adventure.id) : undefined;
+}
