@@ -8,6 +8,7 @@ import WritingKingdomPage from "./features/writing/WritingKingdomPage";
 import WorldMapPage from "./features/world/WorldMapPage";
 import { getResumeLocationFromWorldState, normalizeWorldLocation } from "./features/world/worldLocation";
 import "./styles.css";
+import DevDashboardPage from "./features/dev/DevDashboardPage";
 
 function ComingSoonScreen({ title, onBack }) {
   return (
@@ -118,11 +119,16 @@ export default function App() {
     );
   }
 
+    if (import.meta.env.DEV && screen === "dev") {
+    return <DevDashboardPage />;
+  }
+
   return (
     <TreeHouseDashboard
       onGoToAdventures={() => setScreen("adventures")}
       onGoToMath={() => navigateTo("math")}
       onGoToWorld={() => navigateTo("world")}
+      onGoToDev={import.meta.env.DEV ? () => setScreen("dev") : undefined}
     />
   );
 }

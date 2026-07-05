@@ -11,7 +11,7 @@ import { useQuests } from "./hooks/useQuests";
 import { useProgressSummary } from "./hooks/useProgressSummary";
 import { useWorldProgressSummary } from "./hooks/useWorldProgressSummary";
 
-export function TreeHouseDashboard({ onGoToAdventures, onGoToMath, onGoToWorld }) {
+export function TreeHouseDashboard({ onGoToAdventures, onGoToMath, onGoToWorld, onGoToDev }) {
   const { data: player, isLoading, error } = usePlayer();
   const { data: quests, isLoading: questsLoading } = useQuests();
   const {
@@ -58,6 +58,17 @@ export function TreeHouseDashboard({ onGoToAdventures, onGoToMath, onGoToWorld }
           Open Adventure Hub
         </button>
       </section>
+
+    {onGoToDev && (
+      <section className="card adventure-gateway-card">
+        <p className="quest-realm">Development</p>
+        <h2>🛠 Developer Dashboard</h2>
+        <p>Reset progress, inspect saved state, and test adventure flows.</p>
+        <button className="secondary-button" onClick={onGoToDev}>
+            Open Dev Dashboard
+        </button>
+      </section>
+    )}
 
       <QuestBoard quest={quests?.[0]} isLoading={questsLoading} onGoToMath={onGoToMath} />
 
