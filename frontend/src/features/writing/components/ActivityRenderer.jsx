@@ -1,5 +1,8 @@
 import MissingPunctuationActivity from "./MissingPunctuationActivity";
 import MissingCapitalActivity from "./MissingCapitalActivity";
+import MissingWordActivity from "./MissingWordActivity";
+import SentenceOrderingActivity from "./SentenceOrderingActivity";
+import GrammarChoiceActivity from "./GrammarChoiceActivity";
 
 export default function ActivityRenderer({ lesson, onComplete }) {
   switch (lesson.activityType) {
@@ -12,6 +15,21 @@ export default function ActivityRenderer({ lesson, onComplete }) {
       return (
         <MissingCapitalActivity lesson={lesson} onComplete={onComplete} />
       );
+    
+    case "missing-word":
+        return (
+            <MissingWordActivity lesson={lesson} onComplete={onComplete} />
+        );
+    
+    case "sentence-ordering":
+        return (
+            <SentenceOrderingActivity lesson={lesson} onComplete={onComplete} />
+        );
+
+    case "grammar-choice":
+        return (
+            <GrammarChoiceActivity lesson={lesson} onComplete={onComplete} />
+        );
 
     default:
       return (

@@ -2,12 +2,16 @@ import { useState } from "react";
 import { WRITING_LESSONS } from "../writingLessons";
 import ActivityRenderer from "./ActivityRenderer";
 import WritingQuestLog from "./WritingQuestLog";
+import WritingBookProgress from "./WritingBookProgress";
+import { loadWritingProgress, saveWritingProgress } from "../writingStorage";
 
 export default function WritingAdventure() {
   const [scene, setScene] = useState("quest-log");
   const [activeLesson, setActiveLesson] = useState(null);
-  const [completedLessons, setCompletedLessons] = useState([]);
-  const [earnedXp, setEarnedXp] = useState(0);
+  const [progress, setProgress] = useState(() => loadWritingProgress());
+
+  const completedLessons = progress.completedLessons;
+  const earnedXp = progress.earnedXp;
 
   function handleStartLesson(lesson) {
     setActiveLesson(lesson);
@@ -18,12 +22,17 @@ export default function WritingAdventure() {
     if (!activeLesson) return;
 
     if (!completedLessons.includes(activeLesson.id)) {
-      setCompletedLessons((current) => [...current, activeLesson.id]);
-      setEarnedXp((current) => current + result.xp);
+        const nextProgress = {
+        completedLessons: [...completedLessons, activeLesson.id],
+        earnedXp: earnedXp + result.xp,
+        };
+
+        setProgress(nextProgress);
+        saveWritingProgress(nextProgress);
     }
 
     setScene("reward");
-  }
+    }
 
   if (scene === "activity" && activeLesson) {
     return (
@@ -74,6 +83,8 @@ export default function WritingAdventure() {
           <strong>{earnedXp}</strong>
         </div>
       </div>
+
+        <WritingBookProgress completedLessons={completedLessons} />
 
       <WritingQuestLog
         lessons={WRITING_LESSONS}
