@@ -40,4 +40,18 @@ export const WRITING_LESSONS = [
     prerequisite: "missing-question-1",
     successMessage: "The sentence now shines with excitement!",
   },
+  {
+    id: "missing-capital-1",
+    title: "The Missing Capital Letter",
+    description: "Every sentence needs a strong beginning.",
+    difficulty: "Easy",
+    realm: "Royal Library",
+    activityType: "missing-capital",
+    xp: 5,
+    sentence: "___ princess opened the royal library.",
+    choices: ["the", "The"],
+    answer: "The",
+    prerequisite: "missing-exclamation-1",
+    successMessage: "The royal scroll shines brighter!",
+},
 ];

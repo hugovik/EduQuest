@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { WRITING_LESSONS } from "../writingLessons";
-import MissingPunctuationActivity from "./MissingPunctuationActivity";
+import ActivityRenderer from "./ActivityRenderer";
 import WritingQuestLog from "./WritingQuestLog";
 
 export default function WritingAdventure() {
@@ -27,10 +27,10 @@ export default function WritingAdventure() {
 
   if (scene === "activity" && activeLesson) {
     return (
-      <MissingPunctuationActivity
-        lesson={activeLesson}
-        onComplete={handleComplete}
-      />
+        <ActivityRenderer
+            lesson={activeLesson}
+            onComplete={handleComplete}
+        />
     );
   }
 
