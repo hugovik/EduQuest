@@ -8,6 +8,7 @@ import useAdventureFlow from "../../adventure/hooks/useAdventureFlow";
 import { ADVENTURE_SCENES } from "../../adventure/adventureScenes";
 import WritingRewardScene from "./WritingRewardScene";
 import { getEarnedLessonXp, getCompletedBooks, } from "../../lesson/lessonUtils";
+import WritingStoryProgress from "./WritingStoryProgress";
 
 export default function WritingAdventure() {
   const { scene, goTo } = useAdventureFlow();
@@ -76,7 +77,9 @@ export default function WritingAdventure() {
         </div>
       </div>
 
-        <WritingBookProgress completedLessons={completedLessons} />
+      <WritingBookProgress completedLessons={completedLessons} />
+      
+      <WritingStoryProgress completedLessons={completedLessons} />
 
       <WritingQuestLog
         lessons={WRITING_LESSONS}
