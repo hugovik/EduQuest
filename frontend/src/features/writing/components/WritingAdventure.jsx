@@ -4,37 +4,39 @@ import ActivityRenderer from "./ActivityRenderer";
 import WritingQuestLog from "./WritingQuestLog";
 import WritingBookProgress from "./WritingBookProgress";
 import { loadWritingProgress, saveWritingProgress } from "../writingStorage";
+import useAdventureFlow from "../../adventure/hooks/useAdventureFlow";
+import { ADVENTURE_SCENES } from "../../adventure/adventureScenes";
+import WritingRewardScene from "./WritingRewardScene";
+import { getEarnedLessonXp, getCompletedBooks, } from "../../lesson/lessonUtils";
 
 export default function WritingAdventure() {
-  const [scene, setScene] = useState("quest-log");
+  const { scene, goTo } = useAdventureFlow();
   const [activeLesson, setActiveLesson] = useState(null);
   const [progress, setProgress] = useState(() => loadWritingProgress());
 
   const completedLessons = progress.completedLessons;
-  const earnedXp = progress.earnedXp;
+  const earnedXp = getEarnedLessonXp( WRITING_LESSONS, completedLessons );
+  const completedBooks = getCompletedBooks( WRITING_LESSONS, completedLessons);
 
   function handleStartLesson(lesson) {
     setActiveLesson(lesson);
-    setScene("activity");
+    goTo(ADVENTURE_SCENES.ACTIVITY);
   }
 
   function handleComplete(result) {
     if (!activeLesson) return;
 
     if (!completedLessons.includes(activeLesson.id)) {
-        const nextProgress = {
-        completedLessons: [...completedLessons, activeLesson.id],
-        earnedXp: earnedXp + result.xp,
-        };
+        const nextProgress = { completedLessons: [...completedLessons, activeLesson.id], };
 
         setProgress(nextProgress);
         saveWritingProgress(nextProgress);
     }
 
-    setScene("reward");
-    }
+    goTo(ADVENTURE_SCENES.REWARD);
+  }
 
-  if (scene === "activity" && activeLesson) {
+  if (scene === ADVENTURE_SCENES.ACTIVITY && activeLesson) {
     return (
         <ActivityRenderer
             lesson={activeLesson}
@@ -43,27 +45,17 @@ export default function WritingAdventure() {
     );
   }
 
-  if (scene === "reward" && activeLesson) {
-    return (
-      <section className="card state-card">
-        <h2>📖 Quest Complete!</h2>
-        <p>{activeLesson.successMessage}</p>
-        <p>
-          You earned <strong>{activeLesson.xp} XP</strong>.
-        </p>
-        <button
-          className="primary-button"
-          type="button"
-          onClick={() => {
-            setActiveLesson(null);
-            setScene("quest-log");
-          }}
-        >
-          Return to Quest Log
-        </button>
-      </section>
-    );
-  }
+  if (scene === ADVENTURE_SCENES.REWARD && activeLesson) {
+  return (
+    <WritingRewardScene
+      lesson={activeLesson}
+      onContinue={() => {
+        setActiveLesson(null);
+        goTo(ADVENTURE_SCENES.QUEST_LOG);
+      }}
+    />
+  );
+}
 
   return (
     <>
@@ -75,7 +67,7 @@ export default function WritingAdventure() {
 
         <div className="mini-stat-card">
           <span>Books Saved</span>
-          <strong>{completedLessons.length > 0 ? 1 : 0}</strong>
+          <strong>{completedBooks}</strong>
         </div>
 
         <div className="mini-stat-card">

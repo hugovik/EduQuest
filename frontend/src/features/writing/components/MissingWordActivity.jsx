@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { evaluateChoiceAnswer } from "../../lesson/lessonEvaluator";
+
+
 
 export default function MissingWordActivity({ lesson, onComplete }) {
   const [selected, setSelected] = useState(null);
@@ -9,7 +12,10 @@ export default function MissingWordActivity({ lesson, onComplete }) {
 
     setSelected(choice);
 
-    const correct = choice === lesson.answer;
+    const correct = evaluateChoiceAnswer(
+      lesson.payload.answer,
+      choice
+    );
     setResult(correct ? "correct" : "incorrect");
 
     if (correct) {
@@ -27,10 +33,10 @@ export default function MissingWordActivity({ lesson, onComplete }) {
 
       <p>Choose the word that completes the sentence.</p>
 
-      <div className="writing-sentence">{lesson.sentence}</div>
+      <div className="writing-sentence">{lesson.payload.sentence}</div>
 
       <div className="writing-choice-grid">
-        {lesson.choices.map((choice) => (
+        {lesson.payload.choices.map((choice) => (
           <button
             key={choice}
             className={`primary-button ${selected === choice ? "selected" : ""}`}

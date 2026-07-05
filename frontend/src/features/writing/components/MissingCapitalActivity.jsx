@@ -9,7 +9,7 @@ export default function MissingCapitalActivity({ lesson, onComplete }) {
 
     setSelected(choice);
 
-    const correct = choice === lesson.answer;
+    const correct = choice === lesson.payload.answer;
     setResult(correct ? "correct" : "incorrect");
 
     if (correct) {
@@ -27,10 +27,10 @@ export default function MissingCapitalActivity({ lesson, onComplete }) {
 
       <p>Which word should start this sentence?</p>
 
-      <div className="writing-sentence">{lesson.sentence}</div>
+      <div className="writing-sentence">{lesson.payload.sentence}</div>
 
       <div className="writing-choice-grid">
-        {lesson.choices.map((choice) => (
+        {lesson.payload.choices.map((choice) => (
           <button
             key={choice}
             className={`primary-button ${selected === choice ? "selected" : ""}`}

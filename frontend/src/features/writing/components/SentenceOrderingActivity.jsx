@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { evaluateOrderedWords } from "../../lesson/lessonEvaluator";
 
 export default function SentenceOrderingActivity({ lesson, onComplete }) {
   const [selectedWords, setSelectedWords] = useState([]);
@@ -19,7 +20,10 @@ export default function SentenceOrderingActivity({ lesson, onComplete }) {
   }
 
   function handleCheck() {
-    const correct = selectedWords.join(" ") === lesson.answer;
+    const correct = evaluateOrderedWords(
+      lesson.payload.answer,
+      selectedWords
+    );
     setResult(correct ? "correct" : "incorrect");
 
     if (correct) {
@@ -42,7 +46,7 @@ export default function SentenceOrderingActivity({ lesson, onComplete }) {
       </div>
 
       <div className="writing-choice-grid">
-        {lesson.words.map((word) => (
+        {lesson.payload.words.map((word) => (
           <button
             key={word}
             className="primary-button"
@@ -63,7 +67,7 @@ export default function SentenceOrderingActivity({ lesson, onComplete }) {
         <button
           className="primary-button"
           type="button"
-          disabled={selectedWords.length !== lesson.words.length}
+          disabled={selectedWords.length !== lesson.payload.words.length}
           onClick={handleCheck}
         >
           Check Sentence
