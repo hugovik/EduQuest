@@ -1,11 +1,7 @@
 export const adventureUnlockRules = {
   math: { type: "default", reason: "Unlocked by default" },
   reading: { type: "default", reason: "Unlocked by default" },
-  writing: {
-    type: "coming_soon",
-    reason: "Writing Kingdom is coming soon.",
-    requirement: "Complete Math Mountains and Reading Forest milestones to unlock Writing Kingdom.",
-  },
+  writing: { type: "default", reason: "Unlocked for Sprint 7.1", },
   geography: {
     type: "coming_soon",
     reason: "Geography Harbor is coming soon.",

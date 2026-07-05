@@ -43,14 +43,14 @@ export const adventureRegistry = [
   {
     id: "writing-kingdom",
     title: "Writing Kingdom",
-    description: "Build sentences, stories, and brave royal messages.",
+    description: "Restore magical books by rebuilding sentences, punctuation, and stories.",
     icon: "🏰",
     route: "writing",
-    status: ADVENTURE_STATUS.comingSoon,
+    status: ADVENTURE_STATUS.playable,
     subject: "writing",
     theme: ADVENTURE_THEMES.writing,
-    isPlayable: false,
-    isComingSoon: true,
+    isPlayable: true,
+    isComingSoon: false,
     requiredRegions: ["math-mountains", "reading-forest"],
   },
   {

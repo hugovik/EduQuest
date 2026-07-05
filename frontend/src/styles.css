@@ -1000,3 +1000,104 @@
     min-height: auto;
   }
 }
+
+/* Writing Kingdom Styles */
+
+.writing-kingdom-page {
+  gap: 1rem;
+}
+
+.writing-kingdom-hero {
+  background:
+    radial-gradient(circle at top left, rgba(255, 244, 196, 0.95), transparent 32%),
+    linear-gradient(135deg, #fff7df 0%, #f3e0ff 48%, #e7d2ff 100%);
+  border: 2px solid rgba(126, 87, 194, 0.25);
+}
+
+.quest-intro {
+  max-width: 720px;
+  font-size: 1.05rem;
+}
+
+.writing-librarian-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(126, 87, 194, 0.18);
+}
+
+.writing-librarian-avatar {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 28px;
+  font-size: 2.5rem;
+  background: rgba(126, 87, 194, 0.12);
+}
+
+.writing-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.writing-primary-quest {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 24px;
+  background: rgba(126, 87, 194, 0.12);
+}
+
+@media (max-width: 720px) {
+  .writing-librarian-card,
+  .writing-progress-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.writing-quest-log {
+  margin-top: 1.25rem;
+}
+
+.writing-quest-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.writing-quest-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(126, 87, 194, 0.18);
+}
+
+.writing-quest-card.completed {
+  border-color: rgba(96, 160, 95, 0.45);
+  background: rgba(236, 255, 232, 0.75);
+}
+
+.writing-quest-card.locked {
+  opacity: 0.65;
+}
+
+.writing-quest-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 720px) {
+  .writing-quest-card {
+    grid-template-columns: 1fr;
+  }
+}

@@ -51,14 +51,14 @@ ADVENTURE_REGISTRY = [
     {
         "id": "writing-kingdom",
         "title": "Writing Kingdom",
-        "description": "Build sentences, stories, and brave royal messages.",
+        "description": "Restore magical books by rebuilding sentences, punctuation, and stories.",
         "icon": "castle",
         "route": "writing",
-        "status": "coming_soon",
+        "status": "playable",
         "subject": "writing",
         "theme": "kingdom",
-        "is_playable": False,
-        "is_coming_soon": True,
+        "is_playable": True,
+        "is_coming_soon": False,
         "required_regions": ["math-mountains", "reading-forest"],
     },
     {
