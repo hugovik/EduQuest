@@ -1,0 +1,65 @@
+import { useState } from "react";
+import { evaluateChoiceAnswer } from "../../lesson/lessonEvaluator";
+
+
+
+export default function MissingWordActivity({ lesson, onComplete }) {
+  const [selected, setSelected] = useState(null);
+  const [result, setResult] = useState(null);
+
+  function handleChoice(choice) {
+    if (result === "correct") return;
+
+    setSelected(choice);
+
+    const correct = evaluateChoiceAnswer(
+      lesson.payload.answer,
+      choice
+    );
+    setResult(correct ? "correct" : "incorrect");
+
+    if (correct) {
+      onComplete?.({
+        xp: lesson.xp,
+        correct: true,
+      });
+    }
+  }
+
+  return (
+    <section className="card state-card">
+      <p className="quest-realm">{lesson.realm}</p>
+      <h2>{lesson.title}</h2>
+
+      <p>Choose the word that completes the sentence.</p>
+
+      <div className="writing-sentence">{lesson.payload.sentence}</div>
+
+      <div className="writing-choice-grid">
+        {lesson.payload.choices.map((choice) => (
+          <button
+            key={choice}
+            className={`primary-button ${selected === choice ? "selected" : ""}`}
+            type="button"
+            onClick={() => handleChoice(choice)}
+          >
+            {choice}
+          </button>
+        ))}
+      </div>
+
+      {result === "correct" && (
+        <div className="success-message">
+          ✨ {lesson.successMessage}
+          <br />+{lesson.xp} XP
+        </div>
+      )}
+
+      {result === "incorrect" && (
+        <div className="error-message">
+          Not quite. Try the word that makes the sentence sound complete.
+        </div>
+      )}
+    </section>
+  );
+}

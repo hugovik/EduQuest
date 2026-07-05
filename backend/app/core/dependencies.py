@@ -15,6 +15,7 @@ from app.repositories.world_state_repository import WorldStateRepository
 from app.repositories.world_quest_repository import WorldQuestRepository
 from app.services.achievement_service import AchievementService
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
+from app.services.adventure_service import AdventureService
 from app.services.adventure_unlock_service import AdventureUnlockService
 from app.services.daily_goal_service import DailyGoalService
 from app.services.inventory_service import InventoryService
@@ -100,6 +101,13 @@ def get_adventure_unlock_service() -> AdventureUnlockService:
     return AdventureUnlockService(
         child_repository=ChildRepository(),
         progress_summary_service=get_adventure_progress_summary_service(),
+    )
+
+
+def get_adventure_service() -> AdventureService:
+    return AdventureService(
+        progress_summary_service=get_adventure_progress_summary_service(),
+        adventure_unlock_service=get_adventure_unlock_service(),
     )
 
 

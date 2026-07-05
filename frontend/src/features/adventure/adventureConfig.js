@@ -1,69 +1,24 @@
-export const adventures = [
-  {
-    id: "math",
-    name: "Math Mountains",
-    route: "math",
-    icon: "⛰️",
-    description: "Repair bridges and solve number challenges.",
-    enabled: true,
-    status: "Ready",
-  },
-  {
-    id: "reading",
-    name: "Reading Forest",
-    route: "reading",
-    icon: "📖",
-    description: "Explore story paths and discover new words.",
-    enabled: true,
-    status: "Ready",
-  },
-  {
-    id: "writing",
-    name: "Writing Kingdom",
-    route: "writing",
-    icon: "✏️",
-    description: "Build sentences, tales, and royal messages.",
-    enabled: false,
-    status: "Coming Soon",
-  },
-  {
-    id: "story",
-    name: "Story Cave",
-    route: "story",
-    icon: "🕯️",
-    description: "Find hidden ideas and shape them into adventures.",
-    enabled: false,
-    status: "Coming Soon",
-  },
-  {
-    id: "geography",
-    name: "Geography Trail",
-    route: "geography",
-    icon: "🗺️",
-    description: "Follow maps, places, and world clues.",
-    enabled: false,
-    status: "Coming Soon",
-  },
-  {
-    id: "science",
-    name: "Science Lab",
-    route: "science",
-    icon: "🔬",
-    description: "Test ideas and investigate how things work.",
-    enabled: false,
-    status: "Coming Soon",
-  },
-  {
-    id: "music",
-    name: "Music Meadow",
-    route: "music",
-    icon: "🎵",
-    description: "Play with rhythm, pitch, and sound patterns.",
-    enabled: false,
-    status: "Coming Soon",
-  },
-];
+import { adventureRegistry, getAdventureBySubject } from "./adventureRegistry.js";
+
+export const adventures = adventureRegistry
+  .filter((adventure) => adventure.subject !== "home")
+  .map((adventure) => ({
+    id: adventure.subject,
+    name: adventure.title,
+    route: adventure.route,
+    icon: adventure.icon,
+    description: adventure.description,
+    enabled: adventure.isPlayable,
+    status: adventure.isComingSoon ? "Coming Soon" : "Ready",
+    registryId: adventure.id,
+  }));
 
 export function getAdventureById(adventureId) {
-  return adventures.find((adventure) => adventure.id === adventureId);
+  const registryAdventure = getAdventureBySubject(adventureId);
+
+  return adventures.find((adventure) => adventure.id === adventureId)
+    ?? adventures.find((adventure) => adventure.registryId === adventureId)
+    ?? (registryAdventure && adventures.find(
+      (adventure) => adventure.registryId === registryAdventure.id
+    ));
 }

@@ -4,6 +4,7 @@ import AdventureHubPage from "./features/adventure/AdventureHubPage";
 import { TreeHouseDashboard } from "./features/treehouse/TreeHouseDashboard";
 import MathMountainsPage from "./features/math/MathMountainsPage";
 import ReadingForestPage from "./features/reading/ReadingForestPage";
+import WritingKingdomPage from "./features/writing/WritingKingdomPage";
 import WorldMapPage from "./features/world/WorldMapPage";
 import { getResumeLocationFromWorldState, normalizeWorldLocation } from "./features/world/worldLocation";
 import "./styles.css";
@@ -23,7 +24,6 @@ function ComingSoonScreen({ title, onBack }) {
 }
 
 const screenTitles = {
-  writing: "Writing Kingdom",
   science: "Science Lab",
   geography: "Geography Harbor",
   music: "Music Meadow",
@@ -94,6 +94,10 @@ export default function App() {
 
   if (screen === "reading") {
     return <ReadingForestPage onBack={() => navigateTo("world")} />;
+  }
+
+  if (screen === "writing") {
+    return <WritingKingdomPage onBack={() => navigateTo("world")} />;
   }
 
   if (screen === "adventures") {

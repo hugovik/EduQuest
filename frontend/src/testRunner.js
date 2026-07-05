@@ -1,6 +1,7 @@
 import { runAchievementApiTests } from "./features/adventure/achievementApi.test.js";
 import { runAdventureApiTests } from "./features/world/adventureApi.test.js";
 import { runAdventureConfigTests } from "./features/adventure/adventureConfig.test.js";
+import { runAdventuresApiTests } from "./features/adventure/adventuresApi.test.js";
 import { runAdventureProgressApiTests } from "./features/adventure/adventureProgressApi.test.js";
 import { runAdventureUnlocksApiTests } from "./features/adventure/adventureUnlocksApi.test.js";
 import { runDailyGoalApiTests } from "./features/adventure/dailyGoalApi.test.js";
@@ -16,6 +17,7 @@ const tests = [
   ["achievement API", runAchievementApiTests],
   ["adventure API", runAdventureApiTests],
   ["adventure config", runAdventureConfigTests],
+  ["adventures API", runAdventuresApiTests],
   ["adventure progress API", runAdventureProgressApiTests],
   ["adventure unlocks API", runAdventureUnlocksApiTests],
   ["daily goal API", runDailyGoalApiTests],
