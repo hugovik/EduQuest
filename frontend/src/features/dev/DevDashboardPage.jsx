@@ -1,30 +1,19 @@
 import { useMemo, useState } from "react";
 import { resetBackendProgress } from "../../api/devApi.js";
+import {
+  exportStorageSnapshot,
+  getStorageSnapshot,
+  importStorageSnapshot,
+  resetStorageKeys,
+} from "../storage/storageService.js";
+import PageHeader from "../../components/PageHeader.jsx";
+import DashboardLayout from "../../components/DashboardLayout.jsx";
+import { ACHIEVEMENTS } from "../achievements/achievements.js";
+import { getUnlockedAchievements } from "../achievements/achievementService.js";
 
-const STORAGE_KEYS = [
-  "eduquest:world-state",
-  "eduquest:inventory",
-  "eduquest:writing-progress",
-  "eduquest:writing-books",
-  "eduquest:writing-stories",
-  "eduquest:math-progress",
-  "eduquest:reading-progress",
-];
-
-function getLocalSnapshot() {
-  return STORAGE_KEYS.reduce((snapshot, key) => {
-    snapshot[key] = localStorage.getItem(key);
-    return snapshot;
-  }, {});
-}
-
-function removeKeys(keys) {
-  keys.forEach((key) => localStorage.removeItem(key));
-}
-
-export default function DevDashboardPage() {
+export default function DevDashboardPage({ onBack }) {
   const [status, setStatus] = useState("");
-  const [snapshot, setSnapshot] = useState(() => getLocalSnapshot());
+  const [snapshot, setSnapshot] = useState(() => getStorageSnapshot());
   const [importText, setImportText] = useState("");
 
   const prettySnapshot = useMemo(
@@ -33,7 +22,7 @@ export default function DevDashboardPage() {
   );
 
   function refreshSnapshot(message = "Snapshot refreshed.") {
-    setSnapshot(getLocalSnapshot());
+    setSnapshot(getStorageSnapshot());
     setStatus(message);
   }
 
@@ -44,7 +33,7 @@ export default function DevDashboardPage() {
   async function handleResetLocalProgress() {
     if (!confirmAction("Reset all local EduQuest progress?")) return;
 
-    removeKeys(STORAGE_KEYS);
+    resetStorageKeys();
     refreshSnapshot("Local progress reset.");
   }
 
@@ -55,9 +44,9 @@ export default function DevDashboardPage() {
     refreshSnapshot("Backend progress reset.");
   }
 
-  function handleExport() {
-    const data = JSON.stringify(getLocalSnapshot(), null, 2);
-    navigator.clipboard?.writeText(data);
+  async function handleExport() {
+    const data = exportStorageSnapshot();
+    await navigator.clipboard?.writeText(data);
     setStatus("Progress JSON copied to clipboard.");
   }
 
@@ -68,17 +57,7 @@ export default function DevDashboardPage() {
 
     try {
       const parsed = JSON.parse(importText);
-
-      Object.entries(parsed).forEach(([key, value]) => {
-        if (!STORAGE_KEYS.includes(key)) return;
-
-        if (value === null || value === undefined) {
-          localStorage.removeItem(key);
-        } else {
-          localStorage.setItem(key, value);
-        }
-      });
-
+      importStorageSnapshot(parsed);
       refreshSnapshot("Progress JSON imported.");
       setImportText("");
     } catch {
@@ -87,17 +66,17 @@ export default function DevDashboardPage() {
   }
 
   return (
-    <main className="page-shell">
-      <section className="card dev-dashboard">
-        <p className="eyebrow">Development Only</p>
-        <h1>Developer Dashboard</h1>
-        <p>
-          Reset, inspect, export, and import EduQuest progress while developing
-          new adventures.
-        </p>
+    <DashboardLayout>
 
-        {status && <p className="helper-text">{status}</p>}
-      </section>
+        <PageHeader
+            eyebrow="Development Only"
+            title="Developer Dashboard"
+            description="Reset, inspect, export, and import EduQuest progress while developing new adventures."
+            onBack={onBack}
+            backLabel="← Back to Tree House"
+        />
+
+    {status && <p className="helper-text">{status}</p>}
 
       <section className="card">
         <h2>Progress Tools</h2>
@@ -111,6 +90,28 @@ export default function DevDashboardPage() {
           <button className="secondary-button" onClick={() => refreshSnapshot()}>
             Refresh Snapshot
           </button>
+        </div>
+      </section>
+
+      <section className="card">
+        <h2>Achievements</h2>
+
+        <div className="button-row">
+          <button className="secondary-button" onClick={handleResetLocalProgress}>
+            Reset Achievements
+          </button>
+        </div>
+
+        <div>
+          {ACHIEVEMENTS.map((achievement) => {
+            const unlocked = getUnlockedAchievements().includes(achievement.id);
+
+            return (
+              <p key={achievement.id}>
+                {unlocked ? "✅" : "⬜"} {achievement.icon} {achievement.title}
+              </p>
+            );
+          })}
         </div>
       </section>
 
@@ -137,6 +138,6 @@ export default function DevDashboardPage() {
         <h2>Raw Local State</h2>
         <pre>{prettySnapshot}</pre>
       </section>
-    </main>
+    </DashboardLayout>
   );
 }

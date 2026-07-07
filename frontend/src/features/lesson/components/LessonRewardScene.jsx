@@ -1,4 +1,4 @@
-export default function WritingRewardScene({
+export default function LessonRewardScene({
   lesson,
   onContinue,
 }) {

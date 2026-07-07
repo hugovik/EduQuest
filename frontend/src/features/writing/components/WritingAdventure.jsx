@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { WRITING_LESSONS } from "../writingLessons";
-import ActivityRenderer from "./ActivityRenderer";
+import ActivityRenderer from "../../lesson/components/ActivityRenderer";
 import WritingQuestLog from "./WritingQuestLog";
 import WritingBookProgress from "./WritingBookProgress";
 import { loadWritingProgress, saveWritingProgress } from "../writingStorage";
 import useAdventureFlow from "../../adventure/hooks/useAdventureFlow";
 import { ADVENTURE_SCENES } from "../../adventure/adventureScenes";
-import WritingRewardScene from "./WritingRewardScene";
+import LessonRewardScene from "../../lesson/components/LessonRewardScene";
 import { getEarnedLessonXp, getCompletedBooks, } from "../../lesson/lessonUtils";
 import WritingStoryProgress from "./WritingStoryProgress";
 
