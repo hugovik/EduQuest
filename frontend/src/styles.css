@@ -1149,3 +1149,367 @@
 .writing-book-card.locked {
   opacity: 0.65;
 }
+
+/* ==========================================
+   Developer Dashboard
+========================================== */
+
+.dev-dashboard {
+  margin-bottom: 1.5rem;
+}
+
+.dev-dashboard .eyebrow {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 193, 7, 0.15);
+  color: #8a5b00;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.dev-dashboard textarea,
+.card textarea {
+  width: 100%;
+  min-height: 180px;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  resize: vertical;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 0.9rem;
+}
+
+.card pre {
+  margin: 0;
+  padding: 1rem;
+  max-height: 500px;
+  overflow: auto;
+  border-radius: 10px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7eb;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.helper-text {
+  margin-top: 0.75rem;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* ==========================================
+   Science Lab
+========================================== */
+
+.science-lab-page {
+  gap: 1.5rem;
+}
+
+.science-experiment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.science-experiment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(74, 144, 226, 0.18);
+  box-shadow: 0 10px 24px rgba(31, 64, 104, 0.08);
+}
+
+.science-experiment-card h3 {
+  margin: 0;
+}
+
+.science-experiment-card p {
+  margin: 0;
+}
+
+.science-experiment-card.is-locked {
+  opacity: 0.65;
+}
+
+.science-equipment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.science-equipment-list span {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(74, 144, 226, 0.12);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.activity-card {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 1.5rem;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(31, 64, 104, 0.12);
+}
+
+.activity-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.activity-image {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  margin: 1rem 0;
+}
+
+.science-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.science-progress-item {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(74, 144, 226, 0.08);
+}
+
+.science-progress-item strong {
+  display: block;
+  font-size: 2rem;
+  color: #2d6cdf;
+}
+
+.science-progress-item span {
+  display: block;
+  margin-top: .25rem;
+  font-size: .9rem;
+}
+
+/* ==========================================
+   Science Hero
+========================================== */
+
+.science-hero {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    align-items: center;
+}
+
+.science-hero__content h2 {
+  margin: .5rem 0 1rem;
+  font-size: 2rem;
+}
+
+.science-hero__content p {
+  opacity: .95;
+  line-height: 1.6;
+}
+
+.science-hero__visual {
+  text-align: center;
+  font-size: 5rem;
+  animation: scienceFloat 4s ease-in-out infinite;
+}
+
+@keyframes scienceFloat {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@media (max-width: 768px) {
+  .science-hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+/* ==========================================
+   Professor Nova
+========================================== */
+
+.professor-panel {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.professor-panel__avatar {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+
+.professor-panel__content {
+  flex: 1;
+}
+
+.professor-panel__message {
+  margin-top: .5rem;
+  line-height: 1.7;
+}
+
+.professor-panel__subtitle {
+  margin: .25rem 0 .75rem;
+  font-size: 1.4rem;
+}
+.science-topic-section {
+  margin-top: 1.5rem;
+}
+
+.science-topic-header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid rgba(74, 144, 226, 0.18);
+}
+
+.science-topic-header h3 {
+  margin: 0;
+}
+
+.science-topic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.science-topic-progress {
+  width: 220px;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.science-topic-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #84cc16);
+  transition: width 0.3s ease;
+}
+
+/* ==========================================
+   Science Experiment Cards Polish
+========================================== */
+
+.science-experiment-card {
+  position: relative;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.science-experiment-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(31, 64, 104, 0.14);
+}
+
+.science-experiment-card.is-locked:hover {
+  transform: none;
+  box-shadow: 0 10px 24px rgba(31, 64, 104, 0.08);
+}
+
+.science-experiment-card .status-badge {
+  align-self: flex-start;
+}
+
+.science-experiment-card.is-unlocked {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.science-experiment-card.is-locked {
+  filter: grayscale(0.15);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-completed {
+  background: rgba(34, 197, 94, 0.14);
+  color: #166534;
+}
+
+.status-new {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
+}
+
+.status-locked {
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+}
+
+.achievement-toast {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 20px;
+  background: #fff7ed;
+  border: 2px solid #fed7aa;
+  box-shadow: 0 14px 30px rgba(124, 45, 18, 0.16);
+}
+
+.achievement-toast__icon {
+  font-size: 3rem;
+}
+
+.achievement-toast__content {
+  flex: 1;
+}
+
+.achievement-toast__content h3 {
+  margin: 0.25rem 0;
+}

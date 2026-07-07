@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { getWorldState, travelToWorldLocation } from "./api/worldApi";
 import AdventureHubPage from "./features/adventure/AdventureHubPage";
+import { adventurePages } from "./features/adventure/adventurePages";
 import { TreeHouseDashboard } from "./features/treehouse/TreeHouseDashboard";
-import MathMountainsPage from "./features/math/MathMountainsPage";
-import ReadingForestPage from "./features/reading/ReadingForestPage";
-import WritingKingdomPage from "./features/writing/WritingKingdomPage";
 import WorldMapPage from "./features/world/WorldMapPage";
-import { getResumeLocationFromWorldState, normalizeWorldLocation } from "./features/world/worldLocation";
+import {
+  getResumeLocationFromWorldState,
+  normalizeWorldLocation,
+} from "./features/world/worldLocation";
+import DevDashboardPage from "./features/dev/DevDashboardPage";
 import "./styles.css";
 
 function ComingSoonScreen({ title, onBack }) {
@@ -24,9 +26,8 @@ function ComingSoonScreen({ title, onBack }) {
 }
 
 const screenTitles = {
-  science: "Science Lab",
-  geography: "Geography Harbor",
-  music: "Music Meadow",
+  geography: "Geography Island",
+  music: "Music Valley",
 };
 
 export default function App() {
@@ -78,26 +79,26 @@ export default function App() {
     return <main className="dashboard">Loading EduQuest...</main>;
   }
 
+  if (import.meta.env.DEV && screen === "dev") {
+    return <DevDashboardPage onBack={() => setScreen("treehouse")} />;
+  }
+
   if (screen === "world") {
     return (
       <WorldMapPage
         worldState={worldState}
         onBack={() => navigateTo("treehouse")}
-        onNavigate={(nextScreen) => navigateTo(nextScreen, { allowOfflineFallback: false })}
+        onNavigate={(nextScreen) =>
+          navigateTo(nextScreen, { allowOfflineFallback: false })
+        }
       />
     );
   }
 
-  if (screen === "math") {
-    return <MathMountainsPage onBack={() => navigateTo("world")} />;
-  }
+  const AdventurePage = adventurePages[screen];
 
-  if (screen === "reading") {
-    return <ReadingForestPage onBack={() => navigateTo("world")} />;
-  }
-
-  if (screen === "writing") {
-    return <WritingKingdomPage onBack={() => navigateTo("world")} />;
+  if (AdventurePage) {
+    return <AdventurePage onBack={() => navigateTo("world")} />;
   }
 
   if (screen === "adventures") {
@@ -123,6 +124,7 @@ export default function App() {
       onGoToAdventures={() => setScreen("adventures")}
       onGoToMath={() => navigateTo("math")}
       onGoToWorld={() => navigateTo("world")}
+      onGoToDev={import.meta.env.DEV ? () => setScreen("dev") : undefined}
     />
   );
 }

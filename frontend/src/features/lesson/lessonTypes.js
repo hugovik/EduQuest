@@ -11,3 +11,7 @@ export const ACTIVITY_TYPES = {
   sentenceOrdering: "sentence-ordering",
   grammarChoice: "grammar-choice",
 };
+
+export const LESSON_TYPES = {
+  OBSERVATION: "observation",
+};

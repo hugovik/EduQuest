@@ -3,6 +3,8 @@ import MissingCapitalActivity from "./MissingCapitalActivity";
 import MissingWordActivity from "./MissingWordActivity";
 import SentenceOrderingActivity from "./SentenceOrderingActivity";
 import GrammarChoiceActivity from "./GrammarChoiceActivity";
+import ObservationActivity from "./ObservationActivity.jsx";
+import ClassificationActivity from "./ClassificationActivity.jsx";
 
 export default function ActivityRenderer({ lesson, onComplete }) {
   switch (lesson.activityType) {
@@ -30,6 +32,22 @@ export default function ActivityRenderer({ lesson, onComplete }) {
         return (
             <GrammarChoiceActivity lesson={lesson} onComplete={onComplete} />
         );
+
+    case "observation":
+        return (
+          <ObservationActivity
+           activity={lesson}
+           onComplete={onComplete}
+          />
+        );
+
+    case "classification":
+      return (
+        <ClassificationActivity
+          activity={lesson}
+          onComplete={onComplete}
+        />
+      );
 
     default:
       return (

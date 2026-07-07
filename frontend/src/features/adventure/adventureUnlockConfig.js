@@ -8,9 +8,8 @@ export const adventureUnlockRules = {
     requirement: "Complete the first Science Lab milestone to unlock Geography Harbor.",
   },
   science: {
-    type: "coming_soon",
-    reason: "Science Lab is coming soon.",
-    requirement: "Complete the first Writing Kingdom milestone to unlock Science Lab.",
+    type: "default",
+  reason: "Unlocked for Sprint 8.1",
   },
   music: {
     type: "coming_soon",
