@@ -7,6 +7,7 @@ from app.models.progress_event import ProgressEvent
 from app.models.quest import Quest
 from app.models.quest_completion import QuestCompletion
 from app.models.reading_progress import ReadingProgress
+from app.models.science_progress import ScienceProgress
 from app.repositories.child_repository import ChildRepository
 
 
@@ -28,6 +29,17 @@ class XPAuditService:
             .filter(
                 ReadingProgress.child_id == child_id,
                 ReadingProgress.completed.is_(True),
+            )
+            .scalar()
+            or 0
+        )
+
+    def get_science_experiment_xp(self, db: Session, child_id: int) -> int:
+        return int(
+            db.query(func.coalesce(func.sum(ScienceProgress.xp_awarded), 0))
+            .filter(
+                ScienceProgress.child_id == child_id,
+                ScienceProgress.completed.is_(True),
             )
             .scalar()
             or 0
@@ -112,10 +124,11 @@ class XPAuditService:
         hidden_reading_xp = reading_passage_xp - current_reading_level_xp
         quest_completion_xp_by_subject = self.get_quest_completion_xp_by_subject(db, child.id)
         quest_completion_xp = sum(quest_completion_xp_by_subject.values())
+        science_experiment_xp = self.get_science_experiment_xp(db, child.id)
         achievement_xp = self.get_achievement_xp(db, child.id)
         penalty_xp = self.get_penalty_xp(db, child.id)
         world_quest_xp = self.get_world_quest_xp(db, child.id)
-        adventure_xp_total = reading_passage_xp + quest_completion_xp
+        adventure_xp_total = reading_passage_xp + quest_completion_xp + science_experiment_xp
         reconciled_xp = adventure_xp_total + achievement_xp + world_quest_xp + penalty_xp
         unexplained_xp = child.xp - reconciled_xp
 
@@ -129,6 +142,7 @@ class XPAuditService:
             "reading_passage_xp": reading_passage_xp,
             "reading_passage_xp_by_level": reading_passage_xp_by_level,
             "hidden_reading_xp": hidden_reading_xp,
+            "science_experiment_xp": science_experiment_xp,
             "quest_completion_xp": quest_completion_xp,
             "quest_completion_xp_by_subject": quest_completion_xp_by_subject,
             "adventure_xp_total": adventure_xp_total,

@@ -47,6 +47,73 @@ export const SCIENCE_LESSONS = [
       },
     ],
   },
+
+  {
+    id: "electricity-3",
+    title: "Complete the Circuit",
+    xp: 20,
+    successMessage:
+      "Brilliant! You matched each circuit part to its job.",
+    activities: [
+      {
+        activityType: "matching",
+        prompt: "Match each circuit part to what it does.",
+        pairs: [
+          { left: "Battery", right: "Provides energy" },
+          { left: "Wire", right: "Carries electricity" },
+          { left: "Bulb", right: "Produces light" },
+          { left: "Switch", right: "Opens or closes the circuit" },
+        ],
+        options: [
+          "Provides energy",
+          "Carries electricity",
+          "Produces light",
+          "Opens or closes the circuit",
+        ],
+      },
+    ],
+  },
+  {
+    id: "electricity-4",
+    title: "Build the Circuit",
+    xp: 20,
+    successMessage:
+      "Wonderful! You built a working circuit step by step.",
+    activities: [
+      {
+        activityType: "sequencing",
+        prompt: "Put the circuit steps in the correct order.",
+        items: [
+          { id: "wire", label: "Connect the wire" },
+          { id: "battery", label: "Start with the battery" },
+          { id: "bulb", label: "Light the bulb" },
+          { id: "switch", label: "Add the switch" },
+        ],
+        correctOrder: ["battery", "wire", "switch", "bulb"],
+      },
+    ],
+  },
+  {
+    id: "electricity-5",
+    title: "What Happens Next?",
+    xp: 25,
+    successMessage:
+      "Excellent prediction! You understand how a simple circuit works.",
+    activities: [
+      {
+        activityType: "prediction",
+        prompt: "What happens if the battery is removed from the circuit?",
+        options: [
+          "The bulb goes out.",
+          "The bulb becomes brighter.",
+          "Nothing changes.",
+          "The wire turns into a battery.",
+        ],
+        correctIndex: 0,
+      },
+    ],
+  },
+
   {
   id: "magnets-1",
 

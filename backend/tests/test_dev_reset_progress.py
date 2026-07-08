@@ -20,6 +20,7 @@ from app.models.quest_completion import QuestCompletion
 from app.models.reading_passage import ReadingPassage
 from app.models.reading_progress import ReadingProgress
 from app.models.reading_story_state import ReadingStoryState
+from app.models.science_progress import ScienceProgress
 from app.models.tree_growth_event import TreeGrowthEvent
 from app.models.world_state import WorldState
 from app.models.world_quest import WorldQuest
@@ -100,6 +101,7 @@ def test_reset_progress_clears_all_gameplay_state_but_keeps_definitions():
             )
         )
         db.add(ReadingStoryState(child_id=child.id, current_chapter_id="reading-l2-01"))
+        db.add(ScienceProgress(child_id=child.id, experiment_id="electricity-1", xp_awarded=10, completed=True))
         db.add(WorldState(child_id=child.id, active_location="reading", last_region="reading"))
         db.add(
             WorldQuest(
@@ -152,6 +154,7 @@ def test_reset_progress_clears_all_gameplay_state_but_keeps_definitions():
             ObstacleProgress,
             ReadingProgress,
             ReadingStoryState,
+            ScienceProgress,
             WorldState,
             WorldQuest,
             QuestCompletion,

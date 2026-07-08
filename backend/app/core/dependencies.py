@@ -23,6 +23,7 @@ from app.services.learning_preference_service import LearningPreferenceService
 from app.services.quest_service import QuestService
 from app.services.reading_service import ReadingService
 from app.services.reward_service import RewardService
+from app.services.science_service import ScienceService
 from app.services.world_service import WorldService
 from app.services.world_quest_service import WorldQuestService
 from app.services.xp_audit_service import XPAuditService
@@ -81,6 +82,12 @@ def get_reading_service() -> ReadingService:
         daily_goal_service=get_daily_goal_service(),
         achievement_service=get_achievement_service(),
         inventory_service=get_inventory_service(),
+    )
+
+
+def get_science_service() -> ScienceService:
+    return ScienceService(
+        child_repository=ChildRepository(),
     )
 
 

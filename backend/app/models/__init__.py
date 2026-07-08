@@ -15,3 +15,4 @@ from .learning_streak import LearningStreak
 from .reading_passage import ReadingPassage
 from .reading_progress import ReadingProgress
 from .reading_story_state import ReadingStoryState
+from .science_progress import ScienceProgress

@@ -5,6 +5,9 @@ import SentenceOrderingActivity from "./SentenceOrderingActivity";
 import GrammarChoiceActivity from "./GrammarChoiceActivity";
 import ObservationActivity from "./ObservationActivity.jsx";
 import ClassificationActivity from "./ClassificationActivity.jsx";
+import MatchingActivity from "./MatchingActivity.jsx";
+import SequencingActivity from "./SequencingActivity.jsx";
+import PredictionActivity from "./PredictionActivity.jsx";
 
 export default function ActivityRenderer({ lesson, onComplete }) {
   switch (lesson.activityType) {
@@ -45,6 +48,30 @@ export default function ActivityRenderer({ lesson, onComplete }) {
       return (
         <ClassificationActivity
           activity={lesson}
+          onComplete={onComplete}
+        />
+      );
+
+    case "matching":
+      return (
+        <MatchingActivity
+          lesson={lesson}
+          onComplete={onComplete}
+        />
+      );
+
+    case "sequencing":
+      return (
+        <SequencingActivity
+          lesson={lesson}
+          onComplete={onComplete}
+        />
+      );
+
+    case "prediction":
+      return (
+        <PredictionActivity
+          lesson={lesson}
           onComplete={onComplete}
         />
       );

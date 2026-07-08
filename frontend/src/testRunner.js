@@ -10,6 +10,7 @@ import { runInventoryApiTests } from "./features/world/inventoryApi.test.js";
 import { runLearningLevelConfigTests } from "./features/learning/learningLevelConfig.test.js";
 import { runLearningPreferencesApiTests } from "./features/learning/learningPreferencesApi.test.js";
 import { runReadingApiTests } from "./features/reading/readingApi.test.js";
+import { runScienceApiTests } from "./features/science/scienceApi.test.js";
 import { runWorldApiTests } from "./features/world/worldApi.test.js";
 import { runWorldRegionConfigTests } from "./features/world/worldRegionConfig.test.js";
 
@@ -26,6 +27,7 @@ const tests = [
   ["learning level config", runLearningLevelConfigTests],
   ["learning preferences API", runLearningPreferencesApiTests],
   ["reading API", runReadingApiTests],
+  ["science API", runScienceApiTests],
   ["world API", runWorldApiTests],
   ["world region config", runWorldRegionConfigTests],
 ];

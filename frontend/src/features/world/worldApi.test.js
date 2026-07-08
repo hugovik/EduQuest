@@ -124,7 +124,7 @@ export async function runWorldApiTests() {
     assert(calls[2].url.endsWith("/world/travel"), "World travel URL should be used.");
     assert(calls[2].options.method === "POST", "World travel should post.");
     assert(normalizeWorldLocation("reading") === "reading", "Reading should be resumable.");
-    assert(normalizeWorldLocation("science") === "treehouse", "Invalid resume location should fall back.");
+    assert(normalizeWorldLocation("science") === "science", "Science should be resumable.");
     assert(getResumeLocationFromWorldState({ active_location: "world" }) === "world", "App should resume World Map.");
     assert(getResumeLocationFromWorldState({ active_location: "math" }) === "math", "App should resume Math Mountains.");
     assert(getResumeLocationFromWorldState({ active_location: "reading" }) === "reading", "App should resume Reading Forest.");

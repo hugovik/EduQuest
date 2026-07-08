@@ -5,8 +5,10 @@ from app.models.quest import Quest
 from app.models.quest_completion import QuestCompletion
 from app.models.reading_passage import ReadingPassage
 from app.models.reading_progress import ReadingProgress
+from app.models.science_progress import ScienceProgress
 from app.repositories.child_repository import ChildRepository
 from app.services.reading_service import READING_PASSAGES
+from app.services.science_service import SCIENCE_EXPERIMENTS
 
 ADVENTURE_TYPES = [
     "math",
@@ -163,6 +165,33 @@ class AdventureProgressSummaryService:
             "status": "not_started",
         }
 
+    def get_science_summary(self, db: Session, child_id: int, level: int) -> dict:
+        completed_experiments = (
+            db.query(ScienceProgress)
+            .filter(
+                ScienceProgress.child_id == child_id,
+                ScienceProgress.completed.is_(True),
+            )
+            .count()
+        )
+        xp_earned = (
+            db.query(func.coalesce(func.sum(ScienceProgress.xp_awarded), 0))
+            .filter(
+                ScienceProgress.child_id == child_id,
+                ScienceProgress.completed.is_(True),
+            )
+            .scalar()
+        )
+        total_experiments = len(SCIENCE_EXPERIMENTS)
+
+        return {
+            "completed_quests": completed_experiments,
+            "total_quests": total_experiments,
+            "xp_earned": xp_earned,
+            "level": level,
+            "status": self.get_status(completed_experiments, total_experiments),
+        }
+
     def get_summary(self, db: Session) -> dict:
         child = self.get_child_or_create_default(db)
         summary = {
@@ -184,6 +213,11 @@ class AdventureProgressSummaryService:
             db,
             child.id,
             "writing",
+            child.level,
+        )
+        summary["science"] = self.get_science_summary(
+            db,
+            child.id,
             child.level,
         )
 

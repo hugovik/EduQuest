@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import DashboardLayout from "../../components/DashboardLayout.jsx";
 import PageHeader from "../../components/PageHeader.jsx";
@@ -9,6 +9,7 @@ import { getAdventureStats } from "../progress/progressService.js";
 import AdventureProgressCard from "../progress/components/AdventureProgressCard.jsx";
 import ProfessorNovaPanel from "./components/ProfessorNovaPanel.jsx";
 import StatusBadge from "../adventure/components/StatusBadge.jsx";
+import { getScienceProgress } from "../../api/scienceApi.js";
 
 function groupExperimentsByTopic(experiments) {
   return experiments.reduce((groups, experiment) => {
@@ -27,6 +28,30 @@ function groupExperimentsByTopic(experiments) {
 export default function ScienceLabPage({ onBack }) {
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [progressVersion, setProgressVersion] = useState(0);
+  const [backendProgress, setBackendProgress] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBackendProgress() {
+      try {
+        const progress = await getScienceProgress();
+        if (!cancelled) {
+          setBackendProgress(progress);
+        }
+      } catch {
+        if (!cancelled) {
+          setBackendProgress(null);
+        }
+      }
+    }
+
+    loadBackendProgress();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [progressVersion]);
 
   let completedLessons = [];
   let completedCount = 0;
@@ -48,6 +73,12 @@ try {
   console.error("Science stats error:", error);
   throw error;
 }
+
+const backendCompletedLessons = backendProgress?.completed_experiments ?? [];
+completedLessons = Array.from(new Set([...completedLessons, ...backendCompletedLessons]));
+completedCount = Math.max(completedCount, backendProgress?.experiments_completed ?? completedLessons.length);
+totalLessons = Math.max(totalLessons, backendProgress?.total_experiments ?? 0);
+scienceXp = backendProgress?.xp_earned ?? scienceXp;
 
 const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
 
