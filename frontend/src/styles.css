@@ -1513,3 +1513,43 @@
 .achievement-toast__content h3 {
   margin: 0.25rem 0;
 }
+
+.matching-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1rem;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+
+.matching-row select {
+  padding: 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #d6d6d6;
+}
+.sequencing-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.sequencing-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: #f7fbff;
+  border: 1px solid #d7e8ff;
+}
+
+.activity-options {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.activity-options button {
+  text-align: left;
+}

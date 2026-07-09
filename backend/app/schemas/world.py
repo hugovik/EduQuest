@@ -66,3 +66,5 @@ class WorldProgressSummaryRead(BaseModel):
     inventory_count: int
     math: dict[str, Any]
     reading: dict[str, Any]
+    writing: dict[str, Any]
+    science: dict[str, Any]

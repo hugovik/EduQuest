@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.models.quest import Quest
 from app.models.quest_completion import QuestCompletion
 from app.models.reading_progress import ReadingProgress
+from app.models.science_progress import ScienceProgress
+from app.models.writing_progress import WritingProgress
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_unlock_service import AdventureUnlockService
 
@@ -216,6 +218,26 @@ class AdventureService:
             .scalar()
         )
 
+    def get_science_last_activity(self, db: Session, child_id: int):
+        return (
+            db.query(func.max(ScienceProgress.updated_at))
+            .filter(
+                ScienceProgress.child_id == child_id,
+                ScienceProgress.completed.is_(True),
+            )
+            .scalar()
+        )
+
+    def get_writing_last_activity(self, db: Session, child_id: int):
+        return (
+            db.query(func.max(WritingProgress.updated_at))
+            .filter(
+                WritingProgress.child_id == child_id,
+                WritingProgress.completed.is_(True),
+            )
+            .scalar()
+        )
+
     def get_adventure_progress(self, db: Session, adventure_id: str) -> dict | None:
         adventure = self.find_adventure(adventure_id)
 
@@ -245,6 +267,12 @@ class AdventureService:
                 child.id,
                 child.grade or child.level,
             )
+        elif subject == "science":
+            correct_answers = completed
+            last_activity = self.get_science_last_activity(db, child.id)
+        elif subject == "writing":
+            correct_answers = completed
+            last_activity = self.get_writing_last_activity(db, child.id)
 
         unlock_state = self.get_unlock_state(db, adventure)
 

@@ -17,6 +17,8 @@ class XPAuditRead(BaseModel):
     reading_passage_xp: int
     reading_passage_xp_by_level: list[ReadingLevelXPAuditRead]
     hidden_reading_xp: int
+    writing_lesson_xp: int
+    science_experiment_xp: int
     quest_completion_xp: int
     quest_completion_xp_by_subject: dict[str, int]
     adventure_xp_total: int

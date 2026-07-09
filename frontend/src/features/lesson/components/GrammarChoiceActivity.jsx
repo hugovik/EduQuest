@@ -20,8 +20,10 @@ export default function GrammarChoiceActivity({ lesson, onComplete }) {
 
     if (correct) {
       onComplete?.({
-        xp: lesson.xp,
         correct: true,
+        score: 1,
+        attempts: 1,
+        xpRequested: lesson.xp ?? 0,
       });
     }
   }

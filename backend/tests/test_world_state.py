@@ -127,10 +127,10 @@ def test_invalid_location_rejected(db_session, world_service):
 
 def test_travel_to_coming_soon_region_is_blocked(db_session, world_service):
     with pytest.raises(HTTPException) as exc_info:
-        world_service.travel(db_session, "writing")
+        world_service.travel(db_session, "geography")
 
     assert exc_info.value.status_code == 403
-    assert exc_info.value.detail == "Writing Kingdom is coming soon."
+    assert exc_info.value.detail == "Geography Harbor is coming soon."
 
 
 def test_world_state_includes_progress_summary_and_unlocks(db_session, world_service):
@@ -141,7 +141,7 @@ def test_world_state_includes_progress_summary_and_unlocks(db_session, world_ser
     assert state["unlocks"]["math"]["unlocked"] is True
     assert state["unlocks"]["reading"]["unlocked"] is True
     assert state["regions"][0]["region_key"] == "treehouse"
-    assert any(region["coming_soon"] for region in state["regions"] if region["region_key"] == "writing")
+    assert any(region["coming_soon"] for region in state["regions"] if region["region_key"] == "geography")
     assert state["overarching_quest"]["title"] == "Restore the EduQuest World"
     assert len(state["quest_steps"]) == 4
 
@@ -180,7 +180,7 @@ def test_world_progress_summary_returns_parent_visible_world_progress(db_session
     assert summary["last_region"] == "reading"
     assert summary["visited_regions"] == ["math", "reading"]
     assert summary["total_regions"] == 6
-    assert summary["unlocked_regions"] == 2
+    assert summary["unlocked_regions"] == 4
     assert summary["completed_regions"] >= 1
     assert summary["world_quest"]["title"] == "Restore the EduQuest World"
     assert summary["world_quest"]["progress_percent"] == state["quest_progress_percent"]

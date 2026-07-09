@@ -13,9 +13,11 @@ from app.models.progress_event import ProgressEvent
 from app.models.quest_completion import QuestCompletion
 from app.models.reading_progress import ReadingProgress
 from app.models.reading_story_state import ReadingStoryState
+from app.models.science_progress import ScienceProgress
 from app.models.tree_growth_event import TreeGrowthEvent
 from app.models.world_state import WorldState
 from app.models.world_quest import WorldQuest
+from app.models.writing_progress import WritingProgress
 
 router = APIRouter(prefix="/dev", tags=["dev"])
 
@@ -30,6 +32,8 @@ RESET_TABLES = [
     ObstacleProgress,
     ReadingProgress,
     ReadingStoryState,
+    ScienceProgress,
+    WritingProgress,
     WorldState,
     WorldQuest,
     QuestCompletion,

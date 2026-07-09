@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardLayout from "../../../components/DashboardLayout.jsx";
 import PageHeader from "../../../components/PageHeader.jsx";
+import { invalidateGlobalProgress } from "../../../api/invalidateGlobalProgress.js";
+import { completeScienceExperiment } from "../../../api/scienceApi";
+import { queryKeys } from "../../../api/queryKeys";
 import ActivityRenderer from "../../lesson/components/ActivityRenderer";
 import LessonRewardScene from "../../lesson/components/LessonRewardScene";
 import ExperimentIntro from "./ExperimentIntro";
@@ -11,16 +15,15 @@ import { SCIENCE_EXPERIMENTS } from "../scienceExperiments";
 import { completeAdventureLesson } from "../../progress/progressService.js";
 import ProfessorNovaPanel from "./ProfessorNovaPanel";
 import AchievementToast from "../../achievements/AchievementToast.jsx";
-import {
-  getAchievement,
-  unlockAchievement,
-} from "../../achievements/achievementService.js";
 
 export default function ScienceAdventure({ lessonId, onExit }) {
+  const queryClient = useQueryClient();
   const [activeLessonId, setActiveLessonId] = useState(lessonId);
   const [showIntro, setShowIntro] = useState(true);
   const [showReward, setShowReward] = useState(false);
   const [unlockedAchievement, setUnlockedAchievement] = useState(null);
+  const [completionError, setCompletionError] = useState("");
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const activeLesson = SCIENCE_LESSONS.find(
     (lesson) => lesson.id === activeLessonId
@@ -38,23 +41,41 @@ export default function ScienceAdventure({ lessonId, onExit }) {
 
   const currentActivity = activeLesson.activities[0];
 
-  function completeLesson() {
-    completeAdventureLesson({
-      adventureKey: "science",
-      lessonId: activeLesson.id,
-    });
-
-    const didUnlock = unlockAchievement("science-first-experiment");
-
-    if (didUnlock) {
-      setUnlockedAchievement(
-        getAchievement("science-first-experiment")
-      );
+  async function completeLesson() {
+    if (isCompleting) {
       return;
     }
 
+    setIsCompleting(true);
+    setCompletionError("");
+
+    try {
+      const result = await completeScienceExperiment(activeLesson.id);
+
+      completeAdventureLesson({
+        adventureKey: "science",
+        lessonId: activeLesson.id,
+      });
+
+      queryClient.setQueryData(queryKeys.player, result.child);
+      invalidateGlobalProgress(queryClient);
+      queryClient.invalidateQueries({ queryKey: queryKeys.adventureProgress("science-lab") });
+
+      const unlockedScienceAchievement = result.achievements_unlocked?.[0];
+
+      if (unlockedScienceAchievement) {
+        setUnlockedAchievement(unlockedScienceAchievement);
+        setIsCompleting(false);
+        return;
+      }
+    } catch (error) {
+      setCompletionError("The lab notebook could not save this experiment. Please try again.");
+      setIsCompleting(false);
+      return;
+    }
 
     setShowReward(true);
+    setIsCompleting(false);
   }
 
   function handleContinue() {
@@ -115,6 +136,18 @@ export default function ScienceAdventure({ lessonId, onExit }) {
           mood="curious"
           message={dialogue.encouragement}
         />
+      )}
+
+      {isCompleting && (
+        <section className="card state-card" role="status">
+          <p>Saving your science discovery...</p>
+        </section>
+      )}
+
+      {completionError && (
+        <section className="card state-card state-card-error" role="alert">
+          <p>{completionError}</p>
+        </section>
       )}
 
       <ActivityRenderer

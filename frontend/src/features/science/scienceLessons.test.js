@@ -1,0 +1,42 @@
+import { SCIENCE_EXPERIMENTS } from "./scienceExperiments.js";
+import { SCIENCE_LESSONS } from "./scienceLessons.js";
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function runScienceLessonsTests() {
+  const magnetExperiments = SCIENCE_EXPERIMENTS.filter(
+    (experiment) => experiment.group === "Magnetism"
+  );
+  const magnetLessons = SCIENCE_LESSONS.filter((lesson) =>
+    lesson.id.startsWith("magnets-")
+  );
+  const magnetActivityTypes = magnetLessons.map(
+    (lesson) => lesson.activities[0].activityType
+  );
+  const electricityFiveIndex = SCIENCE_EXPERIMENTS.findIndex(
+    (experiment) => experiment.id === "electricity-5"
+  );
+  const magnetOneIndex = SCIENCE_EXPERIMENTS.findIndex(
+    (experiment) => experiment.id === "magnets-1"
+  );
+
+  assert(magnetExperiments.length === 5, "Magnetism should have five experiments.");
+  assert(magnetLessons.length === 5, "Magnetism should have five lessons.");
+  assert(
+    magnetOneIndex === electricityFiveIndex + 1,
+    "Magnetism should unlock after Electricity in the experiment order."
+  );
+  assert(
+    magnetActivityTypes.join(",") ===
+      "observation,classification,matching,sequencing,prediction",
+    "Magnetism should reuse the shared activity components in order."
+  );
+  assert(
+    magnetLessons.every((lesson) => lesson.xp > 0 && lesson.successMessage),
+    "Every Magnetism lesson should define an XP reward and completion message."
+  );
+}

@@ -56,7 +56,7 @@ def test_adventures_return_shared_registry_metadata(db_session, adventure_servic
     assert "reading-forest" in adventure_ids
     assert "writing-kingdom" in adventure_ids
     assert adventure_service.get_adventure(db_session, "math-mountains")["is_playable"] is True
-    assert adventure_service.get_adventure(db_session, "writing-kingdom")["is_coming_soon"] is True
+    assert adventure_service.get_adventure(db_session, "writing-kingdom")["is_playable"] is True
 
 
 def test_math_progress_maps_existing_quest_completion(db_session, adventure_service):
@@ -118,7 +118,7 @@ def test_reading_progress_maps_existing_reading_progress(db_session, adventure_s
 
 
 def test_future_adventure_progress_returns_safe_defaults(db_session, adventure_service):
-    progress = adventure_service.get_adventure_progress(db_session, "writing-kingdom")
+    progress = adventure_service.get_adventure_progress(db_session, "geography-island")
 
     assert progress["activities_completed"] == 0
     assert progress["correct_answers"] == 0
