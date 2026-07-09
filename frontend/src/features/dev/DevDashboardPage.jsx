@@ -94,7 +94,10 @@ export default function DevDashboardPage({ onBack }) {
       </section>
 
       <section className="card">
-        <h2>Achievements</h2>
+        <h2>Local Achievements</h2>
+        <p className="helper-text">
+          These are browser-saved achievement flags used by older adventure UI. Backend achievements are the source of truth for new completion flows.
+        </p>
 
         <div className="button-row">
           <button className="secondary-button" onClick={handleResetLocalProgress}>

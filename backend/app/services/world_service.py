@@ -177,6 +177,8 @@ class WorldService:
             "inventory_count": inventory_count,
             "math": state["progress_summary"].get("math", {}),
             "reading": state["progress_summary"].get("reading", {}),
+            "writing": state["progress_summary"].get("writing", {}),
+            "science": state["progress_summary"].get("science", {}),
         }
 
     def validate_location(self, location: str):

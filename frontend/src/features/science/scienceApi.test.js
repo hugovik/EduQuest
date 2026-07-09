@@ -19,7 +19,7 @@ export async function runScienceApiTests() {
         json: async () => ({
           completed_experiments: ["electricity-1"],
           experiments_completed: 1,
-          total_experiments: 6,
+          total_experiments: 10,
           xp_earned: 10,
         }),
       };

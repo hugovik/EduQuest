@@ -19,7 +19,12 @@ export default function MatchingActivity({
     );
 
     if (correct) {
-      onComplete?.({ correct: true });
+      onComplete?.({
+        correct: true,
+        score: 1,
+        attempts: 1,
+        xpRequested: lesson.xp ?? 0,
+      });
     } else {
       alert("Not quite! Try again.");
     }

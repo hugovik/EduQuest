@@ -5,14 +5,17 @@ import { runAdventuresApiTests } from "./features/adventure/adventuresApi.test.j
 import { runAdventureProgressApiTests } from "./features/adventure/adventureProgressApi.test.js";
 import { runAdventureUnlocksApiTests } from "./features/adventure/adventureUnlocksApi.test.js";
 import { runDailyGoalApiTests } from "./features/adventure/dailyGoalApi.test.js";
+import { runActivityContractTests } from "./features/lesson/activityContract.test.js";
 import { runGenerateMathProblemTests } from "./features/math/utils/generateMathProblem.test.js";
 import { runInventoryApiTests } from "./features/world/inventoryApi.test.js";
 import { runLearningLevelConfigTests } from "./features/learning/learningLevelConfig.test.js";
 import { runLearningPreferencesApiTests } from "./features/learning/learningPreferencesApi.test.js";
 import { runReadingApiTests } from "./features/reading/readingApi.test.js";
 import { runScienceApiTests } from "./features/science/scienceApi.test.js";
+import { runScienceLessonsTests } from "./features/science/scienceLessons.test.js";
 import { runWorldApiTests } from "./features/world/worldApi.test.js";
 import { runWorldRegionConfigTests } from "./features/world/worldRegionConfig.test.js";
+import { runWritingApiTests } from "./features/writing/writingApi.test.js";
 
 const tests = [
   ["achievement API", runAchievementApiTests],
@@ -22,14 +25,17 @@ const tests = [
   ["adventure progress API", runAdventureProgressApiTests],
   ["adventure unlocks API", runAdventureUnlocksApiTests],
   ["daily goal API", runDailyGoalApiTests],
+  ["activity contract", runActivityContractTests],
   ["math problem generation", runGenerateMathProblemTests],
   ["inventory API", runInventoryApiTests],
   ["learning level config", runLearningLevelConfigTests],
   ["learning preferences API", runLearningPreferencesApiTests],
   ["reading API", runReadingApiTests],
   ["science API", runScienceApiTests],
+  ["science lessons", runScienceLessonsTests],
   ["world API", runWorldApiTests],
   ["world region config", runWorldRegionConfigTests],
+  ["writing API", runWritingApiTests],
 ];
 
 let failures = 0;

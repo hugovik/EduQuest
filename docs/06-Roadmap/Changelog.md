@@ -2,6 +2,29 @@
 
 ---
 
+## Sprint 8.11 — Core Engine Unification
+
+### Added
+
+- Backend-backed Writing Kingdom lesson completion and progress.
+- Shared backend `AdventureCompletionService` for Science and Writing XP/event/tree updates.
+- Backend Science first-experiment achievement unlock response.
+- Shared frontend `invalidateGlobalProgress()` helper.
+
+### Changed
+
+- Science and Writing completion flows now refresh global progress consistently.
+- Lesson activity components now use the normalized `lesson` prop contract.
+- Global adventure progress summaries include Math, Reading, Writing, and Science.
+
+### Verified
+
+- Backend tests: `117 passed`
+- Frontend smoke tests: `17 frontend test suites passed`
+- Frontend build: passed
+
+---
+
 # Purpose
 
 This document records the evolution of EduQuest throughout its development.

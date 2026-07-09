@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardLayout from "../../../components/DashboardLayout.jsx";
 import PageHeader from "../../../components/PageHeader.jsx";
+import { invalidateGlobalProgress } from "../../../api/invalidateGlobalProgress.js";
 import { completeScienceExperiment } from "../../../api/scienceApi";
 import { queryKeys } from "../../../api/queryKeys";
 import ActivityRenderer from "../../lesson/components/ActivityRenderer";
@@ -14,10 +15,6 @@ import { SCIENCE_EXPERIMENTS } from "../scienceExperiments";
 import { completeAdventureLesson } from "../../progress/progressService.js";
 import ProfessorNovaPanel from "./ProfessorNovaPanel";
 import AchievementToast from "../../achievements/AchievementToast.jsx";
-import {
-  getAchievement,
-  unlockAchievement,
-} from "../../achievements/achievementService.js";
 
 export default function ScienceAdventure({ lessonId, onExit }) {
   const queryClient = useQueryClient();
@@ -61,28 +58,21 @@ export default function ScienceAdventure({ lessonId, onExit }) {
       });
 
       queryClient.setQueryData(queryKeys.player, result.child);
-      queryClient.invalidateQueries({ queryKey: queryKeys.player });
-      queryClient.invalidateQueries({ queryKey: queryKeys.progressSummary });
-      queryClient.invalidateQueries({ queryKey: queryKeys.adventureProgressSummary });
-      queryClient.invalidateQueries({ queryKey: queryKeys.worldProgressSummary });
-      queryClient.invalidateQueries({ queryKey: queryKeys.worldState });
+      invalidateGlobalProgress(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.adventureProgress("science-lab") });
+
+      const unlockedScienceAchievement = result.achievements_unlocked?.[0];
+
+      if (unlockedScienceAchievement) {
+        setUnlockedAchievement(unlockedScienceAchievement);
+        setIsCompleting(false);
+        return;
+      }
     } catch (error) {
       setCompletionError("The lab notebook could not save this experiment. Please try again.");
       setIsCompleting(false);
       return;
     }
-
-    const didUnlock = unlockAchievement("science-first-experiment");
-
-    if (didUnlock) {
-      setUnlockedAchievement(
-        getAchievement("science-first-experiment")
-      );
-      setIsCompleting(false);
-      return;
-    }
-
 
     setShowReward(true);
     setIsCompleting(false);

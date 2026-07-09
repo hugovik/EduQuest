@@ -6,26 +6,20 @@ from app.schemas.achievement import AchievementRead
 from app.schemas.child import ChildRead
 
 
-class ScienceExperimentRead(BaseModel):
-    id: str
-    title: str
-    xp: int
-
-
-class ScienceProgressRead(BaseModel):
-    completed_experiments: list[str]
-    experiments_completed: int
-    total_experiments: int
+class WritingProgressRead(BaseModel):
+    completed_lessons: list[str]
+    lessons_completed: int
+    total_lessons: int
     xp_earned: int
 
 
-class ScienceExperimentCompletionRead(BaseModel):
-    experiment_id: str
+class WritingLessonCompletionRead(BaseModel):
+    lesson_id: str
     completed: bool
+    already_completed: bool
     xp_awarded: int
     total_xp: int
-    already_completed: bool
     child: ChildRead
-    progress: ScienceProgressRead
+    progress: WritingProgressRead
     achievements_unlocked: list[AchievementRead] = []
     completed_at: datetime | None = None

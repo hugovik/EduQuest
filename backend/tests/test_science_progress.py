@@ -1,4 +1,5 @@
 import pytest
+from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -8,7 +9,10 @@ from app.models.child import Child
 from app.models.progress_event import ProgressEvent
 from app.models.science_progress import ScienceProgress
 from app.models.tree_growth_event import TreeGrowthEvent
+from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.child_repository import ChildRepository
+from app.services.achievement_service import AchievementService
+from app.services.adventure_completion_service import AdventureCompletionService
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.science_service import ScienceService
 
@@ -33,7 +37,14 @@ def db_session():
 
 @pytest.fixture()
 def science_service():
-    return ScienceService(child_repository=ChildRepository())
+    return ScienceService(
+        child_repository=ChildRepository(),
+        completion_service=AdventureCompletionService(),
+        achievement_service=AchievementService(
+            child_repository=ChildRepository(),
+            achievement_repository=AchievementRepository(),
+        ),
+    )
 
 
 def test_science_completion_awards_xp_once(db_session, science_service):
@@ -59,6 +70,16 @@ def test_science_completion_awards_xp_once(db_session, science_service):
     assert db_session.query(TreeGrowthEvent).count() == 1
 
 
+def test_science_first_experiment_achievement_unlocks_once(db_session, science_service):
+    result = science_service.complete_experiment(db_session, "electricity-1")
+    replay = science_service.complete_experiment(db_session, "electricity-1")
+
+    assert [achievement.id for achievement in result["achievements_unlocked"]] == [
+        "science-first-experiment"
+    ]
+    assert replay["achievements_unlocked"] == []
+
+
 def test_science_progress_persists_completed_experiments(db_session, science_service):
     science_service.complete_experiment(db_session, "electricity-1")
     science_service.complete_experiment(db_session, "electricity-2")
@@ -80,3 +101,50 @@ def test_adventure_summary_includes_science_xp_and_completion(db_session, scienc
     assert summary["science"]["total_quests"] >= 1
     assert summary["science"]["xp_earned"] == 10
     assert summary["science"]["status"] == "in_progress"
+
+
+def test_magnetism_locked_until_electricity_is_completed(db_session, science_service):
+    with pytest.raises(HTTPException) as exc_info:
+        science_service.complete_experiment(db_session, "magnets-1")
+
+    assert exc_info.value.status_code == 403
+    assert "Complete What Happens Next" in exc_info.value.detail
+
+    for experiment_id in [
+        "electricity-1",
+        "electricity-2",
+        "electricity-3",
+        "electricity-4",
+        "electricity-5",
+    ]:
+        science_service.complete_experiment(db_session, experiment_id)
+
+    result = science_service.complete_experiment(db_session, "magnets-1")
+
+    assert result["completed"] is True
+    assert result["xp_awarded"] == 15
+    assert result["already_completed"] is False
+
+
+def test_magnetism_lessons_unlock_sequentially(db_session, science_service):
+    for experiment_id in [
+        "electricity-1",
+        "electricity-2",
+        "electricity-3",
+        "electricity-4",
+        "electricity-5",
+        "magnets-1",
+    ]:
+        science_service.complete_experiment(db_session, experiment_id)
+
+    with pytest.raises(HTTPException) as exc_info:
+        science_service.complete_experiment(db_session, "magnets-3")
+
+    assert exc_info.value.status_code == 403
+    assert "Complete Magnetic or Not?" in exc_info.value.detail
+
+    science_service.complete_experiment(db_session, "magnets-2")
+    result = science_service.complete_experiment(db_session, "magnets-3")
+
+    assert result["completed"] is True
+    assert result["xp_awarded"] == 20

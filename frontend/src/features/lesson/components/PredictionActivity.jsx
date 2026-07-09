@@ -7,7 +7,12 @@ export default function PredictionActivity({ lesson, onComplete }) {
     setSelected(index);
 
     if (index === lesson.correctIndex) {
-      onComplete?.({ correct: true });
+      onComplete?.({
+        correct: true,
+        score: 1,
+        attempts: 1,
+        xpRequested: lesson.xp ?? 0,
+      });
     } else {
       alert("Not quite! Try again.");
     }

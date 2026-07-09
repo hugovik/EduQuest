@@ -38,8 +38,8 @@ export default function ActivityRenderer({ lesson, onComplete }) {
 
     case "observation":
         return (
-          <ObservationActivity
-           activity={lesson}
+        <ObservationActivity
+           lesson={lesson}
            onComplete={onComplete}
           />
         );
@@ -47,7 +47,7 @@ export default function ActivityRenderer({ lesson, onComplete }) {
     case "classification":
       return (
         <ClassificationActivity
-          activity={lesson}
+          lesson={lesson}
           onComplete={onComplete}
         />
       );

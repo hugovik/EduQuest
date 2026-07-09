@@ -6,9 +6,11 @@ from app.models.quest_completion import QuestCompletion
 from app.models.reading_passage import ReadingPassage
 from app.models.reading_progress import ReadingProgress
 from app.models.science_progress import ScienceProgress
+from app.models.writing_progress import WritingProgress
 from app.repositories.child_repository import ChildRepository
 from app.services.reading_service import READING_PASSAGES
 from app.services.science_service import SCIENCE_EXPERIMENTS
+from app.services.writing_service import WRITING_LESSONS
 
 ADVENTURE_TYPES = [
     "math",
@@ -192,6 +194,33 @@ class AdventureProgressSummaryService:
             "status": self.get_status(completed_experiments, total_experiments),
         }
 
+    def get_writing_summary(self, db: Session, child_id: int, level: int) -> dict:
+        completed_lessons = (
+            db.query(WritingProgress)
+            .filter(
+                WritingProgress.child_id == child_id,
+                WritingProgress.completed.is_(True),
+            )
+            .count()
+        )
+        xp_earned = (
+            db.query(func.coalesce(func.sum(WritingProgress.xp_awarded), 0))
+            .filter(
+                WritingProgress.child_id == child_id,
+                WritingProgress.completed.is_(True),
+            )
+            .scalar()
+        )
+        total_lessons = len(WRITING_LESSONS)
+
+        return {
+            "completed_quests": completed_lessons,
+            "total_quests": total_lessons,
+            "xp_earned": xp_earned,
+            "level": level,
+            "status": self.get_status(completed_lessons, total_lessons),
+        }
+
     def get_summary(self, db: Session) -> dict:
         child = self.get_child_or_create_default(db)
         summary = {
@@ -209,12 +238,7 @@ class AdventureProgressSummaryService:
             child.id,
             child.grade or child.level,
         )
-        summary["writing"] = self.get_subject_summary(
-            db,
-            child.id,
-            "writing",
-            child.level,
-        )
+        summary["writing"] = self.get_writing_summary(db, child.id, child.level)
         summary["science"] = self.get_science_summary(
             db,
             child.id,

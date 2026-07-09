@@ -24,6 +24,7 @@ from app.models.science_progress import ScienceProgress
 from app.models.tree_growth_event import TreeGrowthEvent
 from app.models.world_state import WorldState
 from app.models.world_quest import WorldQuest
+from app.models.writing_progress import WritingProgress
 
 
 def make_db_session():
@@ -102,6 +103,7 @@ def test_reset_progress_clears_all_gameplay_state_but_keeps_definitions():
         )
         db.add(ReadingStoryState(child_id=child.id, current_chapter_id="reading-l2-01"))
         db.add(ScienceProgress(child_id=child.id, experiment_id="electricity-1", xp_awarded=10, completed=True))
+        db.add(WritingProgress(child_id=child.id, lesson_id="missing-period-1", xp_awarded=5, completed=True))
         db.add(WorldState(child_id=child.id, active_location="reading", last_region="reading"))
         db.add(
             WorldQuest(
@@ -155,6 +157,7 @@ def test_reset_progress_clears_all_gameplay_state_but_keeps_definitions():
             ReadingProgress,
             ReadingStoryState,
             ScienceProgress,
+            WritingProgress,
             WorldState,
             WorldQuest,
             QuestCompletion,

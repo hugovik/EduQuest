@@ -14,6 +14,7 @@ from app.repositories.tree_growth_event_repository import TreeGrowthEventReposit
 from app.repositories.world_state_repository import WorldStateRepository
 from app.repositories.world_quest_repository import WorldQuestRepository
 from app.services.achievement_service import AchievementService
+from app.services.adventure_completion_service import AdventureCompletionService
 from app.services.adventure_progress_summary_service import AdventureProgressSummaryService
 from app.services.adventure_service import AdventureService
 from app.services.adventure_unlock_service import AdventureUnlockService
@@ -26,6 +27,7 @@ from app.services.reward_service import RewardService
 from app.services.science_service import ScienceService
 from app.services.world_service import WorldService
 from app.services.world_quest_service import WorldQuestService
+from app.services.writing_service import WritingService
 from app.services.xp_audit_service import XPAuditService
 
 
@@ -34,6 +36,10 @@ def get_achievement_service() -> AchievementService:
         child_repository=ChildRepository(),
         achievement_repository=AchievementRepository(),
     )
+
+
+def get_adventure_completion_service() -> AdventureCompletionService:
+    return AdventureCompletionService()
 
 
 def get_quest_service() -> QuestService:
@@ -88,6 +94,15 @@ def get_reading_service() -> ReadingService:
 def get_science_service() -> ScienceService:
     return ScienceService(
         child_repository=ChildRepository(),
+        completion_service=get_adventure_completion_service(),
+        achievement_service=get_achievement_service(),
+    )
+
+
+def get_writing_service() -> WritingService:
+    return WritingService(
+        child_repository=ChildRepository(),
+        completion_service=get_adventure_completion_service(),
     )
 
 

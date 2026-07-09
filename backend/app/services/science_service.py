@@ -5,14 +5,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.child import Child
-from app.models.progress_event import ProgressEvent
 from app.models.science_progress import ScienceProgress
-from app.models.tree_growth_event import TreeGrowthEvent
 from app.repositories.child_repository import ChildRepository
-from app.services.progression_rules import (
-    calculate_level_from_xp,
-    calculate_tree_stage_from_xp,
-)
+from app.services.achievement_service import AchievementService
+from app.services.adventure_completion_service import AdventureCompletionService
 
 
 SCIENCE_EXPERIMENTS = {
@@ -22,12 +18,25 @@ SCIENCE_EXPERIMENTS = {
     "electricity-4": {"id": "electricity-4", "title": "Build the Circuit", "xp": 20},
     "electricity-5": {"id": "electricity-5", "title": "What Happens Next?", "xp": 25},
     "magnets-1": {"id": "magnets-1", "title": "Magnet Mystery", "xp": 15},
+    "magnets-2": {"id": "magnets-2", "title": "Magnetic or Not?", "xp": 15},
+    "magnets-3": {"id": "magnets-3", "title": "Strong vs Weak", "xp": 20},
+    "magnets-4": {"id": "magnets-4", "title": "Find the Hidden Magnet", "xp": 20},
+    "magnets-5": {"id": "magnets-5", "title": "Compass Adventure", "xp": 25},
 }
+
+SCIENCE_EXPERIMENT_ORDER = list(SCIENCE_EXPERIMENTS.keys())
 
 
 class ScienceService:
-    def __init__(self, child_repository: ChildRepository):
+    def __init__(
+        self,
+        child_repository: ChildRepository,
+        completion_service: AdventureCompletionService,
+        achievement_service: AchievementService | None = None,
+    ):
         self.child_repository = child_repository
+        self.completion_service = completion_service
+        self.achievement_service = achievement_service
 
     def get_child_or_create_default(self, db: Session) -> Child:
         child = self.child_repository.get_first(db)
@@ -57,6 +66,38 @@ class ScienceService:
             )
             .order_by(ScienceProgress.completed_at.asc())
             .all()
+        )
+
+    def get_completed_experiment_ids(self, db: Session, child_id: int) -> set[str]:
+        return {
+            row.experiment_id
+            for row in self.get_progress_rows(db, child_id)
+        }
+
+    def validate_experiment_unlocked(
+        self,
+        db: Session,
+        child_id: int,
+        experiment_id: str,
+    ) -> None:
+        experiment_index = SCIENCE_EXPERIMENT_ORDER.index(experiment_id)
+
+        if experiment_index == 0:
+            return
+
+        previous_experiment_id = SCIENCE_EXPERIMENT_ORDER[experiment_index - 1]
+        completed_experiment_ids = self.get_completed_experiment_ids(db, child_id)
+
+        if previous_experiment_id in completed_experiment_ids:
+            return
+
+        previous_experiment = SCIENCE_EXPERIMENTS[previous_experiment_id]
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                f"Complete {previous_experiment['title']} to unlock "
+                f"{SCIENCE_EXPERIMENTS[experiment_id]['title']}."
+            ),
         )
 
     def serialize_progress(self, db: Session, child_id: int) -> dict:
@@ -103,14 +144,13 @@ class ScienceService:
                 "already_completed": True,
                 "child": child,
                 "progress": self.serialize_progress(db, child.id),
+                "achievements_unlocked": [],
                 "completed_at": existing_progress.completed_at,
             }
 
-        previous_tree_stage = child.tree_stage
+        self.validate_experiment_unlocked(db, child.id, experiment_id)
+
         xp_awarded = experiment["xp"]
-        child.xp += xp_awarded
-        child.level = calculate_level_from_xp(child.xp)
-        child.tree_stage = calculate_tree_stage_from_xp(child.xp)
 
         progress = existing_progress or ScienceProgress(
             child_id=child.id,
@@ -123,26 +163,25 @@ class ScienceService:
         if existing_progress is None:
             db.add(progress)
 
-        db.add(
-            ProgressEvent(
-                child_id=child.id,
-                quest_completion_id=None,
-                event_type="science_experiment_completed",
-                title=f"Completed {experiment['title']}",
-                description=f"{child.name} completed a Science Lab experiment.",
-                xp_change=xp_awarded,
-            )
+        self.completion_service.apply_xp_reward(
+            db,
+            child,
+            xp_awarded=xp_awarded,
+            event_type="science_experiment_completed",
+            title=f"Completed {experiment['title']}",
+            description=f"{child.name} completed a Science Lab experiment.",
+            growth_type="science_discovery",
+            growth_description="The Tree of Growth shimmered with science energy.",
         )
-        db.add(
-            TreeGrowthEvent(
-                child_id=child.id,
-                quest_completion_id=None,
-                growth_type="science_discovery"
-                if child.tree_stage != previous_tree_stage
-                else "science_spark",
-                description="The Tree of Growth shimmered with science energy.",
+        achievements_unlocked = []
+        if self.achievement_service is not None:
+            achievements_unlocked = self.achievement_service.evaluate(
+                db,
+                "science_experiment_completed",
+                child=child,
+                source_adventure="science",
+                metadata=experiment_id,
             )
-        )
 
         db.commit()
         db.refresh(child)
@@ -156,5 +195,6 @@ class ScienceService:
             "already_completed": False,
             "child": child,
             "progress": self.serialize_progress(db, child.id),
+            "achievements_unlocked": achievements_unlocked,
             "completed_at": progress.completed_at,
         }

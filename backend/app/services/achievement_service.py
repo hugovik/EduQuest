@@ -97,6 +97,13 @@ BASE_ACHIEVEMENTS = [
         "category": "adventure",
         "icon": "🛤️",
     },
+    {
+        "id": "science-first-experiment",
+        "name": "First Experiment",
+        "description": "Complete your first science experiment.",
+        "category": "science",
+        "icon": "🧪",
+    },
 ]
 
 
@@ -260,6 +267,11 @@ class AchievementService:
         if event_type == "adventure_entered":
             earned.append(
                 self.award_once(db, child, "first_adventure_entered", source_adventure, metadata)
+            )
+
+        if event_type == "science_experiment_completed":
+            earned.append(
+                self.award_once(db, child, "science-first-experiment", source_adventure or "science", metadata)
             )
 
         return [achievement for achievement in earned if achievement is not None]
