@@ -10,6 +10,8 @@ import AdventureProgressCard from "../progress/components/AdventureProgressCard.
 import ProfessorNovaPanel from "./components/ProfessorNovaPanel.jsx";
 import StatusBadge from "../adventure/components/StatusBadge.jsx";
 import { getScienceProgress } from "../../api/scienceApi.js";
+import { SCIENCE_TOPICS } from "./scienceTopics.js";
+
 
 function groupExperimentsByTopic(experiments) {
   return experiments.reduce((groups, experiment) => {
@@ -29,6 +31,7 @@ export default function ScienceLabPage({ onBack }) {
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [progressVersion, setProgressVersion] = useState(0);
   const [backendProgress, setBackendProgress] = useState(null);
+  const [openTopicId, setOpenTopicId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,7 +130,10 @@ const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
       <section className="card">
         <h2>Experiment Log</h2>
 
-        {Object.entries(experimentGroups).map(([groupName, experiments]) => {
+        {SCIENCE_TOPICS.map((topic) => {
+          const groupName = topic.title;
+          const experiments = experimentGroups[topic.title] ?? [];
+          const isTopicOpen = openTopicId === topic.id;
           const completedInGroup = experiments.filter((experiment) =>
             completedLessons.includes(experiment.id)
           ).length;
@@ -141,34 +147,48 @@ const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
 
           return (
           <section className="science-topic-section" key={groupName}>  
-           <div className="science-topic-header">
-            <div>
-              <h3>{groupName}</h3>
-              <p>
-                {completedInGroup} / {totalInGroup} Experiments Completed
-              </p>
-            </div>
+            <button
+              type="button"
+              className="science-topic-header"
+              onClick={() =>
+                setOpenTopicId((current) => (current === topic.id ? null : topic.id))
+              }
+            >
+              <div>
+                <h3>
+                  {topic.icon} {topic.title}
+                </h3>
+                <p>{topic.description}</p>
+                <p>
+                  {completedInGroup} / {totalInGroup} Experiments Completed
+                </p>
+              </div>
 
-            <div className="science-topic-progress">
-              <div
-                className="science-topic-progress-bar"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
+              <div className="science-topic-progress">
+                <div
+                  className="science-topic-progress-bar"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
 
+              <span className="science-topic-toggle">
+                {isTopicOpen ?  "▼" : "▶"}
+              </span>
+            </button>
+
+          {isTopicOpen && (
             <div className="science-experiment-grid">
               {experiments.map((experiment) => {
-                const globalIndex = SCIENCE_EXPERIMENTS.findIndex(
-                  (item) => item.id === experiment.id
-                );
+               const topicIndex = experiments.findIndex(
+                (item) => item.id === experiment.id
+              );
 
-                const previousExperiment =
-                  globalIndex === 0 ? null : SCIENCE_EXPERIMENTS[globalIndex - 1];
+              const previousTopicExperiment =
+                topicIndex === 0 ? null : experiments[topicIndex - 1];
 
-                const isUnlocked =
-                  globalIndex === 0 ||
-                  completedLessons.includes(previousExperiment.id);
+              const isUnlocked =
+                topicIndex === 0 ||
+                completedLessons.includes(previousTopicExperiment.id);
 
                 const isCompleted = completedLessons.includes(experiment.id);
 
@@ -221,15 +241,17 @@ const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
                         : isUnlocked
                           ? hasLesson
                             ? "Start Experiment"
-                            : "Lesson Coming Soon"
+                            : "Mission Coming Soon"
                           : "Locked"}
                     </button>
                   </article>
                 );
               })}
             </div>
+          )}
           </section>
-        );})}
+        );
+      })}
       </section>
     </DashboardLayout>
   );

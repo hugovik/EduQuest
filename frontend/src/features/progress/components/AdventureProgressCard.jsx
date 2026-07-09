@@ -21,7 +21,7 @@ export default function AdventureProgressCard({
 
         <div className="science-progress-item">
           <strong>{total}</strong>
-          <span>Total Lessons</span>
+          <span>Total Missions</span>
         </div>
       </div>
     </section>

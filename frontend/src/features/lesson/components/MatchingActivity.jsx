@@ -18,16 +18,12 @@ export default function MatchingActivity({
       (pair) => matches[pair.left] === pair.right
     );
 
-    if (correct) {
-      onComplete?.({
-        correct: true,
-        score: 1,
-        attempts: 1,
-        xpRequested: lesson.xp ?? 0,
-      });
-    } else {
-      alert("Not quite! Try again.");
-    }
+    onComplete?.({
+      correct,
+      score: correct ? 1 : 0,
+      attempts: 1,
+      xpRequested: correct ? lesson.xp ?? 0 : 0,
+    });
   }
 
   return (

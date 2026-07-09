@@ -16,7 +16,7 @@ export async function completeWritingLesson(lessonId) {
   });
 
   if (!response.ok) {
-    throw new Error("Unable to complete Writing Kingdom lesson.");
+    throw new Error("Unable to complete Writing Kingdom mission.");
   }
 
   return response.json();

@@ -4,9 +4,13 @@ export default function LessonRewardScene({
 }) {
   return (
     <section className="card state-card">
-      <h2>📖 Quest Complete!</h2>
+      <h2>🚀 Mission Complete!</h2>
 
       <p>{lesson.successMessage}</p>
+
+      {lesson.unlockMessage && (
+        <p>{lesson.unlockMessage}</p>
+      )}
 
       <p>
         You earned <strong>{lesson.xp} XP</strong>.
@@ -17,7 +21,7 @@ export default function LessonRewardScene({
         type="button"
         onClick={onContinue}
       >
-        Return to Quest Log
+        Return to Mission Log
       </button>
     </section>
   );

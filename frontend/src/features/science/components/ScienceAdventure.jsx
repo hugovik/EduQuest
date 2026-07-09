@@ -15,15 +15,19 @@ import { SCIENCE_EXPERIMENTS } from "../scienceExperiments";
 import { completeAdventureLesson } from "../../progress/progressService.js";
 import ProfessorNovaPanel from "./ProfessorNovaPanel";
 import AchievementToast from "../../achievements/AchievementToast.jsx";
+import LessonBriefing from "../../../components/LessonBriefing.jsx";
 
 export default function ScienceAdventure({ lessonId, onExit }) {
   const queryClient = useQueryClient();
   const [activeLessonId, setActiveLessonId] = useState(lessonId);
   const [showIntro, setShowIntro] = useState(true);
+  const [showBriefing, setShowBriefing] = useState(false);
   const [showReward, setShowReward] = useState(false);
   const [unlockedAchievement, setUnlockedAchievement] = useState(null);
   const [completionError, setCompletionError] = useState("");
+  const [activityFeedback, setActivityFeedback] = useState("");
   const [isCompleting, setIsCompleting] = useState(false);
+  const [hasStartedLesson, setHasStartedLesson] = useState(false);
 
   const activeLesson = SCIENCE_LESSONS.find(
     (lesson) => lesson.id === activeLessonId
@@ -39,15 +43,25 @@ export default function ScienceAdventure({ lessonId, onExit }) {
     return null;
   }
 
-  const currentActivity = activeLesson.activities[0];
+  const currentActivity = {
+    ...activeLesson.activities[0],
+    xp: activeLesson.xp,
+    successMessage: activeLesson.successMessage,
+  };
 
-  async function completeLesson() {
+  async function completeLesson(result = { correct: true }) {
     if (isCompleting) {
+      return;
+    }
+
+    if (!result.correct) {
+      setActivityFeedback(dialogue.retry ?? "Good try! Take another look and try again.");
       return;
     }
 
     setIsCompleting(true);
     setCompletionError("");
+    setActivityFeedback("");
 
     try {
       const result = await completeScienceExperiment(activeLesson.id);
@@ -80,6 +94,7 @@ export default function ScienceAdventure({ lessonId, onExit }) {
 
   function handleContinue() {
     setShowReward(false);
+    setShowBriefing(false);
     setShowIntro(true);
     setActiveLessonId(null);
     onExit?.();
@@ -89,11 +104,42 @@ export default function ScienceAdventure({ lessonId, onExit }) {
     return (
       <ExperimentIntro
         experiment={activeExperiment}
-        onBegin={() => setShowIntro(false)}
+        onBegin={() => {
+          setShowIntro(false);
+          setShowBriefing(true);
+        }}
       />
     );
   }
+  if (showBriefing) {
+    return (
+      <DashboardLayout>
+        <PageHeader
+          eyebrow={activeExperiment.topic}
+          title={activeExperiment.title}
+          description={activeExperiment.description}
+        />
 
+        <LessonBriefing
+          title={activeLesson.title}
+          icon={activeExperiment.equipment?.[0]?.icon ?? "🔬"}
+          guideName="Professor Nova"
+          guideAvatar="👩‍🔬"
+          guideMessage={activeLesson.professorMessage}
+          learningObjective={activeLesson.learningObjective}
+          vocabulary={activeLesson.vocabulary}
+          funFact={activeLesson.funFact}
+          estimatedMinutes={activeLesson.estimatedMinutes}
+          difficulty={activeLesson.difficulty}
+          onBack={() => {
+            setShowBriefing(false);
+            setShowIntro(true);
+          }}
+          onStart={() => setShowBriefing(false)}
+        />
+      </DashboardLayout>
+    );
+  }
   if (unlockedAchievement) {
     return (
       <DashboardLayout>
@@ -112,7 +158,8 @@ export default function ScienceAdventure({ lessonId, onExit }) {
     const rewardLesson = {
       ...activeLesson,
       successMessage:
-        activeExperiment.intro?.success ?? activeLesson.successMessage,
+        dialogue.success ?? activeLesson.successMessage,
+      unlockMessage: dialogue.unlock,
     };
 
     return (
@@ -147,6 +194,12 @@ export default function ScienceAdventure({ lessonId, onExit }) {
       {completionError && (
         <section className="card state-card state-card-error" role="alert">
           <p>{completionError}</p>
+        </section>
+      )}
+
+      {activityFeedback && (
+        <section className="card state-card" role="status">
+          <p>{activityFeedback}</p>
         </section>
       )}
 

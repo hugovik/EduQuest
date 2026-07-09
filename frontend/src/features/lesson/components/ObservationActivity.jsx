@@ -5,10 +5,19 @@ export default function ObservationActivity({
   onComplete,
 }) {
   const [selected, setSelected] = useState(null);
+  const [answeredCorrectly, setAnsweredCorrectly] = useState(false);
 
   function choose(index) {
+    if (answeredCorrectly) {
+      return;
+    }
+
     setSelected(index);
     const correct = index === lesson.correctIndex;
+
+    if (correct) {
+      setAnsweredCorrectly(true);
+    }
 
     onComplete({
       correct,
@@ -40,7 +49,7 @@ export default function ObservationActivity({
                 : "secondary-button"
             }
             onClick={() => choose(index)}
-            disabled={selected !== null}
+            disabled={answeredCorrectly}
           >
             {option}
           </button>

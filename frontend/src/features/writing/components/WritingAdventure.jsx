@@ -23,6 +23,7 @@ export default function WritingAdventure() {
   const [backendProgress, setBackendProgress] = useState(null);
   const [completionResult, setCompletionResult] = useState(null);
   const [completionError, setCompletionError] = useState("");
+  const [activityFeedback, setActivityFeedback] = useState("");
   const [isCompleting, setIsCompleting] = useState(false);
 
   useEffect(() => {
@@ -64,8 +65,14 @@ export default function WritingAdventure() {
     if (!activeLesson) return;
     if (isCompleting) return;
 
+    if (result && result.correct === false) {
+      setActivityFeedback("Good try! Read the sentence again and try once more.");
+      return;
+    }
+
     setIsCompleting(true);
     setCompletionError("");
+    setActivityFeedback("");
 
     try {
       const completion = await completeWritingLesson(activeLesson.id);
@@ -81,7 +88,7 @@ export default function WritingAdventure() {
         saveWritingProgress(nextProgress);
       }
     } catch {
-      setCompletionError("The Royal Library could not save this lesson. Please try again.");
+      setCompletionError("The Royal Library could not save this mission. Please try again.");
       setIsCompleting(false);
       return;
     }
@@ -101,6 +108,11 @@ export default function WritingAdventure() {
         {completionError && (
           <section className="card state-card state-card-error" role="alert">
             <p>{completionError}</p>
+          </section>
+        )}
+        {activityFeedback && (
+          <section className="card state-card" role="status">
+            <p>{activityFeedback}</p>
           </section>
         )}
         <ActivityRenderer

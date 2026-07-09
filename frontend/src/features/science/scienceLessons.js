@@ -1,6 +1,13 @@
 export const SCIENCE_LESSONS = [
   {
     id: "electricity-1",
+        curriculum: {
+        grade: 2,
+        subject: "Science",
+        strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "A bulb needs the right parts to light up. Let's discover what electricity needs to travel.",
     title: "What Makes the Bulb Glow?",
     xp: 10,
     successMessage:
@@ -13,9 +20,32 @@ export const SCIENCE_LESSONS = [
         correctIndex: 0,
       },
     ],
+    learningObjective:
+      "Learn that electricity can make a light bulb shine when all the parts are connected correctly.",
+
+    vocabulary: [
+      "electricity",
+      "battery",
+      "bulb",
+      "wire"
+    ],
+
+    funFact:
+      "A tiny battery stores energy that can travel through wires to light a bulb.",
+
+    estimatedMinutes: 5,
+
+    difficulty: 1,
   },
   {
     id: "electricity-2",
+    curriculum: {
+      grade: 2,
+      subject: "Science",
+      strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "Many things around us need power. Let's find which objects use electricity.",
     title: "Power Source",
     xp: 15,
     successMessage:
@@ -33,9 +63,32 @@ export const SCIENCE_LESSONS = [
         ],
       },
     ],
+    learningObjective:
+      "Identify common objects that use electricity as a source of power.",
+
+    vocabulary: [
+      "power",
+      "battery",
+      "electricity",
+      "energy"
+    ],
+
+    funFact:
+      "Some toys use batteries, while others plug into a wall for electricity.",
+
+    estimatedMinutes: 5,
+
+    difficulty: 1,
   },
   {
     id: "electricity-3",
+    curriculum: {
+      grade: 2,
+      subject: "Science",
+      strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "Electricity needs a complete path. Let's connect the pieces and see what happens.",
     title: "Complete the Circuit",
     xp: 20,
     successMessage: "Brilliant! You matched each circuit part to its job.",
@@ -57,9 +110,32 @@ export const SCIENCE_LESSONS = [
         ],
       },
     ],
+    learningObjective:
+      "Understand that electricity needs a complete circuit to flow.",
+
+    vocabulary: [
+      "circuit",
+      "flow",
+      "connect",
+      "wire"
+    ],
+
+    funFact:
+      "If there is even one small gap in a circuit, electricity cannot flow.",
+
+    estimatedMinutes: 6,
+
+    difficulty: 1,
   },
   {
     id: "electricity-4",
+    curriculum: {
+      grade: 2,
+      subject: "Science",
+      strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "Building a circuit is like following a recipe. Let's put the steps in the right order.",
     title: "Build the Circuit",
     xp: 20,
     successMessage: "Wonderful! You built a working circuit step by step.",
@@ -76,9 +152,32 @@ export const SCIENCE_LESSONS = [
         correctOrder: ["battery", "wire", "switch", "bulb"],
       },
     ],
+    learningObjective:
+      "Learn the correct order for building a simple electrical circuit.",
+
+    vocabulary: [
+      "battery",
+      "wire",
+      "bulb",
+      "circuit"
+    ],
+
+    funFact:
+      "Real engineers test their circuits one step at a time to make sure everything works safely.",
+
+    estimatedMinutes: 6,
+
+    difficulty: 1,
   },
   {
     id: "electricity-5",
+    curriculum: {
+      grade: 2,
+      subject: "Science",
+      strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+      "Scientists make predictions before they test. What do you think will happen next?",
     title: "What Happens Next?",
     xp: 25,
     successMessage:
@@ -96,9 +195,32 @@ export const SCIENCE_LESSONS = [
         correctIndex: 0,
       },
     ],
+    learningObjective:
+      "Predict what will happen when parts of a circuit are changed.",
+
+    vocabulary: [
+      "predict",
+      "switch",
+      "circuit",
+      "observe"
+    ],
+
+    funFact:
+      "Scientists make predictions before they do an experiment, then compare their ideas with the results.",
+
+    estimatedMinutes: 6,
+
+    difficulty: 1,
   },
   {
     id: "magnets-1",
+    curriculum: {
+        grade: 2,
+        subject: "Science",
+        strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+      "Have you ever seen a magnet pull something without touching it? Let's find out how that works.",
     title: "Magnet Mystery",
     xp: 15,
     successMessage:
@@ -111,9 +233,23 @@ export const SCIENCE_LESSONS = [
         correctIndex: 0,
       },
     ],
+    learningObjective:
+      "Learn that magnets can pull some objects without touching them.",
+    vocabulary: ["magnet", "pull", "attract"],
+    funFact:
+      "Magnets can pull some objects even through paper or thin cardboard.",
+    estimatedMinutes: 5,
+    difficulty: 1,
   },
   {
     id: "magnets-2",
+        curriculum: {
+        grade: 2,
+        subject: "Science",
+        strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "Some objects stick to magnets and some do not. Let's test them like real scientists.",
     title: "Magnetic or Not?",
     xp: 15,
     successMessage:
@@ -133,9 +269,23 @@ export const SCIENCE_LESSONS = [
         ],
       },
     ],
+    learningObjective:
+      "Learn that magnets attract some metal objects but not all materials.",
+    vocabulary: ["magnetic", "metal", "plastic", "wood"],
+    funFact:
+      "Most magnets attract iron and steel, but they do not attract wood or plastic.",
+    estimatedMinutes: 5,
+    difficulty: 1,
   },
   {
     id: "magnets-3",
+    curriculum: {
+        grade: 2,
+        subject: "Science",
+        strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+      "Not all magnets are the same strength. Let's compare their pulling power.",
     title: "Strong vs Weak",
     xp: 20,
     successMessage: "Brilliant! You matched each magnet to its description.",
@@ -152,9 +302,23 @@ export const SCIENCE_LESSONS = [
         options: ["Strong pull", "Weak pull", "Common household use"],
       },
     ],
+    learningObjective:
+      "Compare stronger and weaker magnets by what they can pull.",
+    vocabulary: ["strong", "weak", "force", "pull"],
+    funFact:
+      "A stronger magnet can pull objects from farther away than a weaker magnet.",
+    estimatedMinutes: 6,
+    difficulty: 1,
   },
   {
     id: "magnets-4",
+    curriculum: {
+        grade: 2,
+        subject: "Science",
+        strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "A mystery magnet is hiding in the lab. Careful testing will help us find it.",
     title: "Find the Hidden Magnet",
     xp: 20,
     successMessage:
@@ -172,9 +336,23 @@ export const SCIENCE_LESSONS = [
         correctOrder: ["tool", "test", "observe", "find"],
       },
     ],
+    learningObjective:
+      "Use careful steps to investigate and find a hidden magnet.",
+    vocabulary: ["observe", "test", "evidence", "investigate"],
+    funFact:
+      "Scientists often follow steps so they can explain how they found an answer.",
+    estimatedMinutes: 6,
+    difficulty: 1,
   },
   {
     id: "magnets-5",
+    curriculum: {
+        grade: 2,
+        subject: "Science",
+        strand: "Electricity and Magnetism"
+    },
+    professorMessage:
+        "A compass has a tiny magnet inside. Let's discover how it helps people find direction.",
     title: "Compass Adventure",
     xp: 25,
     successMessage:
@@ -192,5 +370,12 @@ export const SCIENCE_LESSONS = [
         correctIndex: 0,
       },
     ],
+    learningObjective:
+      "Learn that a compass uses magnetism to point direction.",
+    vocabulary: ["compass", "direction", "needle", "north"],
+    funFact:
+      "A compass needle is a tiny magnet that points toward Earth’s magnetic north.",
+    estimatedMinutes: 6,
+    difficulty: 1,
   },
 ];

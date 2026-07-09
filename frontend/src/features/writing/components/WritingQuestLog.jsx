@@ -42,7 +42,7 @@ export default function WritingQuestLog({
                 disabled={!unlocked}
                 onClick={() => onStartLesson(lesson)}
               >
-                {completed ? "Complete" : unlocked ? "Start" : "Locked"}
+                {completed ? "Mission Complete" : unlocked ? "Start Mission" : "Locked"}
               </button>
             </article>
           );
