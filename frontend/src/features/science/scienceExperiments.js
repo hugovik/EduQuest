@@ -1,6 +1,7 @@
 export const SCIENCE_EXPERIMENTS = [
   {
     id: "electricity-1",
+    requires: null,
     group: "Electricity",
     title: "Light the Bulb",
     topic: "Electricity",
@@ -28,6 +29,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "electricity-2",
+    requires: "electricity-1",
     group: "Electricity",
     title: "Power Source",
     topic: "Electricity",
@@ -56,6 +58,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "electricity-3",
+    requires: "electricity-2",
     group: "Electricity",
     title: "Complete the Circuit",
     topic: "Electricity",
@@ -82,6 +85,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "electricity-4",
+    requires: "electricity-3",
     group: "Electricity",
     title: "Build the Circuit",
     topic: "Electricity",
@@ -109,6 +113,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "electricity-5",
+    requires: "electricity-4",
     group: "Electricity",
     title: "What Happens Next?",
     topic: "Electricity",
@@ -135,6 +140,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "magnets-1",
+    requires: null,
     group: "Magnetism",
     title: "Magnet Mystery",
     topic: "Magnetism",
@@ -163,6 +169,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "magnets-2",
+    requires: "magnets-1",
     group: "Magnetism",
     title: "Magnetic or Not?",
     topic: "Magnetism",
@@ -190,6 +197,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "magnets-3",
+    requires: "magnets-2",
     group: "Magnetism",
     title: "Strong vs Weak",
     topic: "Magnetism",
@@ -215,6 +223,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "magnets-4",
+    requires: "magnets-3",
     group: "Magnetism",
     title: "Find the Hidden Magnet",
     topic: "Magnetism",
@@ -241,6 +250,7 @@ export const SCIENCE_EXPERIMENTS = [
   },
   {
     id: "magnets-5",
+    requires: "magnets-4",
     group: "Magnetism",
     title: "Compass Adventure",
     topic: "Magnetism",

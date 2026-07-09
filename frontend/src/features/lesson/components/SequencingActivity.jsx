@@ -21,16 +21,12 @@ export default function SequencingActivity({ lesson, onComplete }) {
       (id, index) => currentOrder[index] === id
     );
 
-    if (correct) {
-      onComplete?.({
-        correct: true,
-        score: 1,
-        attempts: 1,
-        xpRequested: lesson.xp ?? 0,
-      });
-    } else {
-      alert("Not quite! Try again.");
-    }
+    onComplete?.({
+      correct,
+      score: correct ? 1 : 0,
+      attempts: 1,
+      xpRequested: correct ? lesson.xp ?? 0 : 0,
+    });
   }
 
   return (

@@ -6,16 +6,14 @@ export default function PredictionActivity({ lesson, onComplete }) {
   function choose(index) {
     setSelected(index);
 
-    if (index === lesson.correctIndex) {
-      onComplete?.({
-        correct: true,
-        score: 1,
-        attempts: 1,
-        xpRequested: lesson.xp ?? 0,
-      });
-    } else {
-      alert("Not quite! Try again.");
-    }
+    const correct = index === lesson.correctIndex;
+
+    onComplete?.({
+      correct,
+      score: correct ? 1 : 0,
+      attempts: 1,
+      xpRequested: correct ? lesson.xp ?? 0 : 0,
+    });
   }
 
   return (

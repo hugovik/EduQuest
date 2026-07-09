@@ -1553,3 +1553,71 @@
 .activity-options button {
   text-align: left;
 }
+
+/*Lesson Briefing */
+.lesson-briefing {
+  display: grid;
+  gap: 1rem;
+}
+
+.lesson-briefing-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lesson-briefing-icon {
+  font-size: 2.5rem;
+}
+
+.lesson-briefing-block {
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.lesson-briefing-block h3 {
+  margin-top: 0;
+}
+
+.lesson-vocabulary-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lesson-vocabulary-list span {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  font-weight: 700;
+}
+
+.lesson-briefing-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-weight: 700;
+}
+
+.lesson-briefing-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.lesson-briefing-guide {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(236, 253, 245, 0.8);
+}
+
+.lesson-briefing-guide-avatar {
+  font-size: 2rem;
+}
+
+.lesson-briefing-guide h3 {
+  margin-top: 0;
+}
