@@ -35,6 +35,16 @@ ITEM_CATALOG = {
         "item_type": "artifact",
         "description": "A glowing crystal that restores magic to EduQuest.",
     },
+    "lightning_crystal": {
+        "item_name": "Lightning Crystal",
+        "item_type": "science_reward",
+        "description": "A glowing crystal earned by mastering Electricity.",
+    },
+    "magnetic_compass": {
+        "item_name": "Magnetic Compass",
+        "item_type": "science_reward",
+        "description": "A special compass earned by mastering Magnetism.",
+    },
 }
 
 

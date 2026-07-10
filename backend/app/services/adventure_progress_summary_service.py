@@ -7,9 +7,9 @@ from app.models.reading_passage import ReadingPassage
 from app.models.reading_progress import ReadingProgress
 from app.models.science_progress import ScienceProgress
 from app.models.writing_progress import WritingProgress
+from app.content.science_registry import get_total_science_experiments
 from app.repositories.child_repository import ChildRepository
 from app.services.reading_service import READING_PASSAGES
-from app.services.science_service import SCIENCE_EXPERIMENTS
 from app.services.writing_service import WRITING_LESSONS
 
 ADVENTURE_TYPES = [
@@ -184,7 +184,7 @@ class AdventureProgressSummaryService:
             )
             .scalar()
         )
-        total_experiments = len(SCIENCE_EXPERIMENTS)
+        total_experiments = get_total_science_experiments()
 
         return {
             "completed_quests": completed_experiments,

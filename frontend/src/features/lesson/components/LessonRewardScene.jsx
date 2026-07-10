@@ -12,6 +12,15 @@ export default function LessonRewardScene({
         <p>{lesson.unlockMessage}</p>
       )}
 
+      {lesson.topicReward && (
+        <div className="quest-result success">
+          <strong>New Topic Reward</strong>
+          <p>
+            {lesson.topicReward.icon} {lesson.topicReward.name}
+          </p>
+        </div>
+      )}
+
       <p>
         You earned <strong>{lesson.xp} XP</strong>.
       </p>

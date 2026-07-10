@@ -17,35 +17,56 @@ import ProfessorNovaPanel from "./ProfessorNovaPanel";
 import AchievementToast from "../../achievements/AchievementToast.jsx";
 import LessonBriefing from "../../../components/LessonBriefing.jsx";
 
-export default function ScienceAdventure({ lessonId, onExit }) {
+export default function ScienceAdventure({ lessonId, experiment, onExit }) {
   const queryClient = useQueryClient();
   const [activeLessonId, setActiveLessonId] = useState(lessonId);
   const [showIntro, setShowIntro] = useState(true);
   const [showBriefing, setShowBriefing] = useState(false);
   const [showReward, setShowReward] = useState(false);
   const [unlockedAchievement, setUnlockedAchievement] = useState(null);
+  const [completionResult, setCompletionResult] = useState(null);
   const [completionError, setCompletionError] = useState("");
   const [activityFeedback, setActivityFeedback] = useState("");
   const [isCompleting, setIsCompleting] = useState(false);
   const [hasStartedLesson, setHasStartedLesson] = useState(false);
 
-  const activeLesson = SCIENCE_LESSONS.find(
+  const activeLesson = experiment?.lesson ?? SCIENCE_LESSONS.find(
     (lesson) => lesson.id === activeLessonId
   );
 
-  const activeExperiment = SCIENCE_EXPERIMENTS.find(
+  const activeExperiment = experiment ?? SCIENCE_EXPERIMENTS.find(
     (experiment) => experiment.id === activeLessonId
   );
 
-  const dialogue = activeExperiment.dialogue ?? {};
+  const dialogue = activeExperiment?.dialogue ?? {};
 
-  if (!activeLesson || !activeExperiment) {
-    return null;
+  if (!activeExperiment) {
+    return (
+      <DashboardLayout>
+        <section className="card state-card" role="alert">
+          Science mission metadata could not be loaded. Please return to the lab and try again.
+        </section>
+      </DashboardLayout>
+    );
+  }
+
+  if (!activeLesson) {
+    return (
+      <DashboardLayout>
+        <section className="card state-card" role="alert">
+          This Science mission is registered, but its activity content is not ready yet.
+        </section>
+        <button className="primary-button" type="button" onClick={onExit}>
+          Return to Science Lab
+        </button>
+      </DashboardLayout>
+    );
   }
 
   const currentActivity = {
     ...activeLesson.activities[0],
-    xp: activeLesson.xp,
+    activityType: activeExperiment.activityType ?? activeLesson.activities[0].activityType,
+    xp: activeExperiment.xpReward ?? activeLesson.xp,
     successMessage: activeLesson.successMessage,
   };
 
@@ -64,11 +85,12 @@ export default function ScienceAdventure({ lessonId, onExit }) {
     setActivityFeedback("");
 
     try {
-      const result = await completeScienceExperiment(activeLesson.id);
+      const result = await completeScienceExperiment(activeExperiment.id);
+      setCompletionResult(result);
 
       completeAdventureLesson({
         adventureKey: "science",
-        lessonId: activeLesson.id,
+        lessonId: activeExperiment.id,
       });
 
       queryClient.setQueryData(queryKeys.player, result.child);
@@ -96,6 +118,7 @@ export default function ScienceAdventure({ lessonId, onExit }) {
     setShowReward(false);
     setShowBriefing(false);
     setShowIntro(true);
+    setCompletionResult(null);
     setActiveLessonId(null);
     onExit?.();
   }
@@ -157,9 +180,13 @@ export default function ScienceAdventure({ lessonId, onExit }) {
   if (showReward) {
     const rewardLesson = {
       ...activeLesson,
+      xp: activeExperiment.xpReward ?? activeLesson.xp,
       successMessage:
-        dialogue.success ?? activeLesson.successMessage,
+        completionResult?.topic_completed && activeExperiment.topicMeta?.completionMessage
+          ? activeExperiment.topicMeta.completionMessage
+          : dialogue.success ?? activeLesson.successMessage,
       unlockMessage: dialogue.unlock,
+      topicReward: completionResult?.topic_reward,
     };
 
     return (

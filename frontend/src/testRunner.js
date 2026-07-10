@@ -13,6 +13,8 @@ import { runLearningPreferencesApiTests } from "./features/learning/learningPref
 import { runReadingApiTests } from "./features/reading/readingApi.test.js";
 import { runScienceApiTests } from "./features/science/scienceApi.test.js";
 import { runScienceLessonsTests } from "./features/science/scienceLessons.test.js";
+import { runBuildScienceExperimentsTests } from "./features/science/utils/buildScienceExperiments.test.js";
+import { runValidateScienceContentTests } from "./features/science/utils/validateScienceContent.test.js";
 import { runWorldApiTests } from "./features/world/worldApi.test.js";
 import { runWorldRegionConfigTests } from "./features/world/worldRegionConfig.test.js";
 import { runWritingApiTests } from "./features/writing/writingApi.test.js";
@@ -33,6 +35,8 @@ const tests = [
   ["reading API", runReadingApiTests],
   ["science API", runScienceApiTests],
   ["science lessons", runScienceLessonsTests],
+  ["science experiment builder", runBuildScienceExperimentsTests],
+  ["science content validation", runValidateScienceContentTests],
   ["world API", runWorldApiTests],
   ["world region config", runWorldRegionConfigTests],
   ["writing API", runWritingApiTests],

@@ -55,4 +55,8 @@ export function runActivityContractTests() {
     rewardScene.includes("unlockMessage"),
     "LessonRewardScene should be able to show unlock feedback."
   );
+  assert(
+    rewardScene.includes("topicReward") && rewardScene.includes("New Topic Reward"),
+    "LessonRewardScene should be able to show topic reward feedback."
+  );
 }

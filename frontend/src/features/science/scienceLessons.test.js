@@ -28,7 +28,7 @@ export function runScienceLessonsTests() {
   assert(magnetLessons.length === 5, "Magnetism should have five lessons.");
   assert(
     magnetOneIndex === electricityFiveIndex + 1,
-    "Magnetism should unlock after Electricity in the experiment order."
+    "Magnetism frontend content should remain grouped after Electricity content."
   );
   assert(
     magnetActivityTypes.join(",") ===

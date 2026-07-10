@@ -5,90 +5,104 @@ import PageHeader from "../../components/PageHeader.jsx";
 import ScienceAdventure from "./components/ScienceAdventure.jsx";
 import { SCIENCE_EXPERIMENTS } from "./scienceExperiments.js";
 import { SCIENCE_LESSONS } from "./scienceLessons.js";
-import { getAdventureStats } from "../progress/progressService.js";
 import AdventureProgressCard from "../progress/components/AdventureProgressCard.jsx";
 import ProfessorNovaPanel from "./components/ProfessorNovaPanel.jsx";
 import StatusBadge from "../adventure/components/StatusBadge.jsx";
-import { getScienceProgress } from "../../api/scienceApi.js";
+import { getScienceExperiments, getScienceProgress } from "../../api/scienceApi.js";
 import { SCIENCE_TOPICS } from "./scienceTopics.js";
-
-
-function groupExperimentsByTopic(experiments) {
-  return experiments.reduce((groups, experiment) => {
-    const groupName = experiment.group ?? "Other";
-
-    if (!groups[groupName]) {
-      groups[groupName] = [];
-    }
-
-    groups[groupName].push(experiment);
-
-    return groups;
-  }, {});
-}
+import {
+  buildScienceExperiments,
+  groupScienceExperimentsByTopic,
+  isScienceExperimentUnlocked,
+} from "./utils/buildScienceExperiments.js";
 
 export default function ScienceLabPage({ onBack }) {
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [progressVersion, setProgressVersion] = useState(0);
+  const [registryExperiments, setRegistryExperiments] = useState([]);
   const [backendProgress, setBackendProgress] = useState(null);
+  const [isLoadingScienceData, setIsLoadingScienceData] = useState(true);
+  const [scienceDataError, setScienceDataError] = useState("");
   const [openTopicId, setOpenTopicId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadBackendProgress() {
+    async function loadScienceData() {
+      setIsLoadingScienceData(true);
+      setScienceDataError("");
+
       try {
-        const progress = await getScienceProgress();
+        const [experiments, progress] = await Promise.all([
+          getScienceExperiments(),
+          getScienceProgress(),
+        ]);
+
         if (!cancelled) {
+          setRegistryExperiments(experiments);
           setBackendProgress(progress);
         }
       } catch {
         if (!cancelled) {
+          setRegistryExperiments([]);
           setBackendProgress(null);
+          setScienceDataError("Science missions could not be loaded. Please try again.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingScienceData(false);
         }
       }
     }
 
-    loadBackendProgress();
+    loadScienceData();
 
     return () => {
       cancelled = true;
     };
   }, [progressVersion]);
 
-  let completedLessons = [];
-  let completedCount = 0;
-  let totalLessons = 0;
-  let scienceXp = 0;
+const completedLessons = backendProgress?.completed_experiments ?? [];
+const scienceExperiments = buildScienceExperiments({
+  registryExperiments,
+  richExperiments: SCIENCE_EXPERIMENTS,
+  lessons: SCIENCE_LESSONS,
+  topics: SCIENCE_TOPICS,
+  completedExperimentIds: completedLessons,
+});
+const completedCount = backendProgress?.experiments_completed ?? 0;
+const totalLessons = registryExperiments.length;
+const scienceXp = backendProgress?.xp_earned ?? 0;
+const experimentGroups = groupScienceExperimentsByTopic(scienceExperiments);
+const topicSummaryById = new Map(
+  (backendProgress?.topics ?? []).map((topic) => [topic.id, topic])
+);
+const activeExperiment = scienceExperiments.find(
+  (experiment) => experiment.id === activeLessonId
+);
 
-try {
-  const stats = getAdventureStats({
-    adventureKey: "science",
-    lessons: SCIENCE_LESSONS,
-    progressVersion,
-  });
+  if (isLoadingScienceData) {
+    return <main className="dashboard">Loading Science missions...</main>;
+  }
 
-  completedLessons = stats.completedLessons;
-  completedCount = stats.completedCount;
-  totalLessons = stats.totalLessons;
-  scienceXp = stats.xp;
-} catch (error) {
-  console.error("Science stats error:", error);
-  throw error;
-}
-
-const backendCompletedLessons = backendProgress?.completed_experiments ?? [];
-completedLessons = Array.from(new Set([...completedLessons, ...backendCompletedLessons]));
-completedCount = Math.max(completedCount, backendProgress?.experiments_completed ?? completedLessons.length);
-totalLessons = Math.max(totalLessons, backendProgress?.total_experiments ?? 0);
-scienceXp = backendProgress?.xp_earned ?? scienceXp;
-
-const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
+  if (scienceDataError) {
+    return (
+      <main className="dashboard">
+        <button className="primary-button" onClick={onBack}>
+          Back to Adventure Hub
+        </button>
+        <div className="card state-card" role="alert">
+          {scienceDataError}
+        </div>
+      </main>
+    );
+  }
 
   if (activeLessonId) {
     return (
       <ScienceAdventure
         lessonId={activeLessonId}
+        experiment={activeExperiment}
         onExit={() => {
           setActiveLessonId(null);
           setProgressVersion((current) => current + 1);
@@ -132,18 +146,24 @@ const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
 
         {SCIENCE_TOPICS.map((topic) => {
           const groupName = topic.title;
-          const experiments = experimentGroups[topic.title] ?? [];
+          const experiments = experimentGroups[topic.id] ?? [];
           const isTopicOpen = openTopicId === topic.id;
-          const completedInGroup = experiments.filter((experiment) =>
-            completedLessons.includes(experiment.id)
-          ).length;
+          const topicSummary = topicSummaryById.get(topic.id);
+          const completedInGroup =
+            topicSummary?.completed_experiments ??
+            experiments.filter((experiment) =>
+              completedLessons.includes(experiment.id)
+            ).length;
 
-          const totalInGroup = experiments.length;
+          const totalInGroup =
+            topicSummary?.total_experiments ?? experiments.length;
+          const isTopicCompleted = Boolean(topicSummary?.completed);
 
           const progressPercent =
-            totalInGroup === 0
-              ? 0
-              : Math.round((completedInGroup / totalInGroup) * 100);
+            topicSummary?.progress_percent ??
+            (totalInGroup === 0
+                ? 0
+                : Math.round((completedInGroup / totalInGroup) * 100));
 
           return (
           <section className="science-topic-section" key={groupName}>  
@@ -158,9 +178,10 @@ const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
                 <h3>
                   {topic.icon} {topic.title}
                 </h3>
+                <StatusBadge status={isTopicCompleted ? "completed" : "new"} />
                 <p>{topic.description}</p>
                 <p>
-                  {completedInGroup} / {totalInGroup} Experiments Completed
+                  {completedInGroup} / {totalInGroup} Missions Completed
                 </p>
               </div>
 
@@ -179,22 +200,12 @@ const experimentGroups = groupExperimentsByTopic(SCIENCE_EXPERIMENTS);
           {isTopicOpen && (
             <div className="science-experiment-grid">
               {experiments.map((experiment) => {
-               const topicIndex = experiments.findIndex(
-                (item) => item.id === experiment.id
-              );
-
-              const previousTopicExperiment =
-                topicIndex === 0 ? null : experiments[topicIndex - 1];
-
-              const isUnlocked =
-                topicIndex === 0 ||
-                completedLessons.includes(previousTopicExperiment.id);
-
-                const isCompleted = completedLessons.includes(experiment.id);
-
-                const hasLesson = SCIENCE_LESSONS.some(
-                  (lesson) => lesson.id === experiment.id
+                const isUnlocked = isScienceExperimentUnlocked(
+                  experiment,
+                  completedLessons
                 );
+                const isCompleted = completedLessons.includes(experiment.id);
+                const hasLesson = experiment.hasLesson;
 
                 return (
                   <article
