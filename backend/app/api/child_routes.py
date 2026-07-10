@@ -6,6 +6,7 @@ from app.database.database import get_db
 from app.schemas.child import ChildRead
 from app.schemas.xp_audit import XPAuditRead
 from app.services.quest_service import QuestService
+from app.services.progression_rules import get_level_progress
 from app.services.xp_audit_service import XPAuditService
 
 router = APIRouter(prefix="/child", tags=["child"])
@@ -16,7 +17,18 @@ def get_child(
     db: Session = Depends(get_db),
     quest_service: QuestService = Depends(get_quest_service),
 ):
-    return quest_service.get_child_or_create_default(db)
+    child = quest_service.get_child_or_create_default(db)
+    level_progress = get_level_progress(child.xp)
+
+    return {
+        "id": child.id,
+        "name": child.name,
+        "grade": child.grade,
+        "level": child.level,
+        "xp": child.xp,
+        "tree_stage": child.tree_stage,
+        **level_progress,
+    }
 
 
 @router.get("/xp-audit", response_model=XPAuditRead)

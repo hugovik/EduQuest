@@ -121,8 +121,6 @@ export default function App() {
 
   return (
     <TreeHouseDashboard
-      onGoToAdventures={() => setScreen("adventures")}
-      onGoToMath={() => navigateTo("math")}
       onGoToWorld={() => navigateTo("world")}
       onGoToDev={import.meta.env.DEV ? () => setScreen("dev") : undefined}
     />
