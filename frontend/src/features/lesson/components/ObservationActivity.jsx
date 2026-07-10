@@ -20,6 +20,8 @@ export default function ObservationActivity({
     }
 
     onComplete({
+      answer: lesson.options[index],
+      locallyCorrect: correct,
       correct,
       score: correct ? 1 : 0,
       attempts: 1,

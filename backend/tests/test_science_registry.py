@@ -12,6 +12,10 @@ from app.content.science_registry import (
     is_valid_science_experiment,
     validate_science_registry,
 )
+from app.content.science_review_registry import (
+    SCIENCE_REVIEW_ITEMS,
+    validate_science_review_registry,
+)
 
 
 def test_electricity_and_magnetism_experiments_are_registered():
@@ -65,6 +69,44 @@ def test_topic_helpers_detect_completion_from_registry():
 
 def test_current_science_registry_passes_validation():
     assert validate_science_registry() == []
+    assert validate_science_review_registry() == []
+
+
+def test_review_registry_requires_every_official_experiment():
+    review_items = {key: value for key, value in SCIENCE_REVIEW_ITEMS.items() if key != "magnets-5"}
+
+    errors = validate_science_review_registry(review_items=review_items)
+
+    assert any("magnets-5" in error and "missing review answer" in error for error in errors)
+
+
+def test_review_registry_rejects_unknown_experiment():
+    review_items = {
+        **SCIENCE_REVIEW_ITEMS,
+        "unknown-science": {
+            "activity_type": "prediction",
+            "answer_key": "Yes",
+            "allowed_answers": ["Yes"],
+        },
+    }
+
+    errors = validate_science_review_registry(review_items=review_items)
+
+    assert any("unknown experiment" in error for error in errors)
+
+
+def test_review_registry_rejects_activity_type_mismatch():
+    review_items = {
+        **SCIENCE_REVIEW_ITEMS,
+        "electricity-1": {
+            **SCIENCE_REVIEW_ITEMS["electricity-1"],
+            "activity_type": "classification",
+        },
+    }
+
+    errors = validate_science_review_registry(review_items=review_items)
+
+    assert any("activity type mismatch" in error for error in errors)
 
 
 def test_duplicate_experiment_ids_fail_validation():

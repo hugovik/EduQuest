@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -39,3 +40,33 @@ class ScienceExperimentCompletionRead(BaseModel):
     topic_reward: dict | None = None
     new_achievements: list[AchievementRead] = []
     completed_at: datetime | None = None
+
+
+class ScienceReviewAnswerSubmission(BaseModel):
+    experiment_id: str
+    answer: Any
+    correct: bool | None = None
+    score: int | None = None
+
+
+class ScienceReviewSubmission(BaseModel):
+    answers: list[ScienceReviewAnswerSubmission]
+
+
+class ScienceReviewResultRead(BaseModel):
+    experiment_id: str
+    correct: bool
+    submitted_answer: Any
+    correct_answer: Any | None = None
+
+
+class ScienceReviewCompletionRead(BaseModel):
+    topic_id: str
+    score: int
+    total_questions: int
+    percentage: int
+    best_percentage: int
+    attempts: int
+    mastery_level: str
+    xp_awarded: int
+    results: list[ScienceReviewResultRead]

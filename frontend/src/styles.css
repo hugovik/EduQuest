@@ -1554,6 +1554,34 @@
   text-align: left;
 }
 
+.science-review-action {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1rem 0;
+}
+
+.science-review-results {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.science-review-result {
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid #d7e8ff;
+  background: #f7fbff;
+}
+
+.science-review-result.is-correct {
+  border-color: #b7dfb7;
+  background: #f1fbf1;
+}
+
+.science-review-result.is-incorrect {
+  border-color: #f0c9a2;
+  background: #fff7ed;
+}
+
 /*Lesson Briefing */
 .lesson-briefing {
   display: grid;

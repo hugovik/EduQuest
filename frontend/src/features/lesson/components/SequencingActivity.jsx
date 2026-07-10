@@ -22,6 +22,8 @@ export default function SequencingActivity({ lesson, onComplete }) {
     );
 
     onComplete?.({
+      answer: currentOrder,
+      locallyCorrect: correct,
       correct,
       score: correct ? 1 : 0,
       attempts: 1,

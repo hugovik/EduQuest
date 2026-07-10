@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout.jsx";
 import PageHeader from "../../components/PageHeader.jsx";
 import ScienceAdventure from "./components/ScienceAdventure.jsx";
+import ScienceTopicReview from "./components/ScienceTopicReview.jsx";
 import { SCIENCE_EXPERIMENTS } from "./scienceExperiments.js";
 import { SCIENCE_LESSONS } from "./scienceLessons.js";
 import AdventureProgressCard from "../progress/components/AdventureProgressCard.jsx";
@@ -24,6 +25,7 @@ export default function ScienceLabPage({ onBack }) {
   const [isLoadingScienceData, setIsLoadingScienceData] = useState(true);
   const [scienceDataError, setScienceDataError] = useState("");
   const [openTopicId, setOpenTopicId] = useState(null);
+  const [activeReviewTopicId, setActiveReviewTopicId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +82,10 @@ const topicSummaryById = new Map(
 const activeExperiment = scienceExperiments.find(
   (experiment) => experiment.id === activeLessonId
 );
+const activeReviewTopic = SCIENCE_TOPICS.find((topic) => topic.id === activeReviewTopicId);
+const activeReviewExperiments = activeReviewTopic
+  ? experimentGroups[activeReviewTopic.id] ?? []
+  : [];
 
   if (isLoadingScienceData) {
     return <main className="dashboard">Loading Science missions...</main>;
@@ -105,6 +111,19 @@ const activeExperiment = scienceExperiments.find(
         experiment={activeExperiment}
         onExit={() => {
           setActiveLessonId(null);
+          setProgressVersion((current) => current + 1);
+        }}
+      />
+    );
+  }
+
+  if (activeReviewTopic) {
+    return (
+      <ScienceTopicReview
+        experiments={activeReviewExperiments}
+        topic={activeReviewTopic}
+        onExit={() => {
+          setActiveReviewTopicId(null);
           setProgressVersion((current) => current + 1);
         }}
       />
@@ -170,6 +189,8 @@ const activeExperiment = scienceExperiments.find(
             <button
               type="button"
               className="science-topic-header"
+              aria-controls={`science-topic-panel-${topic.id}`}
+              aria-expanded={isTopicOpen}
               onClick={() =>
                 setOpenTopicId((current) => (current === topic.id ? null : topic.id))
               }
@@ -183,6 +204,12 @@ const activeExperiment = scienceExperiments.find(
                 <p>
                   {completedInGroup} / {totalInGroup} Missions Completed
                 </p>
+                {topicSummary?.review && (
+                  <p>
+                    Review best: {topicSummary.review.best_percentage}% ·
+                    Mastery: {topicSummary.review.mastery_level}
+                  </p>
+                )}
               </div>
 
               <div className="science-topic-progress">
@@ -197,7 +224,19 @@ const activeExperiment = scienceExperiments.find(
               </span>
             </button>
 
-          {isTopicOpen && (
+            {isTopicOpen && (
+            <div id={`science-topic-panel-${topic.id}`}>
+            {isTopicCompleted && (
+              <div className="science-review-action">
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => setActiveReviewTopicId(topic.id)}
+                >
+                  Start Review
+                </button>
+              </div>
+            )}
             <div className="science-experiment-grid">
               {experiments.map((experiment) => {
                 const isUnlocked = isScienceExperimentUnlocked(
@@ -258,6 +297,7 @@ const activeExperiment = scienceExperiments.find(
                   </article>
                 );
               })}
+            </div>
             </div>
           )}
           </section>

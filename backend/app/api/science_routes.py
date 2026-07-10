@@ -7,6 +7,8 @@ from app.schemas.science import (
     ScienceExperimentCompletionRead,
     ScienceExperimentRead,
     ScienceProgressRead,
+    ScienceReviewCompletionRead,
+    ScienceReviewSubmission,
 )
 from app.services.science_service import ScienceService
 
@@ -38,3 +40,23 @@ def complete_science_experiment(
     science_service: ScienceService = Depends(get_science_service),
 ):
     return science_service.complete_experiment(db, experiment_id)
+
+
+@router.post(
+    "/reviews/{topic_id}/complete",
+    response_model=ScienceReviewCompletionRead,
+)
+def complete_science_review(
+    topic_id: str,
+    submission: ScienceReviewSubmission,
+    db: Session = Depends(get_db),
+    science_service: ScienceService = Depends(get_science_service),
+):
+    answers = [
+        {
+            "experiment_id": item.experiment_id,
+            "answer": item.answer,
+        }
+        for item in submission.answers
+    ]
+    return science_service.complete_topic_review(db, topic_id, answers)

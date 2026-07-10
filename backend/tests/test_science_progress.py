@@ -8,6 +8,7 @@ from app.database.database import Base
 from app.models.child import Child
 from app.models.progress_event import ProgressEvent
 from app.models.science_progress import ScienceProgress
+from app.models.science_review_attempt import ScienceReviewAttempt
 from app.models.tree_growth_event import TreeGrowthEvent
 from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.child_repository import ChildRepository
@@ -246,3 +247,161 @@ def test_invalid_science_experiment_cannot_trigger_topic_reward(db_session, scie
     inventory = science_service.inventory_service.get_inventory(db_session)
 
     assert inventory["items"] == []
+
+
+def complete_electricity_topic(science_service, db_session):
+    for experiment_id in [
+        "electricity-1",
+        "electricity-2",
+        "electricity-3",
+        "electricity-4",
+        "electricity-5",
+    ]:
+        science_service.complete_experiment(db_session, experiment_id)
+
+
+def valid_electricity_review_answers():
+    return [
+        {"experiment_id": "electricity-1", "answer": "Battery"},
+        {
+            "experiment_id": "electricity-2",
+            "answer": {
+                "battery": "Power Source",
+                "solar-cell": "Power Source",
+                "apple": "Not a Power Source",
+                "rock": "Not a Power Source",
+            },
+        },
+        {
+            "experiment_id": "electricity-3",
+            "answer": {
+                "Battery": "Provides energy",
+                "Wire": "Carries electricity",
+                "Bulb": "Produces light",
+                "Switch": "Opens or closes the circuit",
+            },
+        },
+        {"experiment_id": "electricity-4", "answer": ["battery", "wire", "switch", "bulb"]},
+        {"experiment_id": "electricity-5", "answer": "The bulb goes out."},
+    ]
+
+
+def test_review_score_is_calculated_from_submitted_answers(db_session, science_service):
+    complete_electricity_topic(science_service, db_session)
+    answers = valid_electricity_review_answers()
+    answers[0] = {
+        "experiment_id": "electricity-1",
+        "answer": "Paper",
+        "correct": True,
+    }
+
+    result = science_service.complete_topic_review(db_session, "electricity", answers)
+
+    assert result["score"] == 4
+    assert result["percentage"] == 80
+    assert result["xp_awarded"] == 0
+    assert result["results"][0]["correct"] is False
+    assert result["results"][0]["correct_answer"] == "Battery"
+    assert db_session.query(ScienceReviewAttempt).count() == 1
+
+
+def test_review_requires_completed_topic(db_session, science_service):
+    science_service.complete_experiment(db_session, "electricity-1")
+
+    with pytest.raises(HTTPException) as exc_info:
+        science_service.complete_topic_review(
+            db_session,
+            "electricity",
+            valid_electricity_review_answers(),
+        )
+
+    assert exc_info.value.status_code == 403
+    assert db_session.query(ScienceReviewAttempt).count() == 0
+
+
+def test_review_rejects_missing_duplicate_and_cross_topic_answers(db_session, science_service):
+    complete_electricity_topic(science_service, db_session)
+
+    with pytest.raises(HTTPException):
+        science_service.complete_topic_review(
+            db_session,
+            "electricity",
+            valid_electricity_review_answers()[:-1],
+        )
+
+    duplicate_answers = valid_electricity_review_answers()
+    duplicate_answers[-1] = {"experiment_id": "electricity-1", "answer": "Battery"}
+    with pytest.raises(HTTPException):
+        science_service.complete_topic_review(db_session, "electricity", duplicate_answers)
+
+    cross_topic_answers = valid_electricity_review_answers()
+    cross_topic_answers[-1] = {"experiment_id": "magnets-1", "answer": "Paper clip"}
+    with pytest.raises(HTTPException):
+        science_service.complete_topic_review(db_session, "electricity", cross_topic_answers)
+
+    assert db_session.query(ScienceReviewAttempt).count() == 0
+
+
+def test_review_validates_all_supported_answer_shapes(db_session, science_service):
+    complete_electricity_topic(science_service, db_session)
+
+    malformed_cases = [
+        [{"experiment_id": "electricity-1", "answer": {"bad": "shape"}}],
+        [{"experiment_id": "electricity-2", "answer": "Power Source"}],
+        [{"experiment_id": "electricity-3", "answer": {"Battery": "Unknown"}}],
+        [{"experiment_id": "electricity-4", "answer": ["battery", "wire", "switch", "unknown"]}],
+        [{"experiment_id": "electricity-5", "answer": "Unknown prediction"}],
+    ]
+
+    for replacement in malformed_cases:
+        answers = valid_electricity_review_answers()
+        index = next(
+            idx for idx, item in enumerate(answers)
+            if item["experiment_id"] == replacement[0]["experiment_id"]
+        )
+        answers[index] = replacement[0]
+
+        with pytest.raises(HTTPException):
+            science_service.complete_topic_review(db_session, "electricity", answers)
+
+    assert db_session.query(ScienceReviewAttempt).count() == 0
+
+
+def test_valid_review_persists_mastery_and_updates_progress_summary(db_session, science_service):
+    complete_electricity_topic(science_service, db_session)
+
+    result = science_service.complete_topic_review(
+        db_session,
+        "electricity",
+        valid_electricity_review_answers(),
+    )
+    progress = science_service.get_progress(db_session)
+    electricity = next(topic for topic in progress["topics"] if topic["id"] == "electricity")
+
+    assert result["score"] == 5
+    assert result["percentage"] == 100
+    assert result["best_percentage"] == 100
+    assert result["attempts"] == 1
+    assert result["mastery_level"] == "mastered"
+    assert electricity["review"]["attempts"] == 1
+    assert electricity["review"]["best_percentage"] == 100
+    assert electricity["review"]["mastery_level"] == "mastered"
+
+
+def test_review_does_not_award_xp_rewards_or_achievements(db_session, science_service):
+    complete_electricity_topic(science_service, db_session)
+    child = db_session.query(Child).one()
+    xp_after_topic_completion = child.xp
+    inventory_before = science_service.inventory_service.get_inventory(db_session)["items"]
+
+    result = science_service.complete_topic_review(
+        db_session,
+        "electricity",
+        valid_electricity_review_answers(),
+    )
+    db_session.refresh(child)
+    inventory_after = science_service.inventory_service.get_inventory(db_session)["items"]
+
+    assert result["xp_awarded"] == 0
+    assert child.xp == xp_after_topic_completion
+    assert inventory_after == inventory_before

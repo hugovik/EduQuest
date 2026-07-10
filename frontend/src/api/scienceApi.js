@@ -31,3 +31,23 @@ export async function completeScienceExperiment(experimentId) {
 
   return response.json();
 }
+
+export async function completeScienceTopicReview(topicId, answers) {
+  const submittedAnswers = answers.map((item) => ({
+    experiment_id: item.experiment_id,
+    answer: item.answer,
+  }));
+  const response = await fetch(`${API_BASE_URL}/science/reviews/${topicId}/complete`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ answers: submittedAnswers }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to complete Science Lab review.");
+  }
+
+  return response.json();
+}

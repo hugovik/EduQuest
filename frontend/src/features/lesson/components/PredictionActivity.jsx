@@ -9,6 +9,8 @@ export default function PredictionActivity({ lesson, onComplete }) {
     const correct = index === lesson.correctIndex;
 
     onComplete?.({
+      answer: lesson.options[index],
+      locallyCorrect: correct,
       correct,
       score: correct ? 1 : 0,
       attempts: 1,

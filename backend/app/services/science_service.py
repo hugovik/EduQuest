@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 from fastapi import HTTPException
 from sqlalchemy import func
@@ -14,8 +15,10 @@ from app.content.science_registry import (
     get_total_science_experiments,
     is_science_topic_complete,
 )
+from app.content.science_review_registry import get_science_review_item
 from app.models.child import Child
 from app.models.science_progress import ScienceProgress
+from app.models.science_review_attempt import ScienceReviewAttempt
 from app.repositories.child_repository import ChildRepository
 from app.services.achievement_service import AchievementService
 from app.services.adventure_completion_service import AdventureCompletionService
@@ -151,6 +154,7 @@ class ScienceService:
             reward = topic.get("completion_reward") or {}
             reward_item_key = reward.get("item_key")
             reward_earned = False
+            review_summary = self.get_review_summary(db, child_id, topic["id"])
 
             if reward_item_key and self.inventory_service is not None:
                 reward_earned = self.inventory_service.has_item(
@@ -172,10 +176,136 @@ class ScienceService:
                     if total_count == 0
                     else round((completed_count / total_count) * 100),
                     "reward_earned": reward_earned,
+                    "review": review_summary,
                 }
             )
 
         return topic_summaries
+
+    def get_mastery_level(self, percentage: int) -> str:
+        if percentage >= 90:
+            return "mastered"
+        if percentage >= 70:
+            return "strong"
+        if percentage >= 50:
+            return "growing"
+        return "beginning"
+
+    def get_review_summary(self, db: Session, child_id: int, topic_id: str) -> dict:
+        attempts = (
+            db.query(ScienceReviewAttempt)
+            .filter(
+                ScienceReviewAttempt.child_id == child_id,
+                ScienceReviewAttempt.topic_id == topic_id,
+            )
+            .all()
+        )
+
+        best_percentage = max([attempt.percentage for attempt in attempts], default=0)
+        return {
+            "attempts": len(attempts),
+            "best_percentage": best_percentage,
+            "mastery_level": self.get_mastery_level(best_percentage),
+        }
+
+    def validate_review_answer(self, experiment_id: str, submitted_answer) -> dict:
+        review_item = get_science_review_item(experiment_id)
+        if review_item is None:
+            raise HTTPException(status_code=400, detail="Review answer key is missing.")
+
+        activity_type = review_item["activity_type"]
+        correct_answer = review_item["answer_key"]
+
+        if activity_type in {"observation", "prediction"}:
+            if not isinstance(submitted_answer, str):
+                raise HTTPException(status_code=422, detail="Review answer must be a selected answer.")
+            if submitted_answer not in review_item.get("allowed_answers", []):
+                raise HTTPException(status_code=422, detail="Review answer is not a valid option.")
+            correct = submitted_answer == correct_answer
+        elif activity_type in {"classification", "matching"}:
+            if not isinstance(submitted_answer, dict):
+                raise HTTPException(status_code=422, detail="Review answer must be a mapping.")
+            expected_keys = set(correct_answer.keys())
+            submitted_keys = set(submitted_answer.keys())
+            if submitted_keys != expected_keys:
+                raise HTTPException(status_code=422, detail="Review answer has missing or unexpected items.")
+            expected_values = set(correct_answer.values())
+            if any(value not in expected_values for value in submitted_answer.values()):
+                raise HTTPException(status_code=422, detail="Review answer includes an unknown option.")
+            correct = submitted_answer == correct_answer
+        elif activity_type == "sequencing":
+            if not isinstance(submitted_answer, list) or not all(
+                isinstance(item, str) for item in submitted_answer
+            ):
+                raise HTTPException(status_code=422, detail="Review answer must be an ordered list.")
+            if set(submitted_answer) != set(correct_answer):
+                raise HTTPException(status_code=422, detail="Review answer includes missing or unknown steps.")
+            correct = submitted_answer == correct_answer
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported review activity type.")
+
+        return {
+            "experiment_id": experiment_id,
+            "correct": correct,
+            "submitted_answer": submitted_answer,
+            "correct_answer": None if correct else correct_answer,
+        }
+
+    def complete_topic_review(self, db: Session, topic_id: str, answers: list[dict]) -> dict:
+        topic = get_science_topic(topic_id)
+        if topic is None:
+            raise HTTPException(status_code=404, detail="Science topic not found.")
+
+        child = self.get_child_or_create_default(db)
+        completed_experiment_ids = self.get_completed_experiment_ids(db, child.id)
+        if not is_science_topic_complete(topic_id, completed_experiment_ids):
+            raise HTTPException(status_code=403, detail="Complete this Science topic before reviewing it.")
+
+        topic_experiments = get_science_topic_experiments(topic_id)
+        official_experiment_ids = [experiment["id"] for experiment in topic_experiments]
+        submitted_experiment_ids = [answer["experiment_id"] for answer in answers]
+
+        if len(submitted_experiment_ids) != len(set(submitted_experiment_ids)):
+            raise HTTPException(status_code=422, detail="Review answers include duplicate missions.")
+        if set(submitted_experiment_ids) != set(official_experiment_ids):
+            raise HTTPException(status_code=422, detail="Review answers must include every mission in this topic.")
+
+        results = [
+            self.validate_review_answer(answer["experiment_id"], answer["answer"])
+            for answer in answers
+        ]
+        results_by_id = {result["experiment_id"]: result for result in results}
+        ordered_results = [results_by_id[experiment_id] for experiment_id in official_experiment_ids]
+        score = len([result for result in ordered_results if result["correct"]])
+        total_questions = len(official_experiment_ids)
+        percentage = round((score / total_questions) * 100) if total_questions else 0
+        mastery_level = self.get_mastery_level(percentage)
+
+        attempt = ScienceReviewAttempt(
+            child_id=child.id,
+            topic_id=topic_id,
+            score=score,
+            total_questions=total_questions,
+            percentage=percentage,
+            mastery_level=mastery_level,
+            answers_json=json.dumps(answers),
+            results_json=json.dumps(ordered_results),
+        )
+        db.add(attempt)
+        db.commit()
+
+        summary = self.get_review_summary(db, child.id, topic_id)
+        return {
+            "topic_id": topic_id,
+            "score": score,
+            "total_questions": total_questions,
+            "percentage": percentage,
+            "best_percentage": summary["best_percentage"],
+            "attempts": summary["attempts"],
+            "mastery_level": summary["mastery_level"],
+            "xp_awarded": 0,
+            "results": ordered_results,
+        }
 
     def grant_topic_reward_once(
         self,

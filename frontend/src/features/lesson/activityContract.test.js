@@ -41,6 +41,14 @@ export function runActivityContractTests() {
     "Normalized activity completions should include xpRequested."
   );
   assert(
+    observation.includes("answer: lesson.options[index]") &&
+      prediction.includes("answer: lesson.options[index]") &&
+      classification.includes("answer: next") &&
+      matching.includes("answer: matches") &&
+      sequencing.includes("answer: currentOrder"),
+    "Shared science activities should provide normalized submitted answers for review scoring."
+  );
+  assert(
     !matching.includes("alert(") &&
       !prediction.includes("alert(") &&
       !sequencing.includes("alert("),
