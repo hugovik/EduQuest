@@ -1,9 +1,9 @@
-import treehouseSceneDesktop from "../../assets/treehouse/backgrounds/treehouse-scene-desktop.png";
-import treehouseSceneTablet from "../../assets/treehouse/backgrounds/treehouse-scene-tablet.png";
-import treehouseSceneMobile from "../../assets/treehouse/backgrounds/treehouse-scene-mobile.png";
-import professorOwl from "../../assets/treehouse/characters/professor-owl.png";
-import sparkDragon from "../../assets/treehouse/characters/spark-dragon.png";
-import treeGrowthWorld from "../../assets/treehouse/growth/tree-growth-world.png";
+import treehouseSceneDesktop from "../../assets/treehouse/backgrounds/treehouse-scene-desktop.jpg";
+import treehouseSceneTablet from "../../assets/treehouse/backgrounds/treehouse-scene-tablet.jpg";
+import treehouseSceneMobile from "../../assets/treehouse/backgrounds/treehouse-scene-mobile.jpg";
+import professorOwl from "../../assets/treehouse/characters/professor-owl.jpg";
+import sparkDragon from "../../assets/treehouse/characters/spark-dragon.jpg";
+import treeGrowthWorld from "../../assets/treehouse/growth/tree-growth-world.jpg";
 
 export const treehouseSceneAssets = {
   desktop: treehouseSceneDesktop,

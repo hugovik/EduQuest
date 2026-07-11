@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { treehouseCharacterAssets } from "../treehouseAssets";
 
-export default function SparkDragon({ character, onInteract }) {
+export default function SparkDragon({ character, isActive = false, onInteract }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <article className={`treehouse-character treehouse-spark-dragon mood-${character.mood ?? "cheerful"}`}>
       <button
+        aria-expanded={isActive}
         aria-label={`Check on ${character.name}`}
         className="treehouse-character-button"
+        data-object-state={isActive ? "open" : "default"}
         type="button"
         onClick={onInteract}
       >

@@ -121,6 +121,7 @@ export default function App() {
 
   return (
     <TreeHouseDashboard
+      onGoToReading={() => navigateTo("reading", { allowOfflineFallback: false })}
       onGoToWorld={() => navigateTo("world")}
       onGoToDev={import.meta.env.DEV ? () => setScreen("dev") : undefined}
     />

@@ -4,10 +4,21 @@ export default function TreehouseNavigation({
   inventoryCount = 0,
   onGoToDev,
   onGoToWorld,
+  onOpenObject,
 }) {
   function handleControl(controlId) {
+    if (controlId === "bag" && onOpenObject) {
+      onOpenObject("inventory");
+      return;
+    }
+
     if (controlId === "settings" && onGoToDev) {
       onGoToDev();
+      return;
+    }
+
+    if (controlId === "settings" && onOpenObject) {
+      onOpenObject("settings");
     }
   }
 
@@ -20,7 +31,7 @@ export default function TreehouseNavigation({
         {treehouseControls.map((control) => {
           const isBag = control.id === "bag";
           const isSettings = control.id === "settings";
-          const disabled = isBag || (isSettings && !onGoToDev);
+          const disabled = isSettings && !onGoToDev && !onOpenObject;
 
           return (
             <button

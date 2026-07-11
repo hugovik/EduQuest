@@ -1,4 +1,4 @@
-export default function QuestBoard({ quest, isLoading = false, onGoToMath }) {
+export default function QuestBoard({ quest, isLoading = false, onOpenWorld }) {
   if (isLoading) {
     return (
       <div className="card state-card" role="status">
@@ -25,8 +25,8 @@ export default function QuestBoard({ quest, isLoading = false, onGoToMath }) {
 
       <p>{quest.realm}</p>
 
-      <button className="primary-button" onClick={onGoToMath}>
-        Go to Math Mountains
+      <button className="primary-button" type="button" onClick={onOpenWorld}>
+        Open World Map
       </button>
     </div>
   );

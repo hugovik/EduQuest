@@ -5,9 +5,10 @@ import { useDailyGoal } from "../adventure/hooks/useDailyGoal";
 import { usePlayer } from "./hooks/usePlayer";
 import { useProgressSummary } from "./hooks/useProgressSummary";
 import { useQuests } from "./hooks/useQuests";
+import { useTreehouseShortcuts } from "./hooks/useTreehouseShortcuts";
 import { useWorldProgressSummary } from "./hooks/useWorldProgressSummary";
 
-export default function TreehousePage({ onGoToDev, onGoToWorld }) {
+export default function TreehousePage({ onGoToDev, onGoToReading, onGoToWorld }) {
   const { data: player, isLoading: playerLoading, error: playerError } = usePlayer();
   const { data: quests, isLoading: questsLoading } = useQuests();
   const {
@@ -24,6 +25,14 @@ export default function TreehousePage({ onGoToDev, onGoToWorld }) {
     isLoading: progressSummaryLoading,
     error: progressSummaryError,
   } = useProgressSummary();
+  const {
+    contribute,
+    contributionError,
+    error: shortcutsError,
+    isContributing,
+    loading: shortcutsLoading,
+    shortcuts,
+  } = useTreehouseShortcuts();
 
   if (playerLoading) {
     return <main className="dashboard treehouse-page">Loading Treehouse...</main>;
@@ -41,7 +50,14 @@ export default function TreehousePage({ onGoToDev, onGoToWorld }) {
         dailyGoal={dailyGoal}
         inventoryCount={inventoryCount}
         isQuestLoading={dailyGoalLoading || questsLoading}
+        isShortcutLoading={shortcutsLoading}
+        shortcutError={shortcutsError}
+        shortcuts={shortcuts}
+        shortcutContributionError={contributionError}
+        isShortcutContributing={isContributing}
+        onContributeShortcut={contribute}
         onGoToDev={onGoToDev}
+        onGoToReading={onGoToReading}
         onGoToWorld={onGoToWorld}
         player={player}
         quest={quests?.[0]}

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { treehouseCharacterAssets } from "../treehouseAssets";
 
-export default function ProfessorOwl({ character, onInteract }) {
+export default function ProfessorOwl({ character, isActive = false, onInteract }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <article className="treehouse-character treehouse-professor-owl">
       <button
+        aria-expanded={isActive}
         aria-label={`Talk to ${character.name}`}
         className="treehouse-character-button"
+        data-object-state={isActive ? "open" : "default"}
         type="button"
         onClick={onInteract}
       >

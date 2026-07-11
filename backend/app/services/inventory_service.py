@@ -17,8 +17,8 @@ ITEM_CATALOG = {
     },
     "reading_leaf": {
         "item_name": "Reading Leaf",
-        "item_type": "collectible",
-        "description": "A leaf bookmark from Reading Forest.",
+        "item_type": "construction_material",
+        "description": "A leaf bookmark that can help build Reading Forest Treehouse shortcuts.",
     },
     "forest_gem": {
         "item_name": "Forest Gem",
@@ -177,6 +177,7 @@ class InventoryService:
         child_id: int | None,
         item_key: str,
         quantity: int = 1,
+        commit: bool = True,
     ) -> dict:
         if quantity <= 0:
             raise HTTPException(status_code=422, detail="Quantity must be greater than zero.")
@@ -192,6 +193,7 @@ class InventoryService:
             raise HTTPException(status_code=400, detail="Not enough inventory items.")
 
         item.quantity -= quantity
-        db.commit()
-        db.refresh(item)
+        if commit:
+            db.commit()
+            db.refresh(item)
         return self.serialize_item(item)
