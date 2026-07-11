@@ -1,5 +1,6 @@
 import { SCIENCE_EXPERIMENTS } from "./scienceExperiments.js";
 import { SCIENCE_LESSONS } from "./scienceLessons.js";
+import { readFileSync } from "node:fs";
 
 function assert(condition, message) {
   if (!condition) {
@@ -8,6 +9,10 @@ function assert(condition, message) {
 }
 
 export function runScienceLessonsTests() {
+  const scienceLabPageSource = readFileSync(
+    new URL("./ScienceLabPage.jsx", import.meta.url),
+    "utf8"
+  );
   const magnetExperiments = SCIENCE_EXPERIMENTS.filter(
     (experiment) => experiment.group === "Magnetism"
   );
@@ -28,7 +33,7 @@ export function runScienceLessonsTests() {
   assert(magnetLessons.length === 5, "Magnetism should have five lessons.");
   assert(
     magnetOneIndex === electricityFiveIndex + 1,
-    "Magnetism should unlock after Electricity in the experiment order."
+    "Magnetism frontend content should remain grouped after Electricity content."
   );
   assert(
     magnetActivityTypes.join(",") ===
@@ -38,5 +43,14 @@ export function runScienceLessonsTests() {
   assert(
     magnetLessons.every((lesson) => lesson.xp > 0 && lesson.successMessage),
     "Every Magnetism lesson should define an XP reward and completion message."
+  );
+  assert(
+    SCIENCE_LESSONS.every((lesson) => lesson.reviewExplanation),
+    "Every Science lesson should include a short review explanation."
+  );
+  assert(
+    scienceLabPageSource.includes("aria-expanded") &&
+      scienceLabPageSource.includes("aria-controls"),
+    "Science topic accordion should expose accessible expanded state."
   );
 }

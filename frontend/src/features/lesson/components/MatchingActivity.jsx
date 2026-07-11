@@ -19,6 +19,8 @@ export default function MatchingActivity({
     );
 
     onComplete?.({
+      answer: matches,
+      locallyCorrect: correct,
       correct,
       score: correct ? 1 : 0,
       attempts: 1,

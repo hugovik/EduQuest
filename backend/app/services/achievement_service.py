@@ -104,6 +104,20 @@ BASE_ACHIEVEMENTS = [
         "category": "science",
         "icon": "🧪",
     },
+    {
+        "id": "science_electricity_master",
+        "name": "Electricity Explorer",
+        "description": "Complete every Electricity mission in Science Lab.",
+        "category": "science",
+        "icon": "⚡",
+    },
+    {
+        "id": "science_magnetism_master",
+        "name": "Magnet Master",
+        "description": "Complete every Magnetism mission in Science Lab.",
+        "category": "science",
+        "icon": "🧭",
+    },
 ]
 
 
@@ -273,5 +287,16 @@ class AchievementService:
             earned.append(
                 self.award_once(db, child, "science-first-experiment", source_adventure or "science", metadata)
             )
+
+        if event_type == "science_topic_completed" and metadata:
+            achievement_key = {
+                "electricity": "science_electricity_master",
+                "magnetism": "science_magnetism_master",
+            }.get(metadata)
+
+            if achievement_key:
+                earned.append(
+                    self.award_once(db, child, achievement_key, source_adventure or "science", metadata)
+                )
 
         return [achievement for achievement in earned if achievement is not None]

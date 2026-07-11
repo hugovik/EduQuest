@@ -96,6 +96,7 @@ def get_science_service() -> ScienceService:
         child_repository=ChildRepository(),
         completion_service=get_adventure_completion_service(),
         achievement_service=get_achievement_service(),
+        inventory_service=get_inventory_service(),
     )
 
 

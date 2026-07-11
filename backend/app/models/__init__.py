@@ -16,4 +16,5 @@ from .reading_passage import ReadingPassage
 from .reading_progress import ReadingProgress
 from .reading_story_state import ReadingStoryState
 from .science_progress import ScienceProgress
+from .science_review_attempt import ScienceReviewAttempt
 from .writing_progress import WritingProgress

@@ -1,8 +1,10 @@
-# Sprint 9.0 - Science Lab Magnetism
+# Sprint 9 - Science Lab Magnetism
 
 ## Summary
 
-Sprint 9.0 adds Magnetism as the second Science Lab topic after Electricity.
+Sprint 9 adds and stabilizes Magnetism as the second Science Lab topic after Electricity.
+
+Status: Complete
 
 ## What Changed
 
@@ -21,14 +23,21 @@ Sprint 9.0 adds Magnetism as the second Science Lab topic after Electricity.
 - Extended the backend Science experiment registry so Magnetism completions use the existing XP, progress, tree growth, and achievement pipeline.
 - Added backend unlock validation so Science experiments must be completed in order.
 - Added frontend and backend tests for Magnetism lesson structure and unlock behavior.
+- Added topic-local progression so `magnets-1` is available without completing Electricity.
+- Added topic completion rewards:
+  - Electricity -> Lightning Crystal
+  - Magnetism -> Magnetic Compass
+- Added Science topic achievements.
+- Added Science Review Mode with persisted attempts, best score, mastery tracking, and backend-validated scoring.
+- Added Science architecture documentation and Sprint 9.10 audit.
 
 ## Unlock Rules
 
 - Electricity lessons unlock in order.
-- Magnetism remains locked until Electricity is complete.
+- Magnetism starts independently; `magnets-1` is available by default.
 - Magnetism lessons unlock in order.
 
 ## Known Limits
 
-- Magnetism uses existing Science Lab visuals and does not introduce a new scene system.
-- The current Science achievement set remains shared; no Magnetism-specific badge was added in this sprint.
+- Review answer keys intentionally duplicate only minimal scoring data on the backend while full lesson presentation remains frontend-owned.
+- `scienceStorage.js` is obsolete and should be removed in a cleanup sprint after confirming no dev tooling still references it.

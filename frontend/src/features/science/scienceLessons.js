@@ -12,6 +12,8 @@ export const SCIENCE_LESSONS = [
     xp: 10,
     successMessage:
       "Excellent! You discovered that the battery provides electricity to the circuit.",
+    reviewExplanation:
+      "A bulb lights only when the battery, wires, and bulb make one complete path.",
     activities: [
       {
         activityType: "observation",
@@ -50,6 +52,8 @@ export const SCIENCE_LESSONS = [
     xp: 15,
     successMessage:
       "Excellent! You found objects that can provide energy to a circuit.",
+    reviewExplanation:
+      "Electrical devices need energy from a battery or a wall outlet.",
     activities: [
       {
         activityType: "classification",
@@ -92,6 +96,8 @@ export const SCIENCE_LESSONS = [
     title: "Complete the Circuit",
     xp: 20,
     successMessage: "Brilliant! You matched each circuit part to its job.",
+    reviewExplanation:
+      "Electricity cannot flow through a circuit when there is a gap.",
     activities: [
       {
         activityType: "matching",
@@ -139,6 +145,8 @@ export const SCIENCE_LESSONS = [
     title: "Build the Circuit",
     xp: 20,
     successMessage: "Wonderful! You built a working circuit step by step.",
+    reviewExplanation:
+      "Circuit parts must be connected carefully before the circuit can be tested.",
     activities: [
       {
         activityType: "sequencing",
@@ -182,6 +190,8 @@ export const SCIENCE_LESSONS = [
     xp: 25,
     successMessage:
       "Excellent prediction! You understand how a simple circuit works.",
+    reviewExplanation:
+      "Changing or disconnecting one circuit part can stop electricity from flowing.",
     activities: [
       {
         activityType: "prediction",
@@ -225,6 +235,8 @@ export const SCIENCE_LESSONS = [
     xp: 15,
     successMessage:
       "Great observing! You discovered that magnets pull some objects but not others.",
+    reviewExplanation:
+      "Magnets can pull some objects without touching them.",
     activities: [
       {
         activityType: "observation",
@@ -254,6 +266,8 @@ export const SCIENCE_LESSONS = [
     xp: 15,
     successMessage:
       "Excellent sorting! You found which objects are magnetic.",
+    reviewExplanation:
+      "Magnets attract some iron and steel objects, but not wood or plastic.",
     activities: [
       {
         activityType: "classification",
@@ -289,6 +303,8 @@ export const SCIENCE_LESSONS = [
     title: "Strong vs Weak",
     xp: 20,
     successMessage: "Brilliant! You matched each magnet to its description.",
+    reviewExplanation:
+      "A stronger magnet can pull more objects or pull them from farther away.",
     activities: [
       {
         activityType: "matching",
@@ -323,6 +339,8 @@ export const SCIENCE_LESSONS = [
     xp: 20,
     successMessage:
       "Fantastic! You followed the clues and found the hidden magnet.",
+    reviewExplanation:
+      "Scientists test carefully and use observations as evidence.",
     activities: [
       {
         activityType: "sequencing",
@@ -357,6 +375,8 @@ export const SCIENCE_LESSONS = [
     xp: 25,
     successMessage:
       "Excellent prediction! You learned how a compass reacts to magnets.",
+    reviewExplanation:
+      "A compass needle is a small magnet that reacts to magnetic forces.",
     activities: [
       {
         activityType: "prediction",

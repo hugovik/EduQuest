@@ -37,3 +37,33 @@ def get_next_growth_target(xp: int) -> int | None:
             return target
 
     return None
+
+
+def get_level_progress(xp: int) -> dict[str, int | None]:
+    current_level_xp = 0
+    next_level_xp = get_next_growth_target(xp)
+
+    for target in GROWTH_TARGETS:
+        if xp >= target:
+            current_level_xp = target
+
+    if next_level_xp is None:
+        return {
+            "current_level_xp": current_level_xp,
+            "next_level_xp": None,
+            "xp_progress_percent": 100,
+        }
+
+    xp_range = next_level_xp - current_level_xp
+    xp_progress_percent = 100
+    if xp_range > 0:
+        xp_progress_percent = min(
+            100,
+            max(0, round(((xp - current_level_xp) / xp_range) * 100)),
+        )
+
+    return {
+        "current_level_xp": current_level_xp,
+        "next_level_xp": next_level_xp,
+        "xp_progress_percent": xp_progress_percent,
+    }

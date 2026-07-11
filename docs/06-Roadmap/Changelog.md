@@ -2,6 +2,40 @@
 
 ---
 
+## Sprint 9 — Science Magnetism, Review, and Mastery
+
+### Added
+
+- Five Magnetism missions in Science Lab.
+- Topic-local mission progression for Electricity and Magnetism.
+- Backend Science registry and review answer registry.
+- Science topic completion rewards: Lightning Crystal and Magnetic Compass.
+- Science topic achievements.
+- Review Mode with persisted attempts, best score, and mastery level.
+- Backend-validated review scoring from submitted learner answers.
+- Science architecture documentation and Sprint 9.10 release audit.
+
+### Changed
+
+- Science progress summaries now include topic and review summaries.
+- Shared activity components now emit normalized submitted answers for review scoring.
+- Science topic accordion buttons now expose expanded state for accessibility.
+
+### Fixed
+
+- Magnetism no longer depends on Electricity completion.
+- Review scoring no longer trusts frontend-submitted correctness or score values.
+- Science review attempts are cleared by developer reset.
+
+### Verified
+
+- Backend tests: `158 passed`
+- Frontend tests: `21 frontend test suites passed`
+- Frontend build: passed
+- `git diff --check`: passed with line-ending warnings only
+
+---
+
 ## Sprint 8.11 — Core Engine Unification
 
 ### Added

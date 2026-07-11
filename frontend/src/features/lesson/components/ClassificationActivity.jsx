@@ -20,6 +20,8 @@ export default function ClassificationActivity({
       );
 
       onComplete({
+        answer: next,
+        locallyCorrect: correct,
         correct,
         score: correct ? 1 : 0,
         attempts: 1,

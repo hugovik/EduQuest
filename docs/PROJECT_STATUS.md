@@ -26,7 +26,7 @@ Educational Adventure Platform
 
 Current Phase
 
-**Sprint 1 - Core Gameplay Loop**
+**Sprint 9 - Science Lab Magnetism Complete**
 
 Current Version
 
@@ -34,7 +34,7 @@ Current Version
 
 Overall Progress
 
-**≈ 42%**
+**≈ 68%**
 
 ---
 
@@ -42,20 +42,19 @@ Overall Progress
 
 ## Sprint Goal
 
-Complete the first reliable gameplay loop by connecting quest completion, XP rewards, progress history, tree growth, and persistent quest completion records.
+Release a stable Science Lab with Electricity, Magnetism, topic-local progression, backend-controlled XP/progress, topic rewards, achievements, Review Mode, mastery tracking, and secure backend scoring.
 
 ---
 
 # Current Focus
 
-▶ Quest Completion Persistence
+▶ Sprint 10 Handover
 
 Current objectives
 
-- Persist every completed quest as a QuestCompletion record
-- Keep ProgressEvent and TreeGrowthEvent creation aligned with quest completion
-- Preserve React Query refresh behavior after quest completion
-- Prepare the next core gameplay system: player progress summary
+- Keep Science Lab stable and documented
+- Preserve backend source-of-truth boundaries
+- Prepare the Tree House as the next central home-base focus
 
 ---
 
@@ -113,20 +112,38 @@ Includes
 
 ---
 
-# In Progress
-
-## Gameplay Persistence
+## Science Lab
 
 Status
 
-🟡 In Progress
+✅ Sprint 9 Complete
+
+Includes
+
+- Electricity topic
+- Magnetism topic with five missions
+- Topic-local mission progression
+- Mission Briefing
+- Backend Science registry
+- Topic rewards and achievements
+- Review Mode and mastery tracking
+- Secure backend review scoring
+
+---
+
+# In Progress
+
+## Sprint 10 Planning
+
+Status
+
+🟡 Ready
 
 Current Tasks
 
-- Run and verify backend tests for quest completion persistence
-- Decide duplicate-completion behavior
-- Add source record references between gameplay events
-- Add player progress summary endpoint
+- Return focus to Tree House as EduQuest's home base
+- Preserve World Map as the primary adventure launcher
+- Integrate Today's Quest, Tree of Growth, inventory, and progress visibility
 
 ---
 
@@ -226,15 +243,16 @@ Lower Priority
 | Tree Growth Events | 🟡 | 70% |
 | Frontend Gameplay UI | 🟡 | 70% |
 | Tree House | 🟡 | 40% |
-| Reading Forest | 🟡 | 25% |
-| XP System | 🟡 | 45% |
+| Reading Forest | ✅ | 85% |
+| Science Lab | ✅ | 100% |
+| XP System | ✅ | 90% |
 | Authentication | ⚪ | 0% |
-| Achievements | ⚪ | 0% |
+| Achievements | ✅ | 80% |
 | Companion | ⚪ | 0% |
 | Parent Dashboard | ⚪ | 0% |
 | AI Integration | ⚪ | 0% |
-| Testing Coverage | ⚪ | 25% |
-| Sprint 1 Overall | 🟡 | 78% |
+| Testing Coverage | 🟡 | 75% |
+| Sprint 9 Overall | ✅ | 100% |
 
 ---
 
