@@ -11,6 +11,7 @@ from app.api.learning_routes import router as learning_router
 from app.api.quest_routes import router as quest_router
 from app.api.reading_routes import router as reading_router
 from app.api.science_routes import router as science_router
+from app.api.treehouse_routes import router as treehouse_router
 from app.api.world_routes import router as world_router
 from app.api.writing_routes import router as writing_router
 from app.database.database import Base, engine
@@ -94,6 +95,7 @@ app.include_router(adventure_router)
 app.include_router(quest_router)
 app.include_router(reading_router)
 app.include_router(science_router)
+app.include_router(treehouse_router)
 app.include_router(world_router)
 app.include_router(writing_router)
 app.include_router(inventory_router)

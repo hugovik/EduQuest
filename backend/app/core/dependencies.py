@@ -11,6 +11,7 @@ from app.repositories.quest_repository import QuestRepository
 from app.repositories.reading_repository import ReadingPassageRepository, ReadingProgressRepository
 from app.repositories.reading_story_state_repository import ReadingStoryStateRepository
 from app.repositories.tree_growth_event_repository import TreeGrowthEventRepository
+from app.repositories.treehouse_shortcut_repository import TreehouseShortcutRepository
 from app.repositories.world_state_repository import WorldStateRepository
 from app.repositories.world_quest_repository import WorldQuestRepository
 from app.services.achievement_service import AchievementService
@@ -25,6 +26,7 @@ from app.services.quest_service import QuestService
 from app.services.reading_service import ReadingService
 from app.services.reward_service import RewardService
 from app.services.science_service import ScienceService
+from app.services.treehouse_shortcut_service import TreehouseShortcutService
 from app.services.world_service import WorldService
 from app.services.world_quest_service import WorldQuestService
 from app.services.writing_service import WritingService
@@ -150,6 +152,15 @@ def get_world_quest_service() -> WorldQuestService:
     return WorldQuestService(
         child_repository=ChildRepository(),
         world_quest_repository=WorldQuestRepository(),
+        inventory_service=get_inventory_service(),
+    )
+
+
+def get_treehouse_shortcut_service() -> TreehouseShortcutService:
+    return TreehouseShortcutService(
+        child_repository=ChildRepository(),
+        shortcut_repository=TreehouseShortcutRepository(),
+        inventory_repository=InventoryRepository(),
         inventory_service=get_inventory_service(),
     )
 

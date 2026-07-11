@@ -16,6 +16,7 @@ from app.models.reading_story_state import ReadingStoryState
 from app.models.science_progress import ScienceProgress
 from app.models.science_review_attempt import ScienceReviewAttempt
 from app.models.tree_growth_event import TreeGrowthEvent
+from app.models.treehouse_shortcut import TreehouseShortcut
 from app.models.world_state import WorldState
 from app.models.world_quest import WorldQuest
 from app.models.writing_progress import WritingProgress
@@ -35,6 +36,7 @@ RESET_TABLES = [
     ReadingStoryState,
     ScienceProgress,
     ScienceReviewAttempt,
+    TreehouseShortcut,
     WritingProgress,
     WorldState,
     WorldQuest,

@@ -16,6 +16,7 @@ import { runScienceLessonsTests } from "./features/science/scienceLessons.test.j
 import { runBuildScienceExperimentsTests } from "./features/science/utils/buildScienceExperiments.test.js";
 import { runValidateScienceContentTests } from "./features/science/utils/validateScienceContent.test.js";
 import { runTreehouseHomeTests } from "./features/treehouse/treehouseHome.test.js";
+import { runTreehouseShortcutsApiTests } from "./features/treehouse/treehouseShortcutsApi.test.js";
 import { runWorldApiTests } from "./features/world/worldApi.test.js";
 import { runWorldRegionConfigTests } from "./features/world/worldRegionConfig.test.js";
 import { runWritingApiTests } from "./features/writing/writingApi.test.js";
@@ -39,6 +40,7 @@ const tests = [
   ["science experiment builder", runBuildScienceExperimentsTests],
   ["science content validation", runValidateScienceContentTests],
   ["treehouse home", runTreehouseHomeTests],
+  ["treehouse shortcuts API", runTreehouseShortcutsApiTests],
   ["world API", runWorldApiTests],
   ["world region config", runWorldRegionConfigTests],
   ["writing API", runWritingApiTests],

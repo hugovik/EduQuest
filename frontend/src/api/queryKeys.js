@@ -21,4 +21,6 @@ export const queryKeys = {
   readingProgress: ["reading-progress"],
   readingProgressSummary: (level) => ["reading-progress-summary", level],
   readingStoryState: ["reading-story-state"],
+  treehouseShortcuts: ["treehouse-shortcuts"],
+  treehouseShortcut: (shortcutId) => ["treehouse-shortcut", shortcutId],
 };

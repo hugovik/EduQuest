@@ -1993,9 +1993,295 @@
   z-index: 2;
 }
 
+.treehouse-scene-hotspots {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.treehouse-hotspot {
+  position: absolute;
+  pointer-events: auto;
+}
+
+.treehouse-hotspot-map {
+  left: 48%;
+  top: 21%;
+}
+
+.treehouse-hotspot-inventory {
+  left: 57%;
+  top: 58%;
+}
+
+.treehouse-hotspot-settings {
+  right: 6%;
+  top: 4%;
+}
+
+.treehouse-hotspot-reading-shortcut {
+  left: 38%;
+  top: 56%;
+}
+
+.treehouse-hotspot-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 2px solid rgba(255, 214, 134, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 252, 235, 0.92);
+  box-shadow: 0 12px 24px rgba(56, 73, 31, 0.2);
+  font-size: 1.5rem;
+}
+
+.treehouse-shortcut-object-visual {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4.5rem;
+  border: 2px solid rgba(105, 70, 38, 0.36);
+  border-radius: 16px 16px 8px 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 235, 0.96), rgba(183, 127, 78, 0.88)),
+    #b7834e;
+  box-shadow: 0 14px 26px rgba(56, 73, 31, 0.22);
+  font-size: 1.8rem;
+}
+
+.treehouse-shortcut-object-visual[data-shortcut-status="locked"] {
+  filter: grayscale(0.5);
+  opacity: 0.76;
+}
+
+.treehouse-shortcut-object-visual[data-shortcut-status="eligible"],
+.treehouse-shortcut-object-visual[data-shortcut-status="building"] {
+  box-shadow: 0 14px 26px rgba(56, 73, 31, 0.22), 0 0 0 5px rgba(255, 206, 92, 0.18);
+}
+
+.treehouse-shortcut-object-visual[data-shortcut-status="completed"] {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(151, 255, 193, 0.62), transparent 34%),
+    linear-gradient(180deg, rgba(255, 252, 235, 0.98), rgba(87, 143, 83, 0.9));
+  box-shadow: 0 14px 26px rgba(56, 73, 31, 0.24), 0 0 24px rgba(116, 207, 129, 0.52);
+}
+
 .treehouse-scene-region {
   position: relative;
   z-index: 3;
+}
+
+.treehouse-interactive-object {
+  position: relative;
+}
+
+.treehouse-object-content {
+  position: relative;
+  z-index: 1;
+}
+
+.treehouse-object-hit-target {
+  position: absolute;
+  inset: -0.45rem;
+  z-index: 2;
+  border: 2px solid transparent;
+  border-radius: 22px;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+}
+
+.treehouse-object-hit-target span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.treehouse-object-hit-target:hover,
+.treehouse-object-hit-target:focus-visible,
+.treehouse-interactive-object[data-object-state="open"] .treehouse-object-hit-target {
+  border-color: rgba(255, 206, 92, 0.8);
+  box-shadow: 0 0 0 5px rgba(255, 206, 92, 0.24), 0 12px 26px rgba(64, 85, 42, 0.18);
+  outline: none;
+}
+
+.treehouse-object-hit-target:hover + .treehouse-object-popover,
+.treehouse-object-hit-target:focus-visible + .treehouse-object-popover {
+  transform: translateY(-2px);
+}
+
+.treehouse-object-popover,
+.treehouse-global-popover-inner {
+  display: grid;
+  gap: 0.65rem;
+  color: #142850;
+  background: rgba(255, 252, 235, 0.98);
+  border: 2px solid rgba(130, 91, 42, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 18px 34px rgba(55, 43, 19, 0.22);
+}
+
+.treehouse-object-popover {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.7rem);
+  z-index: 8;
+  width: min(280px, 78vw);
+  padding: 0.9rem;
+  transform: translateX(-50%);
+}
+
+.treehouse-object-popover-header,
+.treehouse-popover-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.treehouse-object-popover p,
+.treehouse-global-popover p {
+  margin: 0;
+}
+
+.treehouse-object-status {
+  font-weight: 800;
+  color: #406b2f;
+}
+
+.treehouse-popover-close {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(64, 107, 47, 0.26);
+  border-radius: 999px;
+  background: #f4ffe5;
+  color: #142850;
+  cursor: pointer;
+}
+
+.treehouse-card-object[data-object-state="open"] .treehouse-card,
+.treehouse-character-object[data-object-state="open"] .treehouse-character-button {
+  box-shadow: 0 0 0 5px rgba(255, 206, 92, 0.26), var(--treehouse-shadow-depth);
+}
+
+.treehouse-mobile-object-list,
+.treehouse-global-popover {
+  display: none;
+}
+
+.treehouse-mobile-object-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  min-height: 4.25rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(122, 161, 75, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #142850;
+  text-align: left;
+}
+
+.treehouse-mobile-object-card > span:first-child {
+  font-size: 1.6rem;
+}
+
+.treehouse-mobile-object-card strong,
+.treehouse-mobile-object-card small {
+  display: block;
+}
+
+.treehouse-mobile-object-card small {
+  margin-top: 0.2rem;
+  color: #4a5b76;
+}
+
+.treehouse-mobile-object-card:focus-visible,
+.treehouse-mobile-object-card[data-object-state="open"] {
+  outline: 3px solid rgba(255, 206, 92, 0.72);
+  outline-offset: 2px;
+}
+
+.treehouse-shortcut-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.treehouse-shortcut-stage-visual {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem;
+  border-radius: 14px;
+  background: rgba(236, 247, 223, 0.88);
+}
+
+.treehouse-shortcut-stage-visual span {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 12px;
+  background: #fff8df;
+  font-size: 1.5rem;
+}
+
+.treehouse-shortcut-meter {
+  height: 0.65rem;
+  border-radius: 999px;
+  background: #dbe9d5;
+  overflow: hidden;
+}
+
+.treehouse-shortcut-meter span {
+  display: block;
+  min-height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8ecb6d, #f5c85f);
+}
+
+.treehouse-shortcut-requirements {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.treehouse-shortcut-requirements div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid rgba(122, 161, 75, 0.18);
+}
+
+.treehouse-shortcut-requirements dt {
+  font-weight: 800;
+}
+
+.treehouse-shortcut-requirements dd {
+  margin: 0;
+  text-align: right;
+}
+
+.treehouse-shortcut-error {
+  margin: 0;
+  color: #8a2f1c;
+  font-weight: 800;
+}
+
+.treehouse-shortcut-success {
+  margin: 0;
+  color: #2f6b3b;
+  font-weight: 800;
 }
 
 .treehouse-scene-greeting {
@@ -2239,7 +2525,8 @@
       "growth"
       "owl"
       "dragon"
-      "utilities";
+      "utilities"
+      "objects";
     grid-template-columns: 1fr;
     border-radius: 20px;
   }
@@ -2253,6 +2540,10 @@
     width: min(78vw, 280px);
   }
 
+  .treehouse-scene-hotspots {
+    display: none;
+  }
+
   .treehouse-dashboard-strip {
     grid-template-columns: 1fr;
   }
@@ -2262,6 +2553,44 @@
     align-items: center;
     justify-items: start;
   }
+
+  .treehouse-object-hit-target {
+    inset: -0.35rem;
+  }
+
+  .treehouse-object-popover {
+    display: none;
+  }
+
+  .treehouse-mobile-object-list {
+    display: grid;
+    grid-area: objects;
+    gap: 0.65rem;
+    position: relative;
+    z-index: 4;
+  }
+
+  .treehouse-global-popover {
+    position: fixed;
+    inset: auto 1rem 1rem;
+    z-index: 20;
+    display: block;
+  }
+
+  .treehouse-global-popover-inner {
+    max-height: min(72vh, 420px);
+    padding: 1rem;
+    overflow: auto;
+  }
+
+  .treehouse-popover-actions {
+    align-items: stretch;
+  }
+
+  .treehouse-popover-actions button {
+    flex: 1;
+    min-height: 2.8rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2269,7 +2598,10 @@
   .treehouse-lantern-glow,
   .treehouse-character-button,
   .treehouse-scene-adventure-button,
-  .treehouse-control-grid button {
+  .treehouse-control-grid button,
+  .treehouse-object-hit-target,
+  .treehouse-object-popover,
+  .treehouse-mobile-object-card {
     animation: none;
     transition: none;
   }
